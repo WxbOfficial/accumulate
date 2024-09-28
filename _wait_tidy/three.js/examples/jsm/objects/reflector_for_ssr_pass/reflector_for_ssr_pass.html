@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>reflector_for_ssr_pass</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, SSRPass, ReflectorForSSRPass, OutputPass } from '../../jsm.js';
+			import { createSSRScene } from './create_scene.reflector_for_ssr_pass.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			// renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				0.01, 100
+			);
+
+			camera.position.z = 1;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+			// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
+
+			const ssrScene = createSSRScene();
+
+			scene.add( ssrScene );
+
+			scene.add( new THREE.AxesHelper(80) );
+
+			// Ground
+			const planeMesh = new THREE.Mesh(
+				new THREE.PlaneGeometry( 8, 8 ),
+				new THREE.MeshBasicMaterial( { color: 0xcbcbcb } )
+			);
+			planeMesh.rotation.x = - Math.PI / 2;
+			planeMesh.position.y = - 0.0001;
+
+			scene.add( planeMesh );
+
+
+			const groundReflector = new ReflectorForSSRPass( new THREE.PlaneGeometry( 1, 1 ), {
+				clipBias: 0.0003,
+				textureWidth: canvas.clientWidth,
+				textureHeight: canvas.clientHeight,
+				color: 0x888888,
+				useDepthTexture: true,
+			} );
+			groundReflector.material.depthWrite = false;
+			groundReflector.rotation.x = - Math.PI / 2;
+			groundReflector.visible = false;
+			scene.add( groundReflector );
+
+			groundReflector.getRenderTarget().setSize( canvas.clientWidth, canvas.clientHeight );
+			groundReflector.resolution.set( canvas.clientWidth, canvas.clientHeight );
+
+			const composer = new EffectComposer( renderer );
+			const ssrPass = new SSRPass( {
+				renderer,
+				scene,
+				camera,
+				width: canvas.clientWidth,
+				height: canvas.clientHeight,
+				groundReflector: groundReflector,
+				selects: [ ssrScene ]
+			} );
+			ssrPass.thickness = 0.018;
+			ssrPass.infiniteThick = false;
+			ssrPass.maxDistance = 0.1;
+			groundReflector.maxDistance = ssrPass.maxDistance;
+
+			ssrPass.opacity = 1;
+			groundReflector.opacity = ssrPass.opacity;
+
+			composer.addPass( ssrPass );
+			composer.addPass( new OutputPass() );
+
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initSSRGui(gui, ssrPass, 'ssrPass');
+
+			}
+
+			function initSSRGui( gui, ssr, name ){
+
+				const ssrFolder = gui.addFolder( name );
+
+				ssrFolder.add( ssr, 'thickness', 0, 0.1, 0.0001 );
+				ssrFolder.add( ssr, 'infiniteThick' );
+
+				ssrFolder.add( ssr, 'fresnel' ).onChange( ()=>{
+
+					ssr.groundReflector.fresnel = ssr.fresnel;
+				});
+				ssrFolder.add( ssr, 'distanceAttenuation' ).onChange( ()=>{
+
+					ssr.groundReflector.distanceAttenuation = ssr.distanceAttenuation;
+				});
+
+				ssrFolder.add( ssr, 'maxDistance', 0, 0.5, 0.001 ).onChange( ()=>{
+
+					ssr.groundReflector.maxDistance = ssr.maxDistance;
+				});
+
+				ssrFolder.add( ssrPass, 'bouncing' );
+
+				ssrFolder.add( ssr, 'opacity', 0, 1 ).onChange( ()=>{
+
+					ssr.groundReflector.opacity = ssr.opacity;
+				});
+
+				ssrFolder.add( ssrPass, 'blur' );
+			}
+
+
+			loop();
+			function loop() {
+
+				// 注释掉的话，会闪烁，暂时不知道为什么
+				orbitControls.update();
+
+				composer.render();
+
+				// renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

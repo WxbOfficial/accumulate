@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>animations</title>
+		<link href="../../../../_utils/../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单实现了模型位置移动的动画效果
+			执行流程:
+				new 一个 Animation 对象， 然后设置 setKeys 设置关键帧，之后将实例对象放入目标动画数组中，最后调用 scene.beginAnimation 执行动画
+
+			根据相关源码 target 中需要有 animations 属性才会生成 , 如果有 getAnimatables 方法的话，就获取 animations 获取子属性的动画回调执行 beginAnimation。
+
+			Mesh 有 animations 和 getAnimatables 调用 material 动画 ;
+			StandardMaterial 有 getAnimatables 调用 diffuseTexture , ambientTexture , opacityTexture , reflectionTexture , emissiveTexture , specularTexture , bumpTexture 动画
+			Texture 有 animations
+			PointLight , DirectionalLight , HemisphericLight , SpotLight 有 animations
+			ArcRotateCamera , FreeCamera , TouchCamera 有 animations
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js";
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+
+				var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				var boxMat = new BABYLON.StandardMaterial('box', scene);
+
+				boxMat.emissiveTexture = new BABYLON.Texture(
+					'../assets/images/logo1.JPG',
+					scene,
+				)
+
+				box.material = boxMat;
+
+				var animation = new BABYLON.Animation("box", "position", 60,
+					// BABYLON.Animation.ANIMATIONTYPE_FLOAT
+					BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+					// BABYLON.Animation.ANIMATIONTYPE_QUATERNION
+					// BABYLON.Animation.ANIMATIONTYPE_MATRIX
+
+					// BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE,
+					BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE,
+					// BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+				);
+
+				animation.setKeys([
+					{ frame: 1, value: new BABYLON.Vector3(0, 0, 0) },
+					{ frame: 100, value: new BABYLON.Vector3(0, 0, 50) }
+				]);
+
+				box.animations.push(animation);
+
+				scene.beginAnimation(
+					box,
+					0, 60, true, 1,
+				);
+
+
+				// var animation1 = new BABYLON.Animation("box", "alpha", 60,
+				// 	// BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+				// 	BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+
+				// 	// BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+				// 	// BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE,
+
+				// 	// BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE,
+				// 	BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE,
+				// 	// BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+				// );
+				// animation1.setKeys([
+				// 	{ frame: 0, value: 1 },
+				// 	{ frame: 60, value: 0 }
+				// ]);
+
+				// boxMat.animations = []
+				// boxMat.animations.push(animation1);
+
+				// scene.beginAnimation(
+				// 	boxMat,
+				// 	0, 60, true, 1,
+				// );
+
+				window.scene = scene;
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

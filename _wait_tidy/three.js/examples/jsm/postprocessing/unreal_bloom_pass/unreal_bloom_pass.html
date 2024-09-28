@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>unreal_bloom_pass</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		后处理流程:
+			1. 根据亮度阈值取色
+			2. 对取色部分进行模糊处理
+			3. 对模糊的帧渲染进行叠加
+			4. 和原始渲染结果进行叠加
+		注意点:
+			用 RawShaderMaterial WebGLRenderTarget 代替直接使用 UnrealBloomPass, 需要将 renderTarget 宽高乘 pixelRatio,
+
+			UnrealBloomPass 中的话, 在 addPass 通过 setSize 进行重置
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, UnrealBloomPass } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+
+			const composer = new EffectComposer( renderer );
+
+			// RenderPass
+			composer.addPass({
+
+				isPass: true,
+				enabled: true,
+				needsSwap: true,
+				clear: true,
+				renderToScreen: false,
+
+				clearDepth: false,
+				needsSwap: false,
+
+				setSize(){  },
+
+				render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ){
+
+
+					renderer.setRenderTarget( this.renderToScreen ? null : readBuffer );
+
+					renderer.clear(true, true, true);
+					renderer.render( scene, camera );
+				}
+			});
+
+			const unrealBloomPass = new UnrealBloomPass( new THREE.Vector2( canvas.clientWidth, canvas.clientHeight ), 1, 0, 0.85 );
+			composer.addPass( unrealBloomPass );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initUnrealBloomPassGui( gui, unrealBloomPass, 'unrealBloomPass' );
+			}
+
+			function initUnrealBloomPassGui( gui, unrealBloomPass, name ){
+
+				const unrealBloomFolder = gui.addFolder( name );
+
+				unrealBloomFolder.add( unrealBloomPass, 'threshold', 0.0, 1.0 );
+
+				unrealBloomFolder.add( unrealBloomPass, 'strength', 0.0, 3 );
+
+				unrealBloomFolder.add( unrealBloomPass, 'radius', 0.0, 5.0 ).step( 0.01 );
+			}
+
+
+			loop();
+			function loop() {
+
+				composer.render();
+
+				// renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

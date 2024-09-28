@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>gl_position_w_r</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-3d-perspective-correct-texturemapping.html
+
+		result =	(1 - t) * a / aW + t * b / bW
+						---------------------------------
+								(1 - t) / aW + t / bW
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 2;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+			const plane1 = new THREE.BufferGeometry();
+			const plane2 = new THREE.BufferGeometry();
+
+			const position =new THREE.BufferAttribute( new Float32Array( [
+				-1.0, -1.0,  0.0,
+				 1.0, -1.0,  0.0,
+				-1.0,  1.0,  0.0,
+				 1.0,  1.0,  0.0,
+			] ), 3 );
+			plane1.setAttribute( 'position', position );
+			plane2.setAttribute( 'position', position );
+
+			const mult = 6;
+			const position1 = new THREE.BufferAttribute( new Float32Array( [
+				-1.0,					0.25,					0,	1,
+				 1.0 * mult,	0.25 * mult,	0,	1 * mult,
+				-1.0,					0.5,					0,	1,
+				 1.0 * mult,	0.5 * mult,		0,	1 * mult,
+			] ), 4 );
+			const position2 = new THREE.BufferAttribute( new Float32Array( [
+				-1,		-0.5,			0,	1,
+				 1,		-0.5,			0,	1,
+				-1,		-0.25,		0,	1,
+				 1,		-0.25,		0,	1,
+			] ), 4 );
+			plane1.setAttribute( 'a_position', position1 );
+			plane2.setAttribute( 'a_position', position2 );
+
+			const brightness = new THREE.BufferAttribute( new Float32Array( [
+				1,
+				0,
+				1,
+				0,
+			] ), 1)
+			plane1.setAttribute('a_brightness', brightness );
+			plane2.setAttribute('a_brightness', brightness );
+
+			plane1.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+			plane2.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+
+			const shaderMaterial = new THREE.RawShaderMaterial({
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec4 a_position;
+					attribute float a_brightness;
+
+					uniform mat4 projectionMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 modelMatrix;
+
+					varying float v_brightness;
+
+					void main(void) {
+
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * a_position;
+						// gl_Position = a_position;
+
+						v_brightness = a_brightness;
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					varying float v_brightness;
+
+					void main() {
+
+						gl_FragColor = vec4(v_brightness, 0.0, 0.0, 1.0);
+					}
+				`,
+			})
+			const mesh1 = new THREE.Mesh( plane1, shaderMaterial );
+			const mesh2 = new THREE.Mesh( plane2, shaderMaterial );
+
+			scene.add(mesh1);
+			scene.add(mesh2);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

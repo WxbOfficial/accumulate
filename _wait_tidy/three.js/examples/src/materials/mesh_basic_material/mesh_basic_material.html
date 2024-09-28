@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>mesh_basic_material</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 2;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+			const plane = new THREE.BufferGeometry();
+			plane.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				-1.0, -1.0,  0.0,
+				 1.0, -1.0,  0.0,
+				-1.0,  1.0,  0.0,
+				 1.0,  1.0,  0.0,
+			] ), 3 ) );
+
+			plane.setAttribute('uv', new THREE.BufferAttribute( new Float32Array( [
+				0.0, 0.0,
+				1.0, 0.0,
+				0.0, 1.0,
+				1.0, 1.0,
+			] ), 2) );
+
+			plane.setAttribute('normal', new THREE.BufferAttribute( new Float32Array( [
+				0.0, 0.0, 1.0,
+				0.0, 0.0, 1.0,
+				0.0, 0.0, 1.0,
+				0.0, 0.0, 1.0,
+			] ), 3) );
+
+			plane.setAttribute('color', new THREE.BufferAttribute( new Float32Array( [
+				1.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+			] ), 3) );
+
+			plane.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+
+			// const plane = new THREE.PlaneGeometry( 2, 2, 32, 32 );
+
+			const meshBasicMaterial = new THREE.MeshBasicMaterial({
+				map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				// lightMap: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				// specularMap: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				envMap: new THREE.CubeTextureLoader().load(
+					[
+						"px.jpg", "nx.jpg",
+						"py.jpg", "ny.jpg",
+						"pz.jpg", "nz.jpg"
+					].map((url)=>{
+						 	return "../../../assets/images/cube/skybox/" + url;
+					}),
+				)
+			});
+
+			const mesh = new THREE.Mesh( plane, meshBasicMaterial );
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				materialSide = {
+					FrontSide: THREE.FrontSide,
+					BackSide: THREE.BackSide,
+					DoubleSide: THREE.DoubleSide,
+				},
+				envMapMapping = {
+					CubeReflectionMapping: THREE.CubeReflectionMapping,
+					CubeRefractionMapping: THREE.CubeRefractionMapping,
+					EquirectangularReflectionMapping: THREE.EquirectangularReflectionMapping,
+					EquirectangularRefractionMapping: THREE.EquirectangularRefractionMapping,
+					CubeUVReflectionMapping: THREE.CubeUVReflectionMapping,
+				},
+				materialCombine = {
+					MultiplyOperation: THREE.MultiplyOperation,
+					MixOperation: THREE.MixOperation,
+					AddOperation: THREE.AddOperation,
+				};
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMaterialGui( gui, meshBasicMaterial, 'material' );
+				initMaterialEnvGui( gui, meshBasicMaterial, 'materialEnv' );
+			}
+
+			function initMaterialGui( gui, material, name ){
+
+				const materialFolder = gui.addFolder(name);
+
+				function changeMaterial(){
+
+					material.needsUpdate = true;
+				}
+
+				materialFolder.add( material, 'vertexColors' ).onChange(changeMaterial);
+
+				materialFolder.add( material, 'transparent' ).onChange(changeMaterial);
+				materialFolder.add( material, 'opacity', 0, 1 );
+
+				materialFolder.add( material, 'side', materialSide );
+
+				materialFolder.add( material, 'lightMapIntensity', 0, 2 );
+			}
+
+			function initMaterialEnvGui( gui, material, name ){
+
+				const
+					materialEnvFolder = gui.addFolder(name),
+					param = {
+						envMapRotationAngle: {
+							x: 0, y: 0, z: 0,
+						},
+					};
+
+				function changeMaterial(){
+
+					material.needsUpdate = true;
+				}
+
+				materialEnvFolder.add( material.envMap, 'mapping', envMapMapping ).name('envMap.mapping').onChange(changeMaterial);
+
+				materialEnvFolder.add( material, 'combine', materialCombine ).onChange(changeMaterial);
+
+				materialEnvFolder.add( material, 'reflectivity', 0, 1 )
+
+				materialEnvFolder.add( material, 'refractionRatio', 0, 10 );
+
+				materialEnvFolder.add( param.envMapRotationAngle, 'x', -180, 180 ).onChange(( angle )=>{
+					material.envMapRotation.x = angle / 180 * Math.PI;
+				});
+				materialEnvFolder.add( param.envMapRotationAngle, 'y', -180, 180 ).onChange(( angle )=>{
+					material.envMapRotation.y = angle / 180 * Math.PI;
+				});
+				materialEnvFolder.add( param.envMapRotationAngle, 'z', -180, 180 ).onChange(( angle )=>{
+					material.envMapRotation.z = angle / 180 * Math.PI;
+				});
+			}
+
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

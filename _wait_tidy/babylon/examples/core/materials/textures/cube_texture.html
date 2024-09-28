@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../favicon.ico" />
+		<title>cube_texture</title>
+		<link href="../../../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script src="https://cdn.jsdelivr.net/npm/lil-gui"></script>
+		<script src="https://cdn.babylonjs.com/babylon.js"></script>
+	</head>
+	<!--
+		立方体纹理，主要是通过添加 gui 展示问了相关属性及操作效果
+			gui 添加:
+				https://lil-gui.georgealways.com/
+				https://github.com/georgealways/lil-gui
+				https://www.npmjs.com/package/lil-gui
+		目前只简单查看以下属性效果:
+			level coordinatesMode gammaSpace lodGenerationOffset lodGenerationScale rotationY
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			const canvas = document.getElementById("renderCanvas");
+
+			const engine = new BABYLON.Engine(canvas, true);
+			engine.setSize( window.innerWidth, window.innerHeight );
+
+			let { scene, skybox, material } = createScene();
+
+			engine.runRenderLoop(function () {
+				scene.render();
+			});
+
+			window.addEventListener("resize", function () {
+				engine.setSize( window.innerWidth, window.innerHeight );
+				engine.resize();
+			});
+
+			function createScene() {
+
+				const scene = new BABYLON.Scene(engine);
+				scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+				// scene.useRightHandedSystem = true;
+
+				const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.setTarget(BABYLON.Vector3.Zero());
+
+				camera.attachControl(canvas, true);
+
+				// alpha 鼠标左右操作对应的移动
+				// camera.lowerAlphaLimit = 0;
+				// camera.upperAlphaLimit = Math.PI * 2;
+
+				// beta 鼠标上下操作对应的移动
+				camera.lowerBetaLimit = 0;
+				camera.upperBetaLimit = Math.PI;
+
+				// 最小缩放
+				camera.lowerRadiusLimit = 2;
+				// 最大缩放
+				camera.upperRadiusLimit = 200;
+
+				camera.inertia = 0;
+				camera.angularSensibilityX = 108;
+				camera.angularSensibilityY = 108;
+
+				camera.panningInertia = 0;
+				camera.panningSensibility = 0; // 设置为 0
+
+				const localConnected = localAxes(50);
+
+				const light = new BABYLON.HemisphericLight("light",
+						new BABYLON.Vector3(0, 1, 0),
+						scene);
+				// Dim the light a small amount 0 - 1
+				// light.intensity = 0.7;
+
+				// 天空盒模型
+				const skybox = BABYLON.Mesh.CreateBox('skybox', 5, scene, false, BABYLON.Constants.MATERIAL_CounterClockWiseSideOrientation);
+
+				const mat = new BABYLON.PBRMaterial("mat", scene);
+
+				mat.backFaceCulling = false;
+				// mat.emissiveIntensity = 1;
+				// mat.emissiveColor.set(1,1,1);
+
+				skybox.material = mat;
+
+				//Local Axes
+				function localAxes(size) {
+					const axisX = BABYLON.Mesh.CreateLines("axisX", [
+						new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+					], scene);
+					axisX.color = new BABYLON.Color3(1, 0, 0);
+
+					const axisY = BABYLON.Mesh.CreateLines("axisY", [
+							new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+					], scene);
+					axisY.color = new BABYLON.Color3(0, 1, 0);
+
+					const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+							new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+					], scene);
+					axisZ.color = new BABYLON.Color3(0, 0, 1);
+				}
+
+				return { scene, skybox, material: mat };
+			}
+
+			const CubeTextureTypes = {
+				dds: '.dds',
+				hdr: '.hdr',
+			}
+
+			function loadCubeTexture(fileURL, onLoad = ()=>{}){
+
+				const
+					fields = fileURL.split('.'),
+					extension = fields[fields.length - 1].toLowerCase(),
+					forcedExtension = '.' + extension;
+
+				let texture = null;
+
+				switch( forcedExtension ){
+					case CubeTextureTypes.hdr:
+
+						texture = new BABYLON.HDRCubeTexture(
+							fileURL, scene, 512,
+							void 0, void 0, void 0, void 0,
+							()=>{
+								onLoad(texture);
+							},
+							()=>{
+								console.error('HDRCube 加载失败');
+
+								texture.dispose();
+								URL.revokeObjectURL(fileURL);
+							}, void 0
+						);
+						break;
+					case CubeTextureTypes.dds:
+
+						texture = new BABYLON.CubeTexture(
+							fileURL, scene,
+							void 0, void 0, void 0,
+							()=>{
+								onLoad(texture);
+							},
+							()=>{
+								console.error('DDSCube 加载失败');
+
+								texture.dispose();
+							}, void 0, void 0,
+							forcedExtension,
+							void 0, void 0, void 0, void 0, void 0,
+						);
+						break;
+					default:
+						console.error(`非法后缀 ${forcedExtension} CubeTexture的后缀应该是 ${CubeTextureTypes.hdr} 或者 ${CubeTextureTypes.dds} `);
+						break;
+				}
+
+				return texture;
+			}
+
+			loadCubeTexture(
+				'https://playground.babylonjs.com/textures/environment.dds',
+				// 'https://playground.babylonjs.com/textures/room.hdr',
+				(texture)=>{
+
+				material.reflectionTexture = texture;
+				material.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+				initCubeTextureGUI(texture);
+			});
+
+
+			function initCubeTextureGUI(texture){
+				const gui = new lil.GUI();
+
+
+				const skyboxFolder = gui.addFolder('skybox');
+
+				const cubeTextureFolder = gui.addFolder('CubeTexture');
+
+				skyboxFolder.add(skybox, 'infiniteDistance');
+
+				cubeTextureFolder.add(texture, 'level', 0, 10);
+
+				//	感觉没什么效果
+				// const wrapTypes = {
+				// 	CLAMP: BABYLON.Texture.CLAMP_ADDRESSMODE,
+				// 	WRAP: BABYLON.Texture.WRAP_ADDRESSMODE,
+				// 	MIRROR: BABYLON.Texture.MIRROR_ADDRESSMODE,
+				// };
+				// cubeTextureFolder.add(texture, 'wrapR', wrapTypes);
+				// cubeTextureFolder.add(texture, 'wrapU', wrapTypes);
+				// cubeTextureFolder.add(texture, 'wrapV', wrapTypes);
+
+				const coordinatesModeTypes = {
+					EXPLICIT: BABYLON.Texture.EXPLICIT_MODE,
+					SPHERICAL: BABYLON.Texture.SPHERICAL_MODE,
+					PLANAR: BABYLON.Texture.PLANAR_MODE,
+					CUBIC: BABYLON.Texture.CUBIC_MODE,
+					PROJECTION: BABYLON.Texture.PROJECTION_MODE,
+					SKYBOX: BABYLON.Texture.SKYBOX_MODE,
+					INVCUBIC: BABYLON.Texture.INVCUBIC_MODE,
+					EQUIRECTANGULAR: BABYLON.Texture.EQUIRECTANGULAR_MODE,
+					FIXED_EQUIRECTANGULAR: BABYLON.Texture.FIXED_EQUIRECTANGULAR_MODE,
+					FIXED_EQUIRECTANGULAR_MIRRORED: BABYLON.Texture.FIXED_EQUIRECTANGULAR_MIRRORED_MODE,
+				};
+
+				cubeTextureFolder.add(texture, 'coordinatesMode', coordinatesModeTypes);
+
+				cubeTextureFolder.add(texture, 'gammaSpace');
+
+				cubeTextureFolder.add(texture, 'lodGenerationOffset', 0, 20);
+				cubeTextureFolder.add(texture, 'lodGenerationScale', 0, 1);
+
+				cubeTextureFolder.add(texture, 'rotationY', -Math.PI, Math.PI );
+
+				// 有时候生效有时候不生效
+				// cubeTextureFolder.add(texture, 'invertZ');
+
+				//	下面几个看不出没什么效果, 具体的放到以后再研究
+
+				// cubeTextureFolder.add(texture.boundingBoxPosition, 'x', -100, 100);
+				// cubeTextureFolder.add(texture.boundingBoxPosition, 'y', -100, 100);
+				// cubeTextureFolder.add(texture.boundingBoxPosition, 'z', -100, 100);
+
+				// cubeTextureFolder.add(texture, 'hasAlpha');
+				// cubeTextureFolder.add(texture, 'getAlphaFromRGB');
+				// cubeTextureFolder.add(texture, 'is2DArray');
+				// cubeTextureFolder.add(texture, 'is3D');
+				// cubeTextureFolder.add(texture, 'isCube');
+				// cubeTextureFolder.add(texture, 'isRGBD');
+				// cubeTextureFolder.add(texture, 'linearSpecularLOD');
+			}
+
+		</script>
+	</body>
+</html>

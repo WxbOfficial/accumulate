@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>load_json_by_handler</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <!-- <script src='../../build/playcanvas.js'></script> -->
+</head>
+<body>
+    <canvas id='application'></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "pc": "../../../src/index.js",
+                //"pc": "../../../build/playcanvas.js",
+                "scripts": "../../../scripts/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as pc from 'pc';
+        import loadJsonModel from './load_json_model.draft.js';
+        
+        window.pc = pc;
+
+        // create a PlayCanvas application
+        const canvas = document.getElementById('application');
+        const app = new pc.Application(canvas, {
+            mouse: new pc.Mouse(document.body),
+            touch: new pc.TouchDevice(document.body)
+        });
+        window.app = app;
+
+        // fill the available space at full resolution
+        app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+        app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+        // ensure canvas is resized when window changes size
+        window.addEventListener('resize', function(){
+            app.resizeCanvas();
+        });
+
+        const modelGroup = new pc.Entity('modelGroup');
+        app.root.addChild(modelGroup);
+
+        [
+            'https://vrs3.autoimg.cn/advrmodel6/vr_car/X1lGN5LF/Volvo_S60_20230726_001_zhiyihaohuaban_VIchexingku/Model/Volvo_S60_20230726_001_VIchexingku.json',
+
+            // 'https://vrs3.autoimg.cn/advrmodel4/VR_car_att/NN8DLK/001_Wheel_17_7.5_Volvo_S60_VIchexingku/Model/001_Wheel_17_7.5_Volvo_S60_VIchexingku.json',
+            // 'https://vrs3.autoimg.cn/advrmodel1/VR_car_att/A84OVd/001_Disc_17_Volvo_S60_VIchexingku/Model/001_Disc_17_Volvo_S60_VIchexingku.json',
+            // 'https://vrs3.autoimg.cn/advrmodel4/VR_car_att/Ic269J/001_WheelTire_17_225_50_7.5J_Volvo_S60_VIchexingku/Model/001_WheelTire_17_225_50_7.5J_Volvo_S60_VIchexingku.json',
+            // 'https://vrs3.autoimg.cn/advrmodel7/VR_car_att/7FiiFT/001_Caliper_Volvo_S60_VIchexingku/Model/001_Caliper_Volvo_S60_VIchexingku.json',
+
+            // 'https://vrs3.autoimg.cn/advrmodel6/vr_car/X1lGN5LF/Volvo_S60_20230726_001_zhiyihaohuaban_VIchexingku/Flare/Flare.json',
+            // 'https://vrs3.autoimg.cn/advrmodel5/VR_car_att/BHL4JY/001_Interior_Volvo_S60_VIchexingku/Model/001_Interior_Volvo_S60_VIchexingku.json'
+
+
+        ].forEach((url)=>{
+            loadJsonModel(url, (model)=>{
+                const entity = new pc.Entity(name);
+
+                entity.addComponent("model");
+                entity.model.model = model;
+
+                modelGroup.addChild(entity);
+            });
+        });
+
+        let assets = [
+            new pc.Asset('orbit-camera', 'script', { url: '../../../scripts/camera/orbit-camera.js' })
+        ];
+
+        const assetListLoader = new pc.AssetListLoader(assets, app.assets);
+
+        assetListLoader.load(()=>{
+            const camera = new pc.Entity('camera');
+            camera.addComponent("camera", {
+                clearColor: new pc.Color(0.4, 0.45, 0.5)
+            });
+            camera.addComponent("script");
+            camera.script.create("orbitCamera", {
+                attributes: {
+                    inertiaFactor: 0.2 // Override default of 0 (no inertia)
+                }
+            });
+            camera.script.create("orbitCameraInputMouse");
+            camera.script.create("orbitCameraInputTouch");
+            
+            app.root.addChild(camera);
+        });
+
+        app.start();
+    </script>
+</body>
+</html>

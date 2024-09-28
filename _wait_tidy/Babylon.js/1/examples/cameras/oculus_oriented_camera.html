@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>oculus_oriented_camera</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示 OculusOrientedCamera 案例效果
+			搞不懂
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+
+				BABYLON.OculusOrientedCamera.BuildOculusStereoCamera(
+					scene, 'Camera', 0.1, 10000,
+					new BABYLON.Vector3(0, 0, 30),
+					{ yaw: 0.0, pitch: 0.0, roll: 0.0 },
+					false,	//	useFXAA
+					false,		//	disableGravity
+					false,		//	disableCollisions
+					//	collisionEllipsoid
+					new BABYLON.Vector3(0.2,0.855,0.2),
+					//	ovrSettings
+					BABYLON.OculusController.CameraSettings_OculusRiftDevKit2013_Metric
+				)
+
+				// var camera = new BABYLON.OculusOrientedCamera("Camera",
+				// 	new BABYLON.Vector3(0, 0, 30),
+				// 	scene,
+				// 	false,
+				// 	BABYLON.OculusController.CameraSettings_OculusRiftDevKit2013_Metric,
+				// 	{ yaw: 0.0, pitch: 0.0, roll: 0.0 }
+				// );
+
+				// camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				// camera.attachControl(canvas);
+
+				createAxesBox(scene);
+
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

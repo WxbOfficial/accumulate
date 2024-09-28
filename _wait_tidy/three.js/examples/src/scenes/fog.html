@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>fog</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const render = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			render.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100 );
+
+			camera.position.z = 14;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const scene = new THREE.Scene();
+			scene.fog = new THREE.Fog( 0x050505, 1, 10 );
+
+			const plane = new THREE.PlaneGeometry(5, 5, 4, 4);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../assets/images/logo.jpeg'),
+				})
+			);
+			scene.add(mesh);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initObject(gui, mesh, 'object');
+				initFog(gui, scene.fog, 'fog');
+			}
+
+			function initObject(gui, object, name){
+
+				const objectFolder = gui.addFolder(name);
+
+				objectFolder.add(object.position, 'z', 0, 10).name('position.z')
+			}
+
+			function initFog(gui, fog, name){
+
+				const fogFolder = gui.addFolder(name);
+
+				fogFolder.addColor(fog, 'color');
+
+				fogFolder.add(fog, 'near', -10, 10);
+				fogFolder.add(fog, 'far', -10, 10);
+
+			}
+
+			loop();
+			function loop() {
+
+				render.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

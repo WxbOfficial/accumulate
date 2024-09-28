@@ -1,0 +1,17 @@
+
+
+
+class MyJsonLoader{
+
+	constructor(){
+
+	}
+
+	load(){
+
+	}
+
+
+
+
+}

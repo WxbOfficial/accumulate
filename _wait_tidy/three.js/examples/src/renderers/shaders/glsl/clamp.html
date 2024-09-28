@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>clamp</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 2;
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+			const plane = new THREE.BufferGeometry();
+			plane.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				-1.0, -1.0,  0.0,
+				 1.0, -1.0,  0.0,
+				-1.0,  1.0,  0.0,
+				 1.0,  1.0,  0.0,
+			] ), 3 ) );
+
+			plane.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+
+			const rawShaderMaterial = new THREE.RawShaderMaterial({
+				uniforms: {
+					maxValue: {
+						value: 0.8,
+					},
+					minValue: {
+						value: 0.4,
+					},
+					clampValue: {
+						value: 1,
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec3 color;
+
+					uniform mat4 projectionMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 modelMatrix;
+
+					void main(void) {
+
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform	float minValue;
+					uniform	float maxValue;
+					uniform	float clampValue;
+
+					void main() {
+
+						gl_FragColor =
+							vec4(
+								clamp( clampValue, minValue, maxValue ),
+								0.0,
+								0.0,
+								1.0
+							);
+					}
+				`,
+			})
+			const mesh = new THREE.Mesh( plane, rawShaderMaterial );
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( rawShaderMaterial.uniforms.minValue, 'value', 0, 1 ).name( 'minValue' );
+				gui.add( rawShaderMaterial.uniforms.maxValue, 'value', 0, 1 ).name( 'maxValue' );
+				gui.add( rawShaderMaterial.uniforms.clampValue, 'value', 0, 1 ).name( 'clampValue' );
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

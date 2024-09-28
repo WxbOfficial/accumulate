@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="../../../favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#000000" />
+		<meta
+			name="description"
+			content="learn react start"
+		/>
+		<link rel="apple-touch-icon" href="./logo192.png" />
+		<title>warn_if_react_dom_container_in_dev</title>
+	</head>
+	<body>
+		<noscript>You need to enable JavaScript to run this app.</noscript>
+		<div id="root"></div>
+		<script type="module">
+			import * as React from '../../../../src/react/React.js';
+			import * as ReactDOM from '../../../../src/react-dom/client/ReactDOM.js';
+
+			const rootNode = document.getElementById('root');
+
+			const App = React.jsx(
+					'button',
+					{
+						onClick: function(){
+							console.log('You liked this!');
+						},
+						children: "Like",
+					},
+				);
+			// jsx
+			/*
+				<button
+					onClick={function(){
+						console.log('You liked this!');
+					}}>
+					Like
+				</button>
+			*/
+
+			const root = ReactDOM.createRoot(rootNode);
+
+			//	不能选 body
+			const root1 = ReactDOM.createRoot(document.body);
+			//	不能重复作为 root 容器
+			// const root2 = ReactDOM.createRoot(rootNode);
+			// 还有一个 _reactRootContainer , 不是很清楚 , 待完善
+
+			root.render( App );
+		</script>
+	</body>
+</html>

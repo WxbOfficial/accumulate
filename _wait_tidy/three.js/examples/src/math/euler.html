@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>euler</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100 );
+
+			camera.position.set(0, 0, 10);
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			scene.add(new THREE.AxesHelper( 10 ));
+
+			const group = new THREE.Object3D();
+
+			group.add(new THREE.AxesHelper( 4 ));
+			group.add(new THREE.Mesh(
+				new THREE.BoxGeometry(2,2,2),
+				new THREE.MeshBasicMaterial( {color: 0xffff00} )
+			));
+			group.position.set(2, 2, 2)
+
+			scene.add(group);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+				initObject3D( gui, group, '欧拉角旋转' );
+			}
+
+			function initObject3D( gui, object3D, name ){
+
+				const	folder = gui.addFolder( name ),
+					onChange = (dir)=>{
+						return (data)=>{
+							object3D.rotation[dir] = data / 180 * Math.PI;
+						}
+					};
+
+				object3D.rotation['dx'] =
+				object3D.rotation['dy'] =
+				object3D.rotation['dz'] = 0;
+
+				folder.add( object3D.rotation, 'dx', -180, 180 ).onChange( onChange('x') ).name('x');
+				folder.add( object3D.rotation, 'dy', -180, 180 ).onChange( onChange('y') ).name('y');
+				folder.add( object3D.rotation, 'dz', -180, 180 ).onChange( onChange('z') ).name('z');
+			}
+
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

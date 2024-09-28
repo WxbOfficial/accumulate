@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../favicon.ico" />
+    <title>animation</title>
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!-- 
+    抄自 https://playground.babylonjs.com/#CBGEQX#1677
+    babylon 的组合动画实现，控制相机的 target 和 alpha 参数进行动画 -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+  
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 0, 25, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        let localConnected = localAxes(50);
+
+        const light = new BABYLON.HemisphericLight("light", 
+            new BABYLON.Vector3(0, 1, 0), 
+            scene);
+        // Dim the light a small amount 0 - 1
+        // light.intensity = 0.7;
+
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", 
+            {width: 6, height: 6}, 
+            scene);
+
+        startCameraAnimation();
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        function startCameraAnimation(){
+          const frameRate = 60,
+                targetKeys = [],
+                alphaKeys = [],
+
+                loopMode = BABYLON.Animation.ANIMATIONLOOPMODE_YOYO;
+
+          const targetAnimation = new BABYLON.Animation("targetAnimation", "target", frameRate,
+            BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+            loopMode);
+
+          targetKeys.push({
+            frame: 0,
+            value: new BABYLON.Vector3(3, 0, 3)
+          });
+          targetKeys.push({
+            frame: frameRate,
+            value: new BABYLON.Vector3(3, 0, -3)
+          });
+          targetKeys.push({
+            frame: frameRate * 2,
+            value: new BABYLON.Vector3(-3, 0, -3)
+          });
+          targetKeys.push({
+            frame: frameRate * 3,
+            value: new BABYLON.Vector3(-3, 0, 3)
+          });
+          targetKeys.push({
+            frame: frameRate * 4,
+            value: new BABYLON.Vector3(3, 0, 3)
+          });
+          targetAnimation.setKeys(targetKeys);
+
+          const alphaAnimation = new BABYLON.Animation("alphaAnimation", "alpha", frameRate,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+            loopMode);
+          alphaKeys.push({
+            frame: 0,
+            value: Math.PI / 4,
+          });
+          alphaKeys.push({
+            frame: frameRate,
+            value: Math.PI / 4 * -1,
+          });
+          alphaKeys.push({
+            frame: frameRate * 2,
+            value: Math.PI / 4 * -3,
+          });
+          alphaKeys.push({
+            frame: frameRate * 3,
+            value: Math.PI / 4 * -5,
+          });
+          alphaKeys.push({
+            frame: frameRate * 4,
+            value: Math.PI / 4 * -7,
+          });
+
+          alphaAnimation.setKeys(alphaKeys);
+
+          const animationGroup = new BABYLON.AnimationGroup("cameraAnimaionGroup");
+
+          animationGroup.addTargetedAnimation(targetAnimation, camera);
+          animationGroup.addTargetedAnimation(alphaAnimation, camera);
+
+          animationGroup.play(true);
+
+        }
+        return scene;
+      }
+
+    </script>
+  </body>
+</html>

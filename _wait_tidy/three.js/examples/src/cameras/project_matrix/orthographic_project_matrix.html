@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>orthographic_project_matrix</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 20 );
+
+			camera.position.z = 2;
+
+
+			const plane = new THREE.BufferGeometry();
+			plane.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				 0,  0,  0.0,
+				 5,  0,  0.0,
+				 0,  5,  0.0,
+				 5,  5,  0.0,
+			] ), 3 ) );
+
+			plane.setAttribute('uv', new THREE.BufferAttribute( new Float32Array( [
+				0.0, 0.0,
+				1.0, 0.0,
+				0.0, 1.0,
+				1.0, 1.0,
+			] ), 2) );
+
+			plane.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+
+			const uniforms1 = {
+				color: {
+					value: new THREE.Color( 1, 0, 0 ),
+				},
+				orthographic: {
+					value: new THREE.Matrix4(),
+				},
+				translate: {
+				 value: new THREE.Vector3(6, 0, -1),
+				},
+			};
+
+			const uniforms2 = {
+				color: {
+					value: new THREE.Color( 1, 1, 0 ),
+				},
+				orthographic: uniforms1.orthographic,
+				translate: {
+				 value: new THREE.Vector3(0, 0, 0),
+				},
+			};
+
+			const rawShaderMaterial1 = new THREE.RawShaderMaterial({
+				uniforms: uniforms1,
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+
+					uniform mat4 orthographic;
+					uniform vec3 translate;
+
+					void main(void) {
+
+						gl_Position = orthographic * vec4( position.xyz + translate, 1.0 ) ;
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform	vec3 color;
+
+					void main() {
+
+						gl_FragColor = vec4( color, 1.0 );
+					}
+				`,
+				side: THREE.DoubleSide
+			});
+			const rawShaderMaterial2 = rawShaderMaterial1.clone();
+
+			rawShaderMaterial2.uniforms = uniforms2;
+
+			const mesh1 = new THREE.Mesh( plane, rawShaderMaterial1 );
+			const mesh2 = new THREE.Mesh( plane, rawShaderMaterial2 );
+
+			scene.add( mesh1 );
+			scene.add( mesh2 );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			const left = -10;
+			const right = 20;
+			const top = 10;
+			const bottom = -20;
+			const near = -10;
+			const far = 20;
+
+
+			function setOrthographic( matrix4, left, right, top, bottom, near, far ){
+
+				const w = ( right - left );
+				const h = ( top - bottom );
+				const p = ( far - near );
+
+				const x = ( right + left ) / w;
+				const y = ( top + bottom ) / h;
+				const z = ( far + near ) / p;
+
+				matrix4.set(
+
+					// 最左为 0, 最右为 w
+					// 2 / w,	0,			0,			-1,
+					// 0,			-2 / h,	0,			1,
+					// 0,			0,			-2 / p,	1,
+					// 0,			0,			0,			1,
+
+					// 最左为 left, 最右为 right
+					2 / w,	0,				0,					-x,
+					0,			2 / h,		0,					-y,
+					0,			0,				2 / p,			-z,
+					0,			0,				0,					1,
+				)
+			}
+
+			setOrthographic( uniforms1.orthographic.value, left, right, top, bottom, near, far );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMeshOrthographicGui(gui, mesh1, 'mesh1Translate');
+				initMeshOrthographicGui(gui, mesh2, 'mesh2Translate');
+			}
+
+			function initMeshOrthographicGui( gui, mesh, name ){
+
+				const meshTranslateFolder = gui.addFolder(name);
+
+				meshTranslateFolder.addColor( mesh.material.uniforms.color, 'value' ).name( 'color' );
+
+				meshTranslateFolder.add( mesh.material.uniforms.translate.value, 'x', left, right ).name('position.x');
+				meshTranslateFolder.add( mesh.material.uniforms.translate.value, 'y', bottom, top ).name('position.y');
+				meshTranslateFolder.add( mesh.material.uniforms.translate.value, 'z', near-0.01, far+0.01, 0.01 ).name('position.z');
+			}
+
+			loop( 0 );
+			function loop( time ) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

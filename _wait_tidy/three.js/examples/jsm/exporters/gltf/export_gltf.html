@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>export_gltf</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import { _Utils } from '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, GLTFExporter } from '../../jsm.js';
+
+			import exportScenes from './export_scenes/export_scenes.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.01, 10000 );
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const { name, mountScene } = exportScenes[1];
+
+			mountScene( scene );
+
+
+			const exporter = new GLTFExporter();
+			function exportSceneGlb( model = scene, filename = name ){
+
+				exporter.parse( model, function(glb){
+
+
+					_Utils.downloadFile(filename, glb, _Utils.MME.gltfBinary)
+				}, function(error){
+					console.log( 'An error happened', error );
+				}, {
+					binary: true, //Export in binary (.glb) format, returning an ArrayBuffer. Default is false.
+				})
+			}
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					param = {
+						exportGlb(){
+
+							exportSceneGlb( scene );
+						}
+					};
+
+				gui.add( param, 'exportGlb' );
+			}
+
+			loop(0);
+			function loop(delta) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

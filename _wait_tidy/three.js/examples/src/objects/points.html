@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>points</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			camera.position.z = 10;
+
+			scene.add(camera);
+
+			const pointsGeometry = new THREE.BufferGeometry();
+
+			pointsGeometry.setAttribute( "position", new THREE.BufferAttribute(new Float32Array([
+				 0, 0, 0,
+				-4, 4, 0,
+				 4, 4, 0,
+				-4,-4, 0,
+				 4,-4, 0
+			]), 3) );
+
+			pointsGeometry.setAttribute( "color", new THREE.BufferAttribute(new Float32Array([
+				 1, 0, 0,
+				 1, 1, 0,
+				 1, 0, 1,
+				 0, 0, 1,
+				 0, 1, 1
+			]), 3) );
+
+			function nearest_pow2(n) {
+				const l = Math.log(n) / Math.LN2;
+				return Math.pow( 2, Math.round(l) );
+			}
+
+			function addTexture(url){
+
+				const image = new Image();
+				image.src = url;
+
+				const canvasElement = document.createElement('canvas');
+
+				const texture = new THREE.Texture( canvasElement );
+
+
+				image.onload = ()=>{
+
+					canvasElement.width = nearest_pow2(image.naturalWidth);
+					canvasElement.height = nearest_pow2(image.naturalHeight);
+
+					canvasElement.getContext("2d").drawImage( image, 0, 0, canvasElement.width, canvasElement.height );
+
+					texture.needsUpdate = true;
+				}
+
+				return texture;
+			}
+
+			const pointsMaterial = new THREE.PointsMaterial({
+				color: 0xffffff,
+				map: addTexture('../../assets/images/logo.jpeg'),
+				// map: THREE.ImageUtils.loadTexture('../../assets/images/logo.jpeg'),
+				size: 100,
+				sizeAttenuation: false,
+				vertexColors: true,
+			})
+
+			const particleSystem = new THREE.Points(pointsGeometry, pointsMaterial);
+
+			scene.add(particleSystem);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initPointsMaterial(gui, pointsMaterial, 'pointsMaterial');
+			}
+
+			function initPointsMaterial(gui, material, name){
+
+				const materialFolder = gui.addFolder(name);
+
+				materialFolder.addColor(material, 'color');
+
+				materialFolder.add(material, 'size', 0, 300);
+
+				// materialFolder.add(material, 'sizeAttenuation');
+
+				materialFolder.add(material, 'vertexColors').disable();
+			}
+
+			loop();
+			function loop() {
+
+				// mesh.rotation.y += 0.001;
+				// mesh.updateMatrix();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

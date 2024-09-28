@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>inter_leaved</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../../module.js';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 1000
+			);
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const plane = new THREE.BufferGeometry();
+
+			const interleavedBuffer = new THREE.InterleavedBuffer(
+				new Float32Array( [
+					-4, 4, 0, 0, 1, 1, 0, 0,
+					 4, 4, 0, 1, 1, 1, 1, 1,
+					-4,-4, 0, 0, 0, 0, 0, 0,
+					 4,-4, 0, 1, 0, 1, 0, 0,
+				] ), 8
+			);
+
+			plane.setAttribute( "position", new THREE.InterleavedBufferAttribute( interleavedBuffer, 3, 0 ) );
+			plane.setAttribute( "uv", new THREE.InterleavedBufferAttribute( interleavedBuffer, 2, 3 ) );
+			plane.setAttribute( "color", new THREE.InterleavedBufferAttribute( interleavedBuffer, 3, 5 ) );
+
+			plane.setIndex( new THREE.BufferAttribute(new Uint16Array([
+				0, 2, 3,
+				3, 1, 0
+			]), 1) );
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.RawShaderMaterial({
+					uniforms: {
+						map: {
+							value: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+						}
+					},
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+						attribute vec2 uv;
+						attribute vec3 color;
+
+						uniform mat4 projectionMatrix;
+						uniform mat4 viewMatrix;
+						uniform mat4 modelMatrix;
+
+						varying vec2 vUv;
+						varying vec3 vColor;
+
+						void main(void) {
+							vUv = uv;
+							vColor = color;
+
+	            gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+						}
+					`,
+					fragmentShader: `
+						precision mediump float;
+
+						uniform	sampler2D	map;
+
+						varying vec2 vUv;
+						varying vec3 vColor;
+
+						void main() {
+
+							vec4 color = texture2D( map, vUv ) + vec4( vColor, 1.0 );
+
+							gl_FragColor = color;
+						}
+					`
+				})
+			);
+
+			scene.add(mesh);
+
+			var stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

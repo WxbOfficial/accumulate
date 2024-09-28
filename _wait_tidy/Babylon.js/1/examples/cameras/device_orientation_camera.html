@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>arc_rotate_camera</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示 DeviceOrientationCamera 案例效果(通过方向传感器展示)
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.DeviceOrientationCamera("Camera", new BABYLON.Vector3(0, 0, 10), scene);
+
+				camera._camMatrix = new BABYLON.Matrix.Identity();
+				camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+				camera.attachControl(canvas);
+
+				createAxesBox(scene);
+
+				const gui = new lil.GUI();
+
+				initCameraGui(gui, camera);
+				initDeviceOrientationCameraGui(gui, camera);
+
+				return scene;
+			}
+
+			function initCameraGui(gui, camera){
+
+				const cameraFolder = gui.addFolder('Camera');
+
+				cameraFolder.add( camera, 'inertia', 0, 1 ).name('惯性');
+
+				cameraFolder.add( camera, 'fov', 0, 1 ).name('fov');
+
+				cameraFolder.add( camera, 'minZ', 0, 10 ).name('minZ');
+				cameraFolder.add( camera, 'maxZ', 10, 10000 ).name('minZ');
+			}
+
+			function initDeviceOrientationCameraGui(gui, camera){
+
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

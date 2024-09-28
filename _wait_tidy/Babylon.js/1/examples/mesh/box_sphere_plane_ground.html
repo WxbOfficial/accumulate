@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>box_sphere_plane_ground</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 基本的创建引擎、场景、相机、几何体，展示黑色模型。
+	可供调试参数
+		Engine.prototype.forceWireframe
+			被引用
+				Engine.prototype.clear
+				Mesh.prototype.render
+
+	主要涉及对象及参数
+		Engine
+
+			Engine.ShadersRepository
+
+			runRenderLoop
+
+		Scene
+
+			render
+
+		ArcRotateCamera
+
+		Mesh
+			CreateBox
+			CreateSphere
+			CreatePlane
+			CreateGround
+			CreateGroundFromHeightMap
+			CreateCylinder
+
+				setVertices
+
+				setIndices
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				box.position.x = 5;
+				box.position.y = 5;
+
+				var sphere = BABYLON.Mesh.CreateSphere("Sphere", 16, 5, scene);
+
+				sphere.position.x = 0;
+				sphere.position.y = 5;
+
+				var plane = BABYLON.Mesh.CreatePlane("Plane", 5, scene);
+
+				plane.position.x = -5;
+				plane.position.y = 5;
+
+				var ground = BABYLON.Mesh.CreateGround("Ground", 5, 5, 3, scene);
+
+				ground.position.x = 5;
+				ground.position.y = -5;
+
+
+				var groundHeightMap = BABYLON.Mesh.CreateGroundFromHeightMap("Ground",
+						"../assets/images/heightMap.png",
+						// "../assets/images/logo1.jpg",
+						// "../assets/images/logo.jpeg",
+						5, 5, 100, -2, 2, scene);
+
+				groundHeightMap.position.x = 0;
+				groundHeightMap.position.y = -5;
+
+				var clinder = BABYLON.Mesh.CreateCylinder("Cylinder", 5, 2, 2, 32, scene);
+
+				clinder.position.x = -5;
+				clinder.position.y = -5;
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

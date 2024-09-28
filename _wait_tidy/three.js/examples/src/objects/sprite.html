@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>sprite</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000 );
+
+			camera.position.z = 50;
+			// camera.position.x = 50;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const cube = new THREE.BoxGeometry(1, 1, 1);
+
+			const mesh = new THREE.Mesh( cube,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					envMap: new THREE.CubeTextureLoader().load(
+						[
+							"px.jpg", "nx.jpg",
+							"py.jpg", "ny.jpg",
+							"pz.jpg", "nz.jpg"
+						].map((url)=>{
+							 	return "../../assets/images/cube/Escher/" + url;
+						})
+					),
+				})
+			);
+
+			scene.add(mesh);
+
+			const sprite = new THREE.Sprite( new THREE.SpriteMaterial({
+				map: new THREE.TextureLoader().load('../../assets/images/logo1.jpg')
+			}) );
+			sprite.scale.x = 10;
+			sprite.scale.y = 10;
+
+			scene.add( sprite );
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initSprite(gui, sprite, 'sprite');
+			}
+
+			function initSprite(gui, sprite, name){
+
+				const
+					spriteFolder = gui.addFolder('sprite'),
+
+					materialFolder = gui.addFolder('material');
+
+				spriteFolder.add(sprite, 'visible');
+
+				spriteFolder.add(sprite.position, 'x', -2, 2).name('position.x');
+				spriteFolder.add(sprite.position, 'y', -2, 2).name('position.y');
+				spriteFolder.add(sprite.position, 'z', -2, 2).name('position.z');
+
+				spriteFolder.add(sprite.scale, 'x', -20, 20).name('scale.x');
+				spriteFolder.add(sprite.scale, 'y', -20, 20).name('scale.y');
+
+
+				materialFolder.add(sprite.material.map.repeat, 'x', -2, 2).name('uvScale.x');
+				materialFolder.add(sprite.material.map.repeat, 'y', -2, 2).name('uvScale.y');
+
+				materialFolder.add(sprite.material.map.offset, 'x', -2, 2).name('uvOffset.x');
+				materialFolder.add(sprite.material.map.offset, 'y', -2, 2).name('uvOffset.y');
+
+				materialFolder.add(sprite.material, 'opacity', 0, 1);
+
+				materialFolder.addColor(sprite.material, 'color');
+
+				materialFolder.add(sprite.material, 'rotation', -Math.PI, Math.PI);
+
+				materialFolder.add(sprite.material, 'depthTest');
+
+				materialFolder.add(sprite.material, 'depthWrite');
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

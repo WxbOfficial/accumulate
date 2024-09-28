@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../favicon.ico">
+		<title>start</title>
+		<link href="../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"@babylonjs/core/": "../source/core/"
+				}
+			}
+		</script>
+		<!-- <script type="text/javascript" src="https://cdn.babylonjs.com/v7.11.0/babylon.js"></script> -->
+		<script type="text/javascript" src="./babylon.7.11.0.js"></script>
+		<script type="module">
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.inertia = 0;
+				camera.panningInertia = 0;
+				camera.angularSensibilityX = 360 / Math.PI;
+				camera.angularSensibilityY = 360 / Math.PI;
+				camera.panningSensibility = 10;
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+
+				var plane = BABYLON.Mesh.CreatePlane("Plane", 10, scene);
+
+				var planeMat = new BABYLON.StandardMaterial('Plane', scene);
+
+				planeMat.diffuseColor = new BABYLON.Color3(1, 0, 0);
+				planeMat.emissiveColor = new BABYLON.Color3(0.2, 0, 0);
+				planeMat.emissiveTexture = new BABYLON.Texture(
+					// './assets/images/heightMap.png',
+					// "./assets/images/logo1.jpg",
+					"./assets/images/logo.jpeg",
+					scene
+				);
+
+				plane.material = planeMat;
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+			});
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../favicon.ico" />
+    <title>export_gltf</title>
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.js"></script>
+    <!-- 只导出 gltf -->
+    <!-- <script src="https://preview.babylonjs.com/serializers/babylonjs.glTF2Serializer.js"></script> -->
+    <!-- jszip 用于压缩导出 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+  </head>
+  <!--
+    js 文件添加:
+      gltf 加载器: https://www.npmjs.com/package/babylonjs-loaders
+      导出器: 
+      模型导出器: https://www.npmjs.com/package/babylonjs-serializers
+      jszip 压缩: https://www.npmjs.com/package/jszip
+
+    实现 gltf 的模型加载，相关文档(感觉没啥用): https://doc.babylonjs.com/features/featuresDeepDive/importers/glTF
+    实现模型导出相关文档: https://doc.babylonjs.com/features/featuresDeepDive/Exporters/glTFExporter
+  
+    问题:
+      导入之前导出的模型，会不断堆积 __root__ , 额外一个场景导出之前导出的模型的话, 会出现无场景的问题
+    解决:
+      通过将导出模型的 parent 设置为 null 后放到一个备用的空场景中再导出，可解决该问题，不过有时候会多出一个 scale 且 Y 是 -1 ，而且 rotation 也会被修改，有点奇怪
+
+    以后有空的话，需要对源码进行学习，重写一个导出器。
+  -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+      scene.animationsEnabled = false;
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+
+      function createScene() {
+
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+
+        camera.minZ = 0.00051;
+        camera.maxZ = 100000;
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 0.04;
+        // 最大缩放
+        camera.upperRadiusLimit = 50;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 31; // 设置为 0 可禁用平移
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+  
+        camera.attachControl(canvas, true);
+
+        // let localConnected = localAxes(50);
+
+        //Local Axes
+        function localAxes(size) {
+            const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+            ], scene);
+            axisX.color = new BABYLON.Color3(1, 0, 0);
+
+            const axisY = BABYLON.Mesh.CreateLines("axisY", [
+                new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+            ], scene);
+            axisY.color = new BABYLON.Color3(0, 1, 0);
+
+            const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+                new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+            ], scene);
+            axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        const baseUrl = "http://localhost:7999/learn_code/three.js/examples/assets/models/gltf/RobotExpressive/";
+        const fileName = "RobotExpressive.glb";
+
+        // const baseUrl = "http://localhost:7999/Babylon.js/babylon_accumulate/assets/exportGltf/";
+        // const fileName = "BoomBox.gltf";
+
+        loadGltf(scene, baseUrl, fileName);
+
+        return scene;
+      }
+
+      let loadExportModel = null,
+          loadExportModelParent = null;
+      const exportScene = new BABYLON.Scene(engine);
+
+      function loadGltf(scene, baseUrl, fileName){
+
+        // 加载相关模型(babylon 会自己默认的添加一个 __root__根结点)
+        BABYLON.SceneLoader.ImportMesh('', baseUrl, fileName, scene, function (meshes, particleSystems, skeletons) { // 对骨骼和模型进行进一步操作 // 对于glTF文件，粒子系统默认为空 });
+
+          const light = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(0, 1, 0), scene);
+
+          loadExportModel = meshes[1];
+          loadExportModelParent = loadExportModel.parent;
+
+          window.meshes = meshes;
+          // console.log('meshes:', meshes);
+          // console.log('particleSystems:', particleSystems);
+          // console.log('skeletons:', skeletons);
+        });
+
+
+
+        // 加载整个场景
+        // BABYLON.SceneLoader.Append(baseUrl, fileName, scene, function (scene) {
+        //     // Create a default arc rotate camera and light.
+        //     // scene.createDefaultCameraOrLight(true, true, true);
+        // });
+      }
+
+      window.exportGltf = function exportGltf(fileName = 'exportGltf'){
+        loadExportModel.parent = null;
+        exportScene.addMesh(loadExportModel, true);
+
+        // 将场景解析为 gltf
+        BABYLON.GLTF2Export.GLTFAsync(exportScene, fileName).then((gltf) => {
+
+          const zipFile = getGltfZip(gltf.glTFFiles)
+          exportScene.removeMesh(loadExportModel, true);
+          loadExportModel.parent = loadExportModelParent;
+
+        });
+      }
+
+      function endsWith(str, suffix) {
+          return str.indexOf(suffix, str.length - suffix.length) !== -1;
+      }
+
+      function download(content, fileName){
+        const link = document.createElement("a");
+        document.body.appendChild(link);
+        link.setAttribute("type", "hidden");
+        link.download = fileName;
+
+        link.href = window.URL.createObjectURL(content);
+        link.click();
+
+        document.body.removeChild(link);
+      }
+
+      function getGltfZip(glTFFiles, zipName = 'exportGltf'){
+
+        const zip = new JSZip();
+
+        for (const key in glTFFiles) {
+
+          let mimeType, file,
+              blob = glTFFiles[key];
+
+          if (endsWith(key, ".glb")) {
+              mimeType = { type: "model/gltf-binary" };
+          } else if (endsWith(key, ".bin")) {
+              mimeType = { type: "application/octet-stream" };
+          } else if (endsWith(key, ".gltf")) {
+              mimeType = { type: "model/gltf+json" };
+          } else if (endsWith(key, ".jpeg") || endsWith(key, ".jpg")) {
+              mimeType = { type: '.jpg' };
+          } else if (endsWith(key, ".png")) {
+              mimeType = { type: '.png' };
+          }
+
+          file = new Blob([blob], mimeType);
+
+          zip.file(key, new Blob([blob], mimeType));
+        }
+
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            // see FileSaver.js
+            download(content, `${zipName}.zip`);
+        });
+
+      }
+
+      window.exportGlb = function exportGlb(fileName = 'exportGlb'){
+        exportScene.addMesh(loadExportModel, true);
+
+        BABYLON.GLTF2Export.GLBAsync(exportScene, fileName).then((glb) => {
+          glb.downloadFiles();
+
+          exportScene.removeMesh(loadExportModel, true);
+        });
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+{
+	"name": "Main",
+	"created": "2016-12-20T17:04:45.661Z",
+	"settings": {
+		"physics": {
+			"gravity": [0, -9.8, 0]
+		},
+		"render": {
+			"fog_end": 1000,
+			"tonemapping": 3,
+			"skybox": 39934843,
+			"fog_density": 0.01,
+			"gamma_correction": 2,
+			"exposure": 1,
+			"fog_start": 1,
+			"global_ambient": [0, 0, 0],
+			"skyboxIntensity": 1,
+			"fog_color": [0, 0, 0],
+			"lightmapMode": 1,
+			"fog": "none",
+			"lightmapMaxResolution": 2048,
+			"skyboxMip": 1,
+			"lightmapSizeMultiplier": 16
+		}
+	},
+	"entities": {
+		"684df6b4-c6d6-11e6-89b2-22000ac481df": {
+			"position": [0, 0, 0],
+			"scale": [1, 1, 1],
+			"name": "Root",
+			"parent": null,
+			"resource_id": "684df6b4-c6d6-11e6-89b2-22000ac481df",
+			"components": {},
+			"rotation": [0, 0, 0],
+			"enabled": true,
+			"children": [],
+			"tags": []
+		}
+	},
+	"id": 1054824
+}

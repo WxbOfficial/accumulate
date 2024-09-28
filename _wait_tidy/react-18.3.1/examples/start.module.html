@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#000000" />
+		<meta
+			name="description"
+			content="learn react start"
+		/>
+		<link rel="apple-touch-icon" href="./logo192.png" />
+		<title>start</title>
+	</head>
+	<body>
+		<noscript>You need to enable JavaScript to run this app.</noscript>
+		<div id="root"></div>
+		<script type="module">
+			import * as React from '../src/react/React.js';
+			import * as ReactDOM from '../src/react-dom/client/ReactDOM.js';
+
+			const rootNode = document.getElementById('root');
+
+			const App = React.jsx(
+					'button',
+					{
+						onClick: function(){
+							console.log('You liked this!');
+						},
+						children: "Like",
+					},
+				);
+			// jsx
+			/*
+				<button
+					onClick={function(){
+						console.log('You liked this!');
+					}}>
+					Like
+				</button>
+			*/
+
+			const root = ReactDOM.createRoot(rootNode);
+			// ReactDOMRoot: {
+			// 	_internalRoot = FiberRootNode: {
+			// 		current: FiberNode: {
+			// 			stateNode: 指向包含自身的 FiberRootNode,
+			// 			memoizedState: {
+			// 				element: initialChildren,
+			// 				isDehydrated: hydrate,
+			// 				cache: null, // not enabled yet
+			// 				transitions: null,
+			// 				pendingSuspenseBoundaries: null,
+			// 			},
+			// 			updateQueue: {
+			// 				baseState: fiber.memoizedState, 指向包含自身的 FiberNode,
+			// 				firstBaseUpdate: null,
+			// 				lastBaseUpdate: null,
+			// 				shared: {
+			// 					pending: null,
+			// 					interleaved: null,
+			// 					lanes: NoLanes,
+			// 				},
+			// 				effects: null,
+			// 			}
+			// 		}
+			// 	}
+			// }
+
+			root.render( App );
+		</script>
+	</body>
+</html>

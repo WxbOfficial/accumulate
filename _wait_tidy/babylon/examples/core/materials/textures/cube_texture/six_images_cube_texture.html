@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../../favicon.ico" />
+		<title>six_images_cube_texture</title>
+		<link href="../../../../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script src="https://cdn.babylonjs.com/babylon.js"></script>
+
+		<style type="text/css">
+			#sixImages{
+				padding: 0.1rem;
+				position: absolute;
+				top: 0;
+				left: 0;
+			  display: grid;
+			  grid-template-rows: 1fr;
+			  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+				grid-column-gap: 0.01rem;
+				grid-row-gap: 0.01rem;
+				width: 6.25rem;
+				height: 1.2rem;
+				background-color: #6b6b6b;
+			}
+
+			#sixImages >.face{
+				position: relative;
+				background-color: #000000;
+			}
+			#sixImages >.face >.position{
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 0.6rem;
+				height: 0.2rem;
+				line-height: 0.2rem;
+				text-align: center;
+				color: #bbbbbb;
+				background-color: #222222;
+				font-size: 0.12rem;
+			}
+			#sixImages >.face >.delete{
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 0.2rem;
+				text-align: center;
+				height: 0.2rem;
+				line-height: 0.2rem;
+				color: #bbbbbb;
+				background-color: #222222;
+				opacity: 0;
+				transition: opacity .3s, color .3s;
+				font-size: 0.12rem;
+				cursor: pointer;
+				z-index: 2;
+			}
+			#sixImages >.face:hover >.delete{
+				opacity: 1;
+			}
+			#sixImages >.face >.delete:hover{
+				color: #ffffff;
+			}
+			#sixImages >.face >.pre_view{
+				display: none;
+			}
+			#sixImages >.x_p{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 1;
+			  grid-column-end: 2;
+			}
+			#sixImages >.y_p{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 2;
+			  grid-column-end: 3;
+			}
+			#sixImages >.z_p{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 3;
+			  grid-column-end: 4;
+			}
+			#sixImages >.a_n{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 4;
+			  grid-column-end: 5;
+			}
+			#sixImages >.y_n{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 5;
+			  grid-column-end: 6;
+			}
+			#sixImages >.z_n{
+			  grid-row-start: 1;
+			  grid-row-end: 2;
+			  grid-column-start: 6;
+			  grid-column-end: 7;
+			}
+		</style>
+	</head>
+	<!--
+		立方体纹理展示，通过加载六张图实现相关效果。
+			添加了本地上传 、 替换某个方向图片的功能
+			方向标准: x+ 即 x 轴正方向, x- 即 x 轴负方向, 以此类推
+	-->
+	<body>
+		<div id="sixImages">
+			<div class="face x_p">
+				<div class="position">x+</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 0)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+
+			<div class="face y_p">
+				<div class="position">y+</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 1)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+
+			<div class="face z_p">
+				<div class="position">z+</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 2)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+
+			<div class="face x_r">
+				<div class="position">x-</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 3)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+
+			<div class="face y_n">
+				<div class="position">y-</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 4)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+
+			<div class="face z_n">
+				<div class="position">z-</div>
+				<div class="delete">del</div>
+				<input class="hidden_input_button"
+						type="file" name="file"
+						accept=".jpg,.jpeg,.png,.webp"
+						onchange="uploadFile(this, 5)"/>
+				<img class="pre_view fill" alt="" />
+			</div>
+		</div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			const canvas = document.getElementById("renderCanvas");
+
+			const engine = new BABYLON.Engine(canvas, true);
+			engine.setSize( window.innerWidth, window.innerHeight );
+
+			let { scene, skybox, material } = createScene();
+
+			engine.runRenderLoop(function () {
+				scene.render();
+			});
+
+			window.addEventListener("resize", function () {
+				engine.setSize( window.innerWidth, window.innerHeight );
+				engine.resize();
+			});
+
+			function createScene() {
+
+				const scene = new BABYLON.Scene(engine);
+				scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+				// scene.useRightHandedSystem = true;
+
+				const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.setTarget(BABYLON.Vector3.Zero());
+
+				camera.attachControl(canvas, true);
+
+				// alpha 鼠标左右操作对应的移动
+				// camera.lowerAlphaLimit = 0;
+				// camera.upperAlphaLimit = Math.PI * 2;
+
+				// beta 鼠标上下操作对应的移动
+				camera.lowerBetaLimit = 0;
+				camera.upperBetaLimit = Math.PI;
+
+				// 最小缩放
+				camera.lowerRadiusLimit = 2;
+				// 最大缩放
+				camera.upperRadiusLimit = 200;
+
+				camera.inertia = 0;
+				camera.angularSensibilityX = 108;
+				camera.angularSensibilityY = 108;
+
+				camera.panningInertia = 0;
+				camera.panningSensibility = 0; // 设置为 0
+
+				const localConnected = localAxes(50);
+
+				const light = new BABYLON.HemisphericLight("light",
+						new BABYLON.Vector3(0, 1, 0),
+						scene);
+				// Dim the light a small amount 0 - 1
+				// light.intensity = 0.7;
+
+				// 天空盒模型
+				const skybox = BABYLON.Mesh.CreateBox('skybox', 5, scene, false, BABYLON.Constants.MATERIAL_CounterClockWiseSideOrientation);
+
+				const mat = new BABYLON.PBRMaterial("mat", scene);
+
+				mat.backFaceCulling = false;
+
+				skybox.material = mat;
+
+				//Local Axes
+				function localAxes(size) {
+					const axisX = BABYLON.Mesh.CreateLines("axisX", [
+						new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+					], scene);
+					axisX.color = new BABYLON.Color3(1, 0, 0);
+
+					const axisY = BABYLON.Mesh.CreateLines("axisY", [
+							new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+					], scene);
+					axisY.color = new BABYLON.Color3(0, 1, 0);
+
+					const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+							new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+					], scene);
+					axisZ.color = new BABYLON.Color3(0, 0, 1);
+				}
+
+				return { scene, skybox, material: mat };
+			}
+
+			let hasLoad = false;
+			const imageMessages = [];
+
+			window.uploadFile = function uploadFile(target, index = 0){
+				console.log('uploadFile');
+
+				const
+					file = target.files[0],
+					reader = new FileReader();
+
+				reader.readAsDataURL(file);
+				reader.onload = () => {
+					const
+						url = reader.result,
+						imageMessage = imageMessages[index];
+
+					if( imageMessage ){
+
+						imageMessage.url = url;
+						imageMessage.file = file;
+					}else{
+
+						imageMessages[index] = {
+							url, file,
+						}
+					}
+
+					const imageDom = document.querySelectorAll('.pre_view')[index];
+
+					imageDom.setAttribute('src', url);
+					imageDom.style.display = 'block';
+
+					if( imageMessages.length === 6 ){
+						if( hasLoad ){
+
+							updateSixImagesCubeTexture(
+
+								imageMessages.map((message)=>{
+									return message.url;
+								}),
+							);
+						}else{
+							loadSixImagesCubeTexture(
+
+								imageMessages.map((message)=>{
+									return message.url;
+								}),
+							);
+							hasLoad = true;
+						}
+					}
+				};
+
+				target.value = '';
+			}
+
+			let texture = null,
+				count = 0;
+
+			function loadSixImagesCubeTexture(imageUrls, onLoad = ()=>{}){
+				console.log('loadSixImagesCubeTexture');
+
+				texture = new BABYLON.CubeTexture(
+					'', scene,
+					void 0, void 0, imageUrls,
+					()=>{
+						onLoad(texture);
+					},
+					()=>{
+						console.error('SixImagesCubeTexture 加载失败');
+
+						texture.dispose();
+					}, void 0, void 0,
+					void 0,
+					void 0, void 0, void 0, void 0, void 0,
+				);
+
+        material.reflectionTexture = texture;
+        material.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+			}
+
+			function updateSixImagesCubeTexture(imageUrls, onLoad = ()=>{}){
+				console.log('updateSixImagesCubeTexture');
+
+				texture.updateURL(
+					'' + (++ count), void 0,
+					()=>{
+						onLoad(texture);
+					}, void 0,
+					()=>{
+						console.error('SixImagesCubeTexture 更新失败');
+					}, '', void 0,
+					imageUrls
+				)
+			}
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../../favicon.ico">
+		<title>indexedDB</title>
+	</head>
+	<!--
+		用于测试学习 babylon.js 中关于 indexedDB 的原生 api
+
+	-->
+	<body>
+		<script type="text/javascript">
+
+			console.log('window.indexedDB:', window.indexedDB);
+			console.log('window.mozIndexedDB:', window.mozIndexedDB);
+			console.log('window.webkitIndexedDB:', window.webkitIndexedDB);
+			console.log('window.msIndexedDB:', window.msIndexedDB);
+
+
+			console.log('window.IDBTransaction:', window.IDBTransaction);
+			console.log('window.webkitIDBTransaction:', window.webkitIDBTransaction);
+			console.log('window.msIDBTransaction:', window.msIDBTransaction);
+
+
+			console.log('window.IDBKeyRange:', window.IDBKeyRange);
+			console.log('window.webkitIDBKeyRange:', window.webkitIDBKeyRange);
+			console.log('window.msIDBKeyRange:', window.msIDBKeyRange);
+
+			let db = null;
+
+			function OpenAsync(){
+				console.log('OpenAsync');
+
+				if (!window.indexedDB ) {
+					throw new Error("Your browser doesn't support IndexedDB");
+				}
+				else {
+					// If the DB hasn't been opened or created yet
+					if (!db) {
+
+						var request = window.indexedDB.open("babylonjs", 1.0);
+
+						// Could occur if user is blocking the quota for the DB and/or doesn't grant access to IndexedDB
+						request.onerror = function (event) {
+							console.log("IDB request error.", event);
+						};
+
+						// executes when a version change transaction cannot complete due to other active transactions
+						request.onblocked = function (event) {
+							console.log("IDB request blocked. Please reload the page.", event);
+						};
+
+						// DB has been opened successfully
+						request.onsuccess = function (event) {
+							console.log("IDB request success.", event);
+							db = request.result;
+							console.log("DB opened.");
+						};
+
+						// Initialization of the DB. Creating Scenes & Textures stores
+						request.onupgradeneeded = function (event) {
+							console.log("IDB request upgradeneeded.", event);
+							db = event.target.result;
+							// var scenesStore = db.createObjectStore("scenes", { keyPath: "sceneUrl" });
+							// var scenesStore = db.createObjectStore("versions", { keyPath: "sceneUrl" });
+							// var texturesStore = db.createObjectStore("textures", { keyPath: "textureUrl" });
+						};
+					}
+				}
+			}
+
+			function _loadImageFromDBAsync(){
+
+			}
+
+			// OpenAsync();
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../favicon.ico" />
+    <title>texture</title>
+    <link href="../../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui"></script>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!--
+    一般纹理，主要是通过添加 gui 展示纹理相关的属性及操作效果
+      gui 添加:
+        https://lil-gui.georgealways.com/
+        https://github.com/georgealways/lil-gui
+        https://www.npmjs.com/package/lil-gui
+
+      多套 uv 选择: coordinatesIndex
+      uv 偏移: uOffset、vOffset
+      uv 缩放: uScale、vScale
+      uv 旋转:
+        主要是 wAng 配合 uRotationCenter 和 vRotationCenter
+        其中 uAng、vAng 的旋转机制不是很理解，还有 wRotationCenter 参数的作用也不是很理解
+      uv 包裹:
+        主要是 wrapU、wrapV
+        其中 wrapR 参数的作用不是很理解
+
+   -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 5, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        camera.attachControl(canvas, true);
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 0; // 设置为 0
+
+        const localConnected = localAxes(50);
+
+        const light = new BABYLON.HemisphericLight("light",
+            new BABYLON.Vector3(0, 1, 0),
+            scene);
+        // Dim the light a small amount 0 - 1
+        // light.intensity = 0.7;
+
+        // 自定义模型
+        const customMesh = new BABYLON.Mesh("custom", scene);
+
+        const positions = [
+          -1.0, -1.0,  0.0,
+           1.0, -1.0,  0.0,
+          -1.0,  1.0,  0.0,
+           1.0,  1.0,  0.0,
+        ];
+        const indices = [
+          0, 2, 1,
+          1, 2, 3
+        ];
+        const uvs = [
+          1.0, 0.0,
+          0.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
+        ];
+        const uvs2 = [
+          0.0, 0.0,
+          1.0, 0.0,
+          0.0, 1.0,
+          1.0, 1.0,
+        ];
+        const uvs3 = [
+          0.0 * 2, 0.0 * 2,
+          1.0 * 2, 0.0 * 2,
+          0.0 * 2, 1.0 * 2,
+          1.0 * 2, 1.0 * 2,
+        ];
+
+        const vertexData = new BABYLON.VertexData();
+
+        vertexData.positions = positions;
+        vertexData.indices = indices;
+        vertexData.uvs = uvs;
+        vertexData.uvs2 = uvs2;
+        vertexData.uvs3 = uvs3;
+
+        vertexData.applyToMesh(customMesh);
+
+        const mat = new BABYLON.PBRMaterial("mat", scene);
+
+        const texture = new BABYLON.Texture("../../../assets/logo1.JPG", scene);
+
+        window.texture = texture;
+
+        const uvsCount = 3;
+        initTextureGUI(texture, uvsCount);
+
+
+        mat.backFaceCulling = false; // 有点不理解为什么要这样参数设定，有点不大爽
+        mat.emissiveIntensity = 1;
+        mat.emissiveColor.set(1,1,1);
+        mat.emissiveTexture = texture;
+
+        customMesh.material = mat;
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        return scene;
+      }
+
+
+      function initTextureGUI(
+        texture, uvsCount
+      ){
+        const gui = new lil.GUI();
+        const textureFolder = gui.addFolder('texture uv');
+        const param = {
+          uvAng: 0,
+          scale: 1,
+        };
+
+        textureFolder.add(texture, 'level', 0, 10);
+
+        textureFolder.add(texture, 'gammaSpace');
+
+        const indexArr = new Array();
+        for(let i = 0; i < uvsCount; i++){
+          indexArr.push(i);
+        }
+
+        // 选择哪套纹理，最高可选到 uvs6
+        // 可看 mesh.vertexData.ts 中 _applyToCoroutine
+        textureFolder.add(texture, 'coordinatesIndex', indexArr );
+
+        textureFolder.add(texture, 'homogeneousRotationInUVTransform');
+
+        // uv 偏移
+        textureFolder.add(texture, 'uOffset', -1, 1 );
+        textureFolder.add(texture, 'vOffset', -1, 1 );
+
+        // uv 放缩
+        textureFolder.add(texture, 'uScale', -10, 10 );
+        textureFolder.add(texture, 'vScale', -10, 10 );
+
+        // uv 旋转
+        textureFolder.add(texture, 'uRotationCenter', 0, 1 );
+        textureFolder.add(texture, 'vRotationCenter', 0, 1 );
+        // 不是很懂这个参数有什么用
+        textureFolder.add(texture, 'wRotationCenter', 0, 1 );
+        // 有点看不懂 uvAng 的旋转机制
+        textureFolder.add(param, 'uvAng', -Math.PI, Math.PI ).onChange((data)=>{
+          texture.uAng = texture.vAng = data;
+        });
+        // 围绕 uRotationCenter、vRotationCenter 进行旋转
+        textureFolder.add(texture, 'wAng', -Math.PI, Math.PI );
+
+        // uv 包裹
+        const wrapTypes = {
+          CLAMP: BABYLON.Texture.CLAMP_ADDRESSMODE,
+          WRAP: BABYLON.Texture.WRAP_ADDRESSMODE,
+          MIRROR: BABYLON.Texture.MIRROR_ADDRESSMODE,
+        };
+        textureFolder.add(texture, 'wrapU', wrapTypes);
+        textureFolder.add(texture, 'wrapV', wrapTypes);
+        // 不是很懂这个参数有什么用
+        textureFolder.add(texture, 'wrapR', wrapTypes);
+
+
+
+      }
+
+    </script>
+  </body>
+</html>

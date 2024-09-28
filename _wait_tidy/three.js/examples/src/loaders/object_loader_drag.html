@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>gltf_drag</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, GLTFLoader, DRACOLoader } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 100000 );
+
+			camera.position.z = 10
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			scene.add( new THREE.AmbientLight( 0xffffff ) );
+			scene.add(new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ));
+
+			scene.add(new THREE.AxesHelper( 10000 ));
+
+
+			const loader = new THREE.ObjectLoader();
+
+			document.body.addEventListener('dragstart', function(e){
+				console.log('dragstart')
+				e.preventDefault();
+				e.stopPropagation();
+			}, false);
+			document.body.addEventListener('dragover', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+			}, false);
+			document.body.addEventListener('drop', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+
+				const
+					files = e.dataTransfer.files,
+					file = files[0],
+
+					url = URL.createObjectURL(file);
+
+				loader.load(url, function ( object ) {
+
+					console.log('模型加载完成:', object);
+					scene.add( object );
+
+					// gltf.scene.traverse((node)=>{
+					// 	if( node.material ){
+					// 		node.material = new THREE.MeshStandardMaterial();
+					// 	}
+					// })
+
+					URL.revokeObjectURL( url );
+				});
+
+			}, false);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop(0);
+			function loop(delta) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../favicon.ico" />
+    <title>start</title>
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!-- 
+    抄了 https://doc.babylonjs.com/legacy/physics/pivotsAxes 中的案例
+    涉及 ArcRotateCamera 相关文档 https://doc.babylonjs.com/typedoc/classes/BABYLON.ArcRotateCamera
+    babylon 最开始的学习，主要是相机轨道的几个控制参数和三维轴模型的展示 -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+  
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 25, BABYLON.Vector3.Zero(), scene);
+
+        // 类似 three 中 near far
+        // camera.minZ = 0.00051;
+        // camera.maxZ = 100000;
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 31; // 设置为 0 可禁用平移
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+  
+        camera.attachControl(canvas, true);
+
+        let localConnected = localAxes(50);
+
+        //Local Axes
+        function localAxes(size) {
+            const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+            ], scene);
+            axisX.color = new BABYLON.Color3(1, 0, 0);
+
+            const axisY = BABYLON.Mesh.CreateLines("axisY", [
+                new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+            ], scene);
+            axisY.color = new BABYLON.Color3(0, 1, 0);
+
+            const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+                new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+            ], scene);
+            axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+        return scene;
+      }
+
+    </script>
+  </body>
+</html>

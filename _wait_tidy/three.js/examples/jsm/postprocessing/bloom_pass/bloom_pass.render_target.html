@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>bloom_pass.render_target</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+			const rtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio
+			);
+
+			const fullscreenTriangleGeometry = new THREE.BufferGeometry();
+
+			fullscreenTriangleGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				- 1, 3, 0,
+				- 1, - 1, 0,
+				3, - 1, 0
+			] ), 3 ) );
+			fullscreenTriangleGeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( [
+				0, 2,
+				0, 0,
+				2, 0
+			] ), 2 ) );
+
+			const fullScreenQuad = new THREE.Mesh( fullscreenTriangleGeometry,  null );
+
+
+			const renderTargetX = new THREE.WebGLRenderTarget( canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio, { type: THREE.HalfFloatType } ); // will be resized later
+			renderTargetX.texture.name = 'BloomPass.x';
+
+			const renderTargetY = new THREE.WebGLRenderTarget( canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio, { type: THREE.HalfFloatType } ); // will be resized later
+			renderTargetY.texture.name = 'BloomPass.y';
+
+			const blurX = new THREE.Vector2( 0.001953125, 0.0 );
+			const blurY = new THREE.Vector2( 0.0, 0.001953125 );
+
+			function buildKernel( sigma ) {
+
+				// We lop off the sqrt(2 * pi) * sigma term, since we're going to normalize anyway.
+
+				const kMaxKernelSize = 25;
+				let kernelSize = 2 * Math.ceil( sigma * 3.0 ) + 1;
+
+				if ( kernelSize > kMaxKernelSize ) {
+					kernelSize = kMaxKernelSize;
+				}
+
+				const halfWidth = ( kernelSize - 1 ) * 0.5;
+
+				const values = new Array( kernelSize );
+				let sum = 0.0;
+
+				for ( let i = 0; i < kernelSize; ++ i ) {
+
+					values[ i ] = gauss( i - halfWidth, sigma );
+					sum += values[ i ];
+				}
+
+				// normalize the kernel
+
+				for ( let i = 0; i < kernelSize; ++ i ) {
+					values[ i ] /= sum;
+				}
+
+				return values;
+			}
+
+			function gauss( x, sigma ) {
+
+				return Math.exp( - ( x * x ) / ( 2.0 * sigma * sigma ) );
+			}
+
+			let kernelSize = 25;
+
+			const convolutionShader = new THREE.RawShaderMaterial({
+				defines: {
+					KERNEL_SIZE_FLOAT: kernelSize.toFixed( 1 ),
+					KERNEL_SIZE_INT: kernelSize.toFixed( 0 )
+				},
+				uniforms: {
+					map: {
+						value: null
+					},
+					uImageIncrement: {
+						value: null
+					},
+					cKernel: {
+						value: buildKernel(4)
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					uniform vec2 uImageIncrement;
+
+					varying vec2 vUv;
+
+					void main(void) {
+
+						vUv = uv - ( ( KERNEL_SIZE_FLOAT - 1.0 ) / 2.0 ) * uImageIncrement;
+
+						gl_Position = vec4( position.xyz, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform float cKernel[ KERNEL_SIZE_INT ];
+
+					uniform sampler2D map;
+					uniform vec2 uImageIncrement;
+
+					varying vec2 vUv;
+
+					void main() {
+
+						vec2 imageCoord = vUv;
+						vec4 sum = vec4( 0.0, 0.0, 0.0, 0.0 );
+
+						for( int i = 0; i < KERNEL_SIZE_INT; i ++ ) {
+
+							sum += texture2D( map, imageCoord ) * cKernel[ i ];
+							imageCoord += uImageIncrement;
+						}
+
+						gl_FragColor = sum;
+					}
+				`,
+			});
+
+			const mapShader = new THREE.RawShaderMaterial({
+				uniforms: {
+					map: {
+						value: null,
+					},
+					strength: {
+						value: 1,
+					}
+				},
+
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+
+						gl_Position = vec4( position, 1.0 );
+					}
+				`,
+
+				fragmentShader: `
+					precision mediump float;
+
+					varying vec2 vUv;
+
+					uniform sampler2D map;
+					uniform float strength;
+
+					void main() {
+
+						vec4 color = texture2D( map, vUv );
+
+						gl_FragColor = vec4( strength * color.xyz, 1.0 );
+					}`
+			});
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( mapShader.uniforms.strength, 'value', 0, 2 ).name('strength');
+			}
+
+			loop();
+			function loop() {
+
+				renderer.setRenderTarget(rtTexture);
+				renderer.render( scene, camera );
+				renderer.setRenderTarget(null);
+
+				fullScreenQuad.material = convolutionShader;
+
+				convolutionShader.uniforms.map.value = rtTexture.texture;
+				convolutionShader.uniforms.uImageIncrement.value = blurX;
+
+				renderer.setRenderTarget( renderTargetX );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget(null);
+
+				convolutionShader.uniforms.map.value = renderTargetX.texture;
+				convolutionShader.uniforms.uImageIncrement.value = blurY;
+
+				renderer.setRenderTarget( renderTargetY );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget(null);
+
+
+				fullScreenQuad.material = mapShader;
+
+				mapShader.uniforms.map.value = renderTargetY.texture;
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

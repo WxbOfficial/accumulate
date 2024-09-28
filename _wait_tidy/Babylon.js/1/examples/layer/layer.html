@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>layer</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 简单展示 layer 案例效果
+		遗留问题:
+			1. 在 layer.vertex.fx 中把 gl_Position 的 z 值改为 1 或者 -1，都没覆盖效果，不太清楚，根据需要加强对相机矩阵变换的理解
+
+			2. 测试了 clear 和 layer 之间的渲染关系，不 clear 就不会渲染相关 layer ，但是 mesh 可以被渲染出来 不太明白相关原理， 需要继续学习研究。
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+		    // Backgrounds
+		    var background0 = new BABYLON.Layer(
+		    	"back0", "../assets/images/Layer0_0.png",
+		    	scene, true, new BABYLON.Color4(1, 1, 1, 1));
+		    // var background1 = new BABYLON.Layer("back1", "../../../assets/Layer1_0.png", scene);
+		    // var foreground = new BABYLON.Layer("back0", "../../../assets/Layer2_0.png", scene, true, new BABYLON.Color4(1, 0, 0, 1));
+
+				createAxesBox(scene);
+
+
+				return { scene, background0 };
+			}
+
+			const { scene, background0 } = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+				scene.render();
+
+				stats.update();
+				// Background
+				background0.texture.uOffset += 0.001;
+			});
+
+			// 测试代码
+			// window.engine = engine;
+			// window.scene = scene;
+
+			// engine._gl.viewport(0, 0, engine._renderingCanvas.width, engine._renderingCanvas.height);
+
+			// engine._gl.clearColor(1,0,0,1);
+			// engine._gl.clearDepth(1.0);
+			// engine._gl.clear(0 | engine._gl.COLOR_BUFFER_BIT | engine._gl.DEPTH_BUFFER_BIT);
+
+			// scene.render();
+
+			// engine._gl.flush();
+		</script>
+	</body>
+</html>

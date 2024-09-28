@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>webgl_render_target</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+			const targetScene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 20 );
+
+			camera.position.z = 2;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const cube = new THREE.BoxGeometry(1, 1, 1);
+
+			const cubeMesh = new THREE.Mesh( cube,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo.jpeg'),
+					// envMap: new THREE.CubeTextureLoader().load(
+					// 	[
+					// 		"px.jpg", "nx.jpg",
+					// 		"py.jpg", "ny.jpg",
+					// 		"pz.jpg", "nz.jpg"
+					// 	].map((url)=>{
+					// 		 	return "../../../assets/images/cube/Escher/" + url;
+					// 	})
+					// ),
+				})
+			);
+
+			targetScene.add(cubeMesh);
+
+			const rtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth, canvas.clientHeight
+			);
+
+			const plane = new THREE.PlaneGeometry(2, 2);
+
+			const planeMesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: rtTexture.texture,
+					envMap: new THREE.CubeTextureLoader().load(
+						[
+							"px.jpg", "nx.jpg",
+							"py.jpg", "ny.jpg",
+							"pz.jpg", "nz.jpg"
+						].map((url)=>{
+							 	return "../../../assets/images/cube/Escher/" + url;
+						})
+					),
+				})
+			);
+
+			scene.add(planeMesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			loop( 0 );
+			function loop( time ) {
+
+				cubeMesh.rotation.y += 0.01;
+				cubeMesh.rotation.x += 0.01;
+
+				planeMesh.position.x = Math.sin(time / 500);
+
+				renderer.setClearColor(0xffffff, 1);
+				renderer.setRenderTarget(rtTexture);
+				renderer.render( targetScene, camera );
+				renderer.setRenderTarget(null);
+
+				renderer.setClearColor(0x000000, 1);
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

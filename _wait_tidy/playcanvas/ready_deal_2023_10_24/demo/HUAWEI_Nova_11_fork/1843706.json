@@ -1,0 +1,154 @@
+{
+	"branch_id": "7c69fbfa-bdf1-4fa2-b957-56642f2a0338",
+	"name": "nova11",
+	"created": "2023-08-29T03:59:00.329Z",
+	"settings": {
+		"physics": {
+			"gravity": [0, -9.8, 0]
+		},
+		"render": {
+			"lightmapFilterRange": 10,
+			"fog_end": 1000,
+			"lightmapFilterEnabled": false,
+			"ambientBake": false,
+			"tonemapping": 3,
+			"lightingAreaLightsEnabled": false,
+			"lightingShadowType": 0,
+			"ambientBakeOcclusionContrast": 0,
+			"skybox": 39934843,
+			"lightingCookieAtlasResolution": 2048,
+			"fog_density": 0.01,
+			"lightmapFilterSmoothness": 0.2,
+			"gamma_correction": 2,
+			"exposure": 1,
+			"lightingShadowsEnabled": true,
+			"fog_start": 1,
+			"skyboxIntensity": 1,
+			"global_ambient": [1, 1, 1],
+			"ambientBakeNumSamples": 1,
+			"fog_color": [0, 0, 0],
+			"lightingCells": [10, 3, 10],
+			"lightmapMode": 1,
+			"lightingCookiesEnabled": false,
+			"clusteredLightingEnabled": true,
+			"ambientBakeSpherePart": 0.4,
+			"fog": "none",
+			"ambientBakeOcclusionBrightness": 0,
+			"lightmapMaxResolution": 2048,
+			"lightingMaxLightsPerCell": 255,
+			"lightingShadowAtlasResolution": 2048,
+			"skyboxMip": 1,
+			"lightmapSizeMultiplier": 16,
+			"skyboxRotation": [0, 0, 0]
+		}
+	},
+	"entities": {
+		"62aad666-4620-11ee-b24a-1e8fb060b5ff": {
+			"position": [0, 0, 0],
+			"scale": [1, 1, 1],
+			"name": "Root",
+			"parent": null,
+			"resource_id": "62aad666-4620-11ee-b24a-1e8fb060b5ff",
+			"components": {},
+			"rotation": [0, 0, 0],
+			"tags": [],
+			"enabled": true,
+			"children": ["9bdeca40-c538-4f65-ac2f-dc2b7b7fcfc5", "6fd73f40-a29b-4617-a0d8-79c362dcdb5a"]
+		},
+		"9bdeca40-c538-4f65-ac2f-dc2b7b7fcfc5": {
+			"name": "nova11",
+			"tags": [],
+			"enabled": true,
+			"resource_id": "9bdeca40-c538-4f65-ac2f-dc2b7b7fcfc5",
+			"parent": "62aad666-4620-11ee-b24a-1e8fb060b5ff",
+			"children": [],
+			"position": [0, 0, 0],
+			"rotation": [0, 0, 0],
+			"scale": [1, 1, 1],
+			"components": {
+				"model": {
+					"enabled": true,
+					"type": "asset",
+					"asset": 147370394,
+					"materialAsset": null,
+					"castShadows": true,
+					"castShadowsLightmap": true,
+					"receiveShadows": true,
+					"lightmapped": false,
+					"lightmapSizeMultiplier": 1,
+					"castShadowsLightMap": true,
+					"lightMapped": false,
+					"lightMapSizeMultiplier": 1,
+					"isStatic": false,
+					"layers": [0],
+					"batchGroupId": null
+				}
+			}
+		},
+		"6fd73f40-a29b-4617-a0d8-79c362dcdb5a": {
+			"name": "Camera",
+			"tags": [],
+			"enabled": true,
+			"resource_id": "6fd73f40-a29b-4617-a0d8-79c362dcdb5a",
+			"parent": "62aad666-4620-11ee-b24a-1e8fb060b5ff",
+			"children": [],
+			"position": [0.11830875303547383, 1.19074839857212, 2.3770508969174067],
+			"rotation": [-7.590003513813809, 3.198753412244556, 2.488685770936905e-17],
+			"scale": [1, 1, 1],
+			"components": {
+				"camera": {
+					"enabled": true,
+					"clearColorBuffer": true,
+					"clearColor": [0.118, 0.118, 0.118, 1],
+					"clearDepthBuffer": true,
+					"renderSceneDepthMap": false,
+					"renderSceneColorMap": false,
+					"projection": 0,
+					"fov": 45,
+					"frustumCulling": true,
+					"orthoHeight": 4,
+					"nearClip": 0.1,
+					"farClip": 1000,
+					"priority": 0,
+					"rect": [0, 0, 1, 1],
+					"layers": [0, 1, 2, 3, 4]
+				},
+				"script": {
+					"enabled": true,
+					"order": ["orbitCamera", "touchInput", "mouseInput"],
+					"scripts": {
+						"orbitCamera": {
+							"enabled": true,
+							"attributes": {
+								"autoRender": true,
+								"distanceMax": 0,
+								"distanceMin": 0,
+								"pitchAngleMax": 90,
+								"pitchAngleMin": -90,
+								"inertiaFactor": 0.2,
+								"focusEntity": null,
+								"frameOnStart": true
+							}
+						},
+						"touchInput": {
+							"enabled": true,
+							"attributes": {
+								"orbitSensitivity": 0.4,
+								"distanceSensitivity": 0.2
+							}
+						},
+						"mouseInput": {
+							"enabled": true,
+							"attributes": {
+								"orbitSensitivity": 0.3,
+								"distanceSensitivity": 0.15
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"checkpoint_id": "5e01026b-ce8a-429f-b383-7775a4214c55",
+	"id": 1843706
+}

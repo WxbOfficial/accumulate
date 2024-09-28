@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>skin</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../../module.js';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 1000
+			);
+
+			camera.position.z = 10;
+
+			// scene.add(camera);
+
+			const plane = new THREE.BufferGeometry();
+
+			plane.setAttribute( "position", new THREE.BufferAttribute(new Float32Array([
+				-3, 3, 0,
+				 3, 3, 0,
+				-3,-3, 0,
+				 3,-3, 0
+			]), 3) );
+
+			plane.setAttribute( "uv", new THREE.BufferAttribute( new Float32Array([
+				0, 1,
+				1, 1,
+				0, 0,
+				1, 0
+			]), 2) );
+
+			plane.setAttribute( "skinIndex", new THREE.BufferAttribute( new Float32Array([
+				0, 0, 0, 0,
+				1, 0, 0, 0,
+				2, 0, 0, 0,
+				3, 0, 0, 0
+			]), 4) );
+
+			plane.setAttribute( "skinWeight", new THREE.BufferAttribute( new Float32Array([
+				1, 0, 0, 0,
+				1, 0, 0, 0,
+				1, 0, 0, 0,
+				1, 0, 0, 0
+			]), 4) );
+
+			plane.setIndex( new THREE.BufferAttribute(new Uint16Array([
+				0, 2, 3,
+				3, 1, 0
+			]), 1) );
+
+			const
+				bone1 = new THREE.Bone(),
+				bone2 = new THREE.Bone(),
+				bone3 = new THREE.Bone(),
+				bone4 = new THREE.Bone(),
+				skeleton = new THREE.Skeleton([
+					bone1, bone2, bone3, bone4,
+				]);
+
+			bone1.position.x = -1;
+			// 因为 boneInverses 的原因, skinnedMesh 在 bind 的时候, 类似加了一个骨骼变化初始状态, 之后的变化会以此为基础
+			// bone1.updateMatrixWorld();
+
+			bone3.position.x = 1;
+			// bone3.updateMatrixWorld();
+
+
+			const mesh = new THREE.SkinnedMesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg')
+				})
+			);
+
+			mesh.bind(skeleton);
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( mesh, 'isSkinnedMesh' );
+
+				gui.add( mesh, 'bindMode', {
+					AttachedBindMode: 'attached',
+					DetachedBindMode: 'detached',
+				} )
+
+				initBone(gui, mesh, 'mesh');
+				initBone(gui, bone1, 'bone1');
+				initBone(gui, bone2, 'bone2').close();
+				initBone(gui, bone3, 'bone3').close();
+				initBone(gui, bone4, 'bone4').close();
+			}
+
+
+			function initBone(gui, bone, boneName){
+
+				const
+					boneFolder = gui.addFolder(boneName),
+					angleParam = {
+						x: bone.rotation.x / Math.PI * 180,
+						y: bone.rotation.y / Math.PI * 180,
+						z: bone.rotation.z / Math.PI * 180,
+					};
+
+				boneFolder.add(bone.position, 'x', -5, 5).name('position.x').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(bone.position, 'y', -5, 5).name('position.y').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(bone.position, 'z', -5, 5).name('position.z').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+
+				boneFolder.add(angleParam, 'x', -180, 180).name('rotation.x').onChange(( angle )=>{
+
+					bone.rotation.x = angle / 180 * Math.PI;
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(angleParam, 'y',  -180, 180).name('rotation.y').onChange(( angle )=>{
+
+					bone.rotation.y = angle / 180 * Math.PI;
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(angleParam, 'z',  -180, 180).name('rotation.z').onChange(( angle )=>{
+
+					bone.rotation.z = angle / 180 * Math.PI;
+					bone.updateMatrixWorld();
+				});
+
+				boneFolder.add(bone.scale, 'x', -3, 3).name('scale.x').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(bone.scale, 'y', -3, 3).name('scale.y').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+				boneFolder.add(bone.scale, 'z', -3, 3).name('scale.z').onChange(()=>{
+					bone.updateMatrixWorld();
+				});
+
+				return boneFolder;
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

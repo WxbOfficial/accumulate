@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>test</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
+    <link href="../default_css.css" rel="stylesheet" type="text/css"/>
+    <!-- <script src='../../build/playcanvas.js'></script> -->
+</head>
+<body>
+    <canvas id='application'></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "pc": "../../src/index.js",
+                "scripts": "../../scripts/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as pc from 'pc';
+
+        window.pc = pc;
+
+        // create a PlayCanvas application
+        const canvas = document.getElementById('application');
+        const app = new pc.Application(canvas, {
+            mouse: new pc.Mouse(document.body),
+            touch: new pc.TouchDevice(document.body)
+        });
+
+
+        // fill the available space at full resolution
+        app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+        app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+        // ensure canvas is resized when window changes size
+        window.addEventListener('resize', function(){
+            app.resizeCanvas();
+        });
+
+        // create camera entity
+        const camera = new pc.Entity('camera');
+        app.root.addChild(camera);
+        camera.setPosition(0, 0, 6);
+
+
+        // create directional light entity
+        const light = new pc.Entity('light');
+        // console.log('light:', light);
+        light.addComponent('light');
+        app.root.addChild(light);
+        light.setEulerAngles(45, 0, 0);
+
+        // create box entity
+        const plane = new pc.Entity('plane');
+        plane.addComponent('model', {
+            type: 'plane'
+        });
+        plane.setEulerAngles(90, 0, 0);
+        app.root.addChild(plane);
+
+        window.startChangeMap = startChangeMap;
+
+        let mapIndex = 0,
+            map1Url = 'http://localhost:7999/business/jm_project/20230807_hw_p60_pro/public/model/texture/beimian.png',
+            map2Url = 'http://localhost:7999/business/jm_project/20230807_hw_p60_pro/public/model/texture/heise.png',
+            map1, map2;
+
+        function initMap1(){
+            
+            const entity = new pc.Entity(name);
+
+            // Using the vanilla engine version which doesn't return the asset object
+            pc.app.assets.loadFromUrl(map1Url, "texture", function (err, asset) {
+
+                console.log('map1 加载完毕');
+                // console.log('map1Url');
+                // console.log('asset:', asset);
+                // console.log('asset.resource:', asset.resource);
+                map1 = asset.resource;
+
+                window.map1 = map1;
+            });
+        }
+        function initMap2(){
+            
+            const entity = new pc.Entity(name);
+
+            // Using the vanilla engine version which doesn't return the asset object
+            pc.app.assets.loadFromUrl(map2Url, "texture", function (err, asset) {
+
+                console.log('map2 加载完毕');
+                // console.log('map2Url');
+                // console.log('asset:', asset);
+                // console.log('asset.resource:', asset.resource);
+                map2 = asset.resource;
+
+                window.map2 = map2;
+            });
+        }
+
+        initMap1();
+        initMap2();
+
+        const shaderDefinition = {
+            attributes: {
+                aPosition: pc.SEMANTIC_POSITION,
+                aUv0: pc.SEMANTIC_TEXCOORD0
+            },
+            vshader: `attribute vec3 aPosition;
+                attribute vec2 aUv0;
+
+                uniform mat4 matrix_model;
+                uniform mat4 matrix_viewProjection;
+
+                varying vec2 vUv0;
+
+                void main(void) {
+                    vUv0 = aUv0;
+                    gl_Position = matrix_viewProjection * matrix_model * vec4(aPosition, 1.0);
+                }`,
+            fshader: `
+                varying vec2 vUv0;
+
+                uniform sampler2D uDiffuseMap;
+                uniform sampler2D uHeightMap;
+                uniform float uTime;
+
+                void main(void) {
+                    float height = texture2D(uHeightMap, vUv0).r;
+                    vec4 color = texture2D(uDiffuseMap, vUv0);
+                    if (height < uTime) {
+                      discard;
+                    }
+                    if (height < (uTime+0.04)) {
+                      color = vec4(0, 0.2, 1, 1.0);
+                    }
+                    gl_FragColor = color;
+                }
+            `
+        }
+
+        const shader = new pc.Shader(gd, shaderDefinition);
+
+
+
+        function startChangeMap(){
+            // console.log('plane:', plane);
+
+            const material = plane.model.meshInstances[0].material;
+
+            window.material = material;
+            // let texture = null;
+
+            // if( mapIndex === 0 || mapIndex === 2 ){
+            //     texture = map1;
+            //     mapIndex = 1;
+            // }else if( mapIndex === 1 ){
+            //     texture = map2;
+            //     mapIndex = 2;
+            // }
+
+            // plane.model.meshInstances[0].material.diffuseMap = texture;
+
+            material.diffuseMap = map1;
+            // material.opacityMap = map2;
+            // material.alphaTest = 0;
+            // material.diffuseTint = true;
+            material.diffuseDetailMap = map2;
+            material.diffuseDetailMapOffset = new pc.Vec2(0, 0.5);
+
+            plane.model.meshInstances[0].material.diffuseDetailMode = pc.DETAILMODE_MUL
+            // material.diffuseVertexColor = true;
+            // material.diffuseMapChannel = 'r';
+            // material.diffuse = new pc.Color(0,0,0,0);
+            material.update();
+
+        }
+
+        let assets = [
+            new pc.Asset('script', 'script', { url: '../../scripts/camera/orbit-camera.js' })
+        ];
+
+        const assetListLoader = new pc.AssetListLoader(assets, app.assets);
+
+        assetListLoader.load(()=>{
+            camera.addComponent("camera", {
+                clearColor: new pc.Color(0.4, 0.45, 0.5)
+            });
+            camera.addComponent("script");
+            camera.script.create("orbitCamera", {
+                attributes: {
+                    inertiaFactor: 0.2 // Override default of 0 (no inertia)
+                }
+            });
+            camera.script.create("orbitCameraInputMouse");
+            camera.script.create("orbitCameraInputTouch");
+        });
+
+        app.start();
+    </script>
+</body>
+</html>

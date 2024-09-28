@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>database</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 简单展示 database 存储 效果 -->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js";
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 600, BABYLON.Vector3.Zero(), scene);
+
+				camera.maxZ = 10000;
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, 600));
+				camera.attachControl(canvas);
+
+				BABYLON.Database.enableTexturesOffline = true;
+
+				var plane = BABYLON.Mesh.CreatePlane("plane", 400, scene);
+
+				var planeMat = new BABYLON.StandardMaterial('planeMat', scene);
+
+				planeMat.backFaceCulling = false;
+
+				planeMat.emissiveTexture = new BABYLON.Texture(
+					'../assets/images/logo.jpeg',
+					scene,
+					false,
+				)
+
+				plane.material = planeMat;
+
+				createAxesBox(scene, 200, 10);
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+
+		</script>
+	</body>
+</html>

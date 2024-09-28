@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>gltf.learn</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+		用于学习了解  gltf 的模型加载, 待完善
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, GLTFLoader } from '../../jsm.js';
+
+			import ParseBinary from './parse_binary.js';
+			import createModel from './create_model.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var scene = new THREE.Scene();
+
+			var renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+			var camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			camera.position.z = 10
+
+			var orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			scene.add( new THREE.AmbientLight( 0xffffff ) );
+
+			const loader = new THREE.FileLoader();
+
+			loader.setResponseType( 'arraybuffer' );
+
+			const url =
+				// '../../../assets/models/gltf/RobotExpressive/RobotExpressive.glb';
+
+				// 用于学习的模型文件
+				// '../../exporters/gltf/export_scenes//test_glb/one_plane.glb';
+				'../../exporters/gltf/export_scenes//test_glb/two_plane.glb';
+
+			loader.load( url, function ( data ) {
+
+				const { json, bin } = ParseBinary(data);
+
+				console.log('json:', json);
+
+				const gltf = createModel( json, bin );
+
+				console.log('gltf:', gltf);
+
+				scene.add( gltf.scene );
+			});
+
+
+			var stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop(0);
+			function loop(delta) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

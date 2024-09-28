@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>effect_composer</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, FullScreenQuad } from '../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			// renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../assets/images/logo.jpeg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+
+			const composer = new EffectComposer( renderer );
+
+			// RenderPass
+			composer.addPass({
+
+				isPass: true,
+				enabled: true,
+				needsSwap: true,
+				clear: true,
+				renderToScreen: false,
+
+				clearDepth: false,
+				needsSwap: false,
+
+				setSize(){  },
+
+				render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ){
+
+					const oldAutoClear = renderer.autoClear;
+					renderer.autoClear = false;
+
+					renderer.setRenderTarget( this.renderToScreen ? null : readBuffer );
+
+					if ( this.clear === true ) {
+
+						renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+					}
+
+					renderer.render( scene, camera );
+
+					renderer.autoClear = oldAutoClear;
+				}
+			});
+
+			const material = new THREE.RawShaderMaterial({
+				uniforms: {
+					texture: {
+						value: null,
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+					precision mediump int;
+
+					uniform mat4 modelMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 projectionMatrix;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+
+					precision mediump float;
+					precision mediump int;
+
+					varying vec2 vUv;
+
+					uniform sampler2D texture;
+
+					void main() {
+						vec4 texel = texture2D(texture, vUv);
+
+						texel.x = 0.0;
+						gl_FragColor = texel;
+					}
+				`
+			});
+			const fullScreenQuad = new FullScreenQuad(material)
+
+			composer.addPass({
+
+				isPass: true,
+				enabled: true,
+				needsSwap: true,
+				clear: false,
+				renderToScreen: false,
+
+				setSize(){  },
+
+				render(renderer, writeBuffer, readBuffer){
+
+					if( material.uniforms.texture.value === null ){
+
+						material.uniforms.texture.value = readBuffer.texture;
+					}
+
+					renderer.setRenderTarget( null );
+					fullScreenQuad.render( renderer );
+
+				}
+
+			});
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				cubeMesh.rotation.y += 0.01;
+				cubeMesh.rotation.x += 0.01;
+
+				composer.render();
+
+				// renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

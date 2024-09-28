@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../../favicon.ico" />
+    <title>sampler_2d</title>
+    <link href="../../../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!--
+    可编程纹理，在片元着色器的基础上添加 json 信息，传入参数控制着色器，简单实现图片渐变切换动画
+    文档(需要看源码配合): https://doc.babylonjs.com/features/featuresDeepDive/materials/advanced/custom_procedural_textures
+
+    问题: 
+      只支持相对路径，绝对路径会自动加上前缀出错
+    解决: 
+      阅读相关源码，将 CustomProceduralTexture.updateTextures 函数的操作提出，在外部实现，并且在 _config.sampler2Ds 中添加 isAbsolute 判断是否是绝对路径，然后进行相对或者绝对的请求
+   -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+  
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+        scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 5, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        camera.attachControl(canvas, true);
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 0; // 设置为 0 
+
+        const localConnected = localAxes(50);
+
+        const light = new BABYLON.HemisphericLight("light", 
+        new BABYLON.Vector3(0, 1, 0), 
+        scene);
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        let shaderName = 'red', procTexture = null;
+
+        procTexture = createProceduralTexture(shaderName, scene);
+
+        setProceduralTextureConfig(procTexture);
+
+        createPlane(procTexture, scene);
+
+        return scene;
+      }
+
+      function createProceduralTexture(name, scene){
+
+        BABYLON.Effect.ShadersStore[`${name}PixelShader`] =
+          "#ifdef GL_ES\n" +
+          "precision highp float;\n" +
+          "#endif\n\n" +
+
+          "uniform float u_t;\n" +
+          "uniform sampler2D nowSample2D;\n" +
+          "uniform sampler2D nextSample2D;\n" +
+
+          "varying vec2 vUV; \n" +
+
+          "void main(void) {\n" +
+          " gl_FragColor = vec4( texture2D(nowSample2D, vUV).xyz * (1.0 - u_t) + texture2D(nextSample2D, vUV).xyz * u_t, 1.0);\n" +
+          "}\n" +
+          "";
+
+        const procTexture = new BABYLON.CustomProceduralTexture(name, name, 1024, scene, void 0, void 0, true);
+
+        return procTexture;
+      }
+
+      function setProceduralTextureConfig(procTexture){
+        const baiguguUrl = "../../../../../assets/logo1.jpg";
+        const yinyangyuUrl = "../../../../../assets/logo.jpeg";
+        const u_t = {
+          type: "float",
+          name: "u_t",
+          value: 0.0
+        }
+        const sampler2Ds = [
+          {
+              sample2Dname: "nowSample2D",
+              textureRelativeUrl: baiguguUrl,
+              // isAbsolute: true,
+          },
+          {
+              sample2Dname: "nextSample2D",
+              textureRelativeUrl: yinyangyuUrl,
+          },
+        ];
+
+        procTexture._config = {
+          animate: false,
+          refreshrate: 0,
+          uniforms: [
+            u_t
+          ],
+          sampler2Ds: sampler2Ds,
+        }
+
+        procTexture.updateShaderUniforms();
+
+        // 只能进行相对路径的请求
+        // procTexture.updateTextures();
+
+        // 修改过后能根据 isAbsolute 参数进行绝对路径或者相对路径的请求
+        updateTextures(procTexture);
+
+
+        let startTime = -1,
+            duration = 1500,
+            endTime = -1,
+            nowTime = -1,
+            animationTypes = { Add: 'Add', Red: 'Red' },
+            animationType = animationTypes.Add;
+
+        startAnimation();
+        // 开始图片渐变转化动画
+        function startAnimation(){
+          startTime = Date.now();
+          endTime = startTime + duration;
+
+          updateSampler2DAnimation();
+        }
+
+        function updateSampler2DAnimation(){
+          nowTime = Date.now();
+          if( nowTime - startTime > duration ){
+
+            if( animationType === animationTypes.Add ){
+              u_t.value = 1.0;
+
+              animationType = animationTypes.Red;
+            }else{
+              u_t.value = 0.0;
+
+              animationType = animationTypes.Add;
+            }
+
+            startTime = Date.now();
+            endTime = startTime + duration;
+          }else{
+
+            if( animationType === animationTypes.Add ){
+              u_t.value = ( nowTime - startTime ) / duration;
+            }else{
+              u_t.value = 1 - ( nowTime - startTime ) / duration;
+            }
+          }
+
+          requestAnimationFrame(updateSampler2DAnimation);
+
+          procTexture.updateShaderUniforms();
+        }
+      }
+
+      function updateTextures(procTexture){
+        const sampler2Ds = procTexture._config.sampler2Ds;
+        for (let i = 0, len = sampler2Ds.length; i < len; i++) {
+          const sampler2D = sampler2Ds[i];
+          let url;
+          if( sampler2D.isAbsolute ){
+            url = sampler2D.textureRelativeUrl;
+          }else{
+            url = procTexture._texturePath + "/" + sampler2D.textureRelativeUrl
+          }
+
+          procTexture.setTexture(sampler2Ds[i].sample2Dname, new BABYLON.Texture(url, procTexture.getScene()));
+        }
+      }
+
+
+
+      function createPlane(procTexture, scene){
+        
+        const customMesh = new BABYLON.Mesh("custom", scene);
+
+        const positions = [
+          -1.0, -1.0,  0.0,
+           1.0, -1.0,  0.0,
+          -1.0,  1.0,  0.0,
+           1.0,  1.0,  0.0,
+        ];
+        const indices = [
+          0, 2, 1,
+          1, 2, 3
+        ];
+        const uvs = [
+          0.0, 0.0,
+          1.0, 0.0,
+          0.0, 1.0,
+          1.0, 1.0,
+        ];
+
+        const vertexData = new BABYLON.VertexData();
+
+        vertexData.positions = positions;
+        vertexData.indices = indices;
+        vertexData.uvs = uvs;
+
+        vertexData.applyToMesh(customMesh);
+
+        const mat = new BABYLON.PBRMaterial("mat", scene);
+
+        
+        mat.backFaceCulling = false; // 有点不理解为什么要这样参数设定，有点不大爽
+        mat.emissiveIntensity = 1;
+        mat.emissiveColor.set(1,1,1);
+        mat.emissiveTexture = procTexture;
+
+        customMesh.material = mat;
+
+      }
+
+
+    </script>
+  </body>
+</html>

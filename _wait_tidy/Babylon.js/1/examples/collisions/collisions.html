@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>collisions</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		展示 collisions 效果, 遇到墙不再运动
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+				var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 0, -20), scene);
+				camera.checkCollisions = true;
+				camera.applyGravity = true;
+
+				var light = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(0.2, -1, 0), scene);
+				light.position = new BABYLON.Vector3(0, 80, 0);
+
+				createAxesBox(scene);
+
+				// Playground
+				var ground = BABYLON.Mesh.CreateBox("Ground", 1, scene);
+				ground.scaling = new BABYLON.Vector3(100, 1, 100);
+				ground.position.y = -5.0;
+				ground.checkCollisions = true;
+
+				var border0 = BABYLON.Mesh.CreateBox("border0", 1, scene);
+				border0.scaling = new BABYLON.Vector3(1, 100, 100);
+				border0.position.y = -5.0;
+				border0.position.x = -50.0;
+				border0.checkCollisions = true;
+
+				var border1 = BABYLON.Mesh.CreateBox("border1", 1, scene);
+				border1.scaling = new BABYLON.Vector3(1, 100, 100);
+				border1.position.y = -5.0;
+				border1.position.x = 50.0;
+				border1.checkCollisions = true;
+
+				var border2 = BABYLON.Mesh.CreateBox("border2", 1, scene);
+				border2.scaling = new BABYLON.Vector3(100, 100, 1);
+				border2.position.y = -5.0;
+				border2.position.z = 50.0;
+				border2.checkCollisions = true;
+
+				var border3 = BABYLON.Mesh.CreateBox("border3", 1, scene);
+				border3.scaling = new BABYLON.Vector3(100, 100, 1);
+				border3.position.y = -5.0;
+				border3.position.z = -50.0;
+				border3.checkCollisions = true;
+
+				camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+
+				camera.attachControl(canvas);
+
+				var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+				groundMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+				groundMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+				ground.material = groundMat;
+				border0.material = groundMat;
+				border1.material = groundMat;
+				border2.material = groundMat;
+				border3.material = groundMat;
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>load_scene</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
+    <link href="../default_css.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+    <canvas id='application'></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "pc": "../../src/index.js",
+                "scripts": "../../scripts/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as pc from 'pc';
+
+        // create a PlayCanvas application
+        const canvas = document.getElementById('application');
+        const app = new pc.Application(canvas, {
+            // mouse: new pc.Mouse(document.body),
+            // touch: new pc.TouchDevice(document.body)
+        });
+
+        // fill the available space at full resolution
+        app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+        app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+        // ensure canvas is resized when window changes size
+        window.addEventListener('resize', function(){
+            app.resizeCanvas();
+        });
+
+        app.configure('https://s1.mi.com/m/webgl/mi10youth/files/config.json', ()=>{
+
+            app.scenes.loadScene('https://s1.mi.com/m/webgl/mi10youth/files/892532.json', function(err, scene){
+                
+            });
+        });
+
+        app.start();
+    </script>
+</body>
+</html>

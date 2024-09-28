@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>anchor</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src='../../../../build/playcanvas.js'></script>
+    <style type="text/css">
+        .anchor{
+            position: absolute;
+            top: -12px;
+            left: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .anchor > .line{
+            position: relative;
+            top: -1px;
+            flex: 1;
+            width: 24px;
+            height: 1px;
+            display: inline-block;
+            background-color: rgba(32,34,36,.6);
+        }
+        .anchor > .line > .h-anchor__icon{
+            position: absolute;
+            left: -2px;
+            top: 1px;
+            right: 0;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            margin-top: -2px;
+            border-radius: 50%;
+            background: #f1f3f5;
+            animation: fade 2s linear infinite alternate-reverse;
+        }
+
+        .anchor > .line > .h-anchor__icon::before{
+            right: -2px;
+            top: -2px;
+            content: "";
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid rgba(32,34,36,.6);
+        }
+
+        .anchor > .name{
+            font-size: 12px;
+            height: 24px;
+            line-height: 24px;
+            border-radius: 14px;
+            color: #fff;
+            padding: 0 8px;
+            box-shadow: 0 0 0 1px rgba(255,255,255,.2);
+            background-color: rgba(32,34,36,.6);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="anchor1" class="anchor" style="display: none;">
+        <div class="line">
+            <div class="h-anchor__icon"></div>
+        </div>
+        <div class="name">测试锚点</div>
+    </div>
+    <canvas id='application'></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "pc": "../../../../src/index.js",
+                "scripts": "../../../../scripts/"
+            }
+        }
+    </script>
+    <script type="module">
+        // import * as pc from 'pc';
+        // import AnchorManager from './anchor_manager.js';
+        // window.pc = pc;
+
+        // create a PlayCanvas application
+        const canvas = document.getElementById('application');
+        const app = new pc.Application(canvas, {
+            mouse: new pc.Mouse(document.body),
+            touch: new pc.TouchDevice(document.body)
+        });
+        window.app = app;
+
+        // fill the available space at full resolution
+        app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+        app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+        const camera = new pc.Entity('camera');
+        camera.addComponent("camera", {
+            clearColor: new pc.Color(0.4, 0.45, 0.5)
+        });
+
+        app.root.addChild(camera);
+
+        window.camera = camera;
+
+        // ensure canvas is resized when window changes size
+        window.addEventListener('resize', function(){
+            app.resizeCanvas();
+        });
+
+        // function loadModelJson(url, name){
+        //     const entity = new pc.Entity(name);
+
+        //     pc.app.assets.loadFromUrl(url, "model", function (err, asset) {
+
+        //         entity.addComponent("model");
+        //         entity.model.model = asset.resource;
+
+        //         pc.app.root.addChild(entity);
+        //     });
+        // }
+        // [
+            // 'https://vrs3.autoimg.cn/advrmodel6/vr_car/X1lGN5LF/Volvo_S60_20230726_001_zhiyihaohuaban_VIchexingku/Model/Volvo_S60_20230726_001_VIchexingku.json',
+        // ].forEach((url, index)=>{
+        //     loadModelJson(url, index);
+        // });
+
+        let assets = [
+            new pc.Asset('orbit-camera', 'script', { url: '../../../../scripts/camera/orbit-camera.js' })
+        ];
+        const assetListLoader = new pc.AssetListLoader(assets, app.assets);
+        assetListLoader.load(()=>{
+
+            const script = camera.addComponent("script");
+            
+            camera.script.create("orbitCamera", {
+                attributes: {
+                    inertiaFactor: 0.2 // Override default of 0 (no inertia)
+                }
+            });
+            camera.script.create("orbitCameraInputMouse");
+            camera.script.create("orbitCameraInputTouch");
+        });
+
+
+        const box = new pc.Entity('cube');
+        box.addComponent('model', {
+            type: 'box'
+        });
+        box.setLocalScale(0.06, 0.06, 0.06);
+        box.setLocalPosition(0, 0, 0);
+        app.root.addChild(box);
+
+        // const anchorManager = new AnchorManager({
+        //     container: document.body
+        // });
+
+        // window.anchorManager = anchorManager;
+
+        // const anchor1 = document.getElementById('anchor1');
+
+        // anchorManager.addAnchor2d({
+        //     dom: anchor1,
+        //     pos: new pc.Vec3(0,0,0),
+        // });
+
+        app.on('update', (dt)=>{
+            // console.log('update');
+            // anchorManager.update(camera);
+        });
+
+        app.start();
+
+        let str = 'const \n';
+
+    ['ADDRESS_CLAMP_TO_EDGE', 'ADDRESS_MIRRORED_REPEAT', 'ADDRESS_REPEAT',
+        'BLEND_NORMAL',
+        'CULLFACE_NONE',
+        'FILTER_NEAREST', 'FILTER_LINEAR', 'FILTER_NEAREST_MIPMAP_NEAREST', 'FILTER_LINEAR_MIPMAP_NEAREST',
+        'FILTER_NEAREST_MIPMAP_LINEAR', 'FILTER_LINEAR_MIPMAP_LINEAR',
+        'INDEXFORMAT_UINT8', 'INDEXFORMAT_UINT16', 'INDEXFORMAT_UINT32',
+        'PROJECTION_ORTHOGRAPHIC',
+        'SEMANTIC_POSITION', 'SEMANTIC_NORMAL', 'SEMANTIC_TANGENT', 'SEMANTIC_COLOR',
+        'SEMANTIC_BLENDINDICES', 'SEMANTIC_BLENDWEIGHT', 'SEMANTIC_TEXCOORD0',
+        'SEMANTIC_TEXCOORD1', 'SEMANTIC_TEXCOORD2', 'SEMANTIC_TEXCOORD3', 'SEMANTIC_TEXCOORD4',
+        'SEMANTIC_TEXCOORD5', 'SEMANTIC_TEXCOORD6', 'SEMANTIC_TEXCOORD7', 'TYPE_INT8',
+        'TYPE_UINT8', 'TYPE_INT16', 'TYPE_UINT16',
+        'TYPE_INT32', 'TYPE_UINT32', 'TYPE_FLOAT32'].forEach((key)=>{
+                console.log(key, pc[key], typeof pc[key]);
+                str += `\t${key} = ${pc[key]},\n`;
+            })
+
+        console.log(str);
+
+        console.log(pc.math);
+
+    </script>
+</body>
+</html>

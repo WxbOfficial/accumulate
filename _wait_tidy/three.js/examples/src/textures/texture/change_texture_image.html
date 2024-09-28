@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>change_texture_image</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		texture 无法更新替换 image, 只能初始化, 不然的话, 需要改源码
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100 );
+
+			camera.position.z = 6;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			const texture = new THREE.Texture();
+			// new THREE.TextureLoader().load('../../assets/images/logo.jpeg');
+
+
+			const plane = new THREE.PlaneGeometry(8, 8, 1, 1);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: texture
+				})
+			);
+			scene.add(mesh);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					params = {
+						nowUrl: null,
+					},
+					imageMap = new Map();
+
+				gui.add( params, 'nowUrl', {
+
+					'logo.jpeg': '../../../assets/images/logo.jpeg',
+					'mip-low-res-example': '../../../assets/images/mip-low-res-example.png',
+					'logo1.jpg': '../../../assets/images/logo1.jpg',
+				} ).onChange((url)=>{
+
+					console.log('url:', url);
+					if( imageMap.has( url ) ){
+
+						texture.image = imageMap.get( url );
+						texture.needsUpdate = true;
+					}else{
+
+						const image = new Image();
+						image.src = url;
+
+						image.onload = ()=>{
+
+							imageMap.set( url, image );
+							texture.image = imageMap.get( url );
+							texture.needsUpdate = true;
+						};
+
+					}
+				});
+
+
+
+
+			}
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

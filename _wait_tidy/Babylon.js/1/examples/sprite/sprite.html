@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>sprite</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 简单展示精灵效果 -->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js";
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				// Sprites
+				const
+					count = 10,
+					url = "../assets/images/Player.png",
+					cellSize = 64
+					// url = "../assets/images/logo.jpeg",
+					// cellSize = 1200
+					;
+				var spriteManager = new BABYLON.SpriteManager(
+					"MonsterA",
+					url,
+					count,
+					cellSize,
+					scene);
+				for (var index = 0; index < count; index++) {
+						var sprite = new BABYLON.Sprite("toto", spriteManager);
+						sprite.position.y = -4.5;
+						sprite.position.z = Math.random() * 20 - 10;
+						sprite.position.x = Math.random() * 20 - 10;
+						sprite.dir = Math.round(Math.random()) * 2 - 1;
+						sprite.invertU = (sprite.dir < 0);
+
+						// sprite.invertU = (Math.round(Math.random()) * 2 - 1 < 0);
+
+						// sprite.angle = Math.PI / 3;
+
+						sprite.playAnimation(0, 9, true, 100);
+
+						sprite.color = new BABYLON.Color4(1, 1, 1, 1);
+				}
+
+				return { scene, spriteManager };
+			}
+
+
+			const { scene, spriteManager } = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			var frameCount = 0;
+			var reloop = 0;
+
+			engine.runRenderLoop(()=>{
+
+				// Sprites
+				frameCount++;
+				if (frameCount > 3) {
+						frameCount = 0;
+						reloop++;
+						for (var index = 0; index < spriteManager.sprites.length; index++) {
+								var sprite = spriteManager.sprites[index];
+								sprite.position.x -= 0.1 * sprite.dir;
+
+								if (reloop > 20) {
+										sprite.dir *= -1;
+										sprite.invertU = !sprite.invertU;
+								}
+						}
+
+						if (reloop > 20) {
+								reloop = 0;
+						}
+				}
+
+				scene.render();
+
+				stats.update();
+			});
+
+		</script>
+	</body>
+</html>

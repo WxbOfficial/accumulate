@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>draw_unselected_depth_buffer</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, OutlinePass } from '../../jsm.js';
+			import {
+				createOutlinePassScene,
+				OutlinePassTool
+			} from './outline_pass_tool.js';
+			import getPrepareMaskUnit from './outline_pass_units/prepare_mask.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+			renderer.setClearColor( 0xffffff, 1 );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+
+			const outlinePassScene = createOutlinePassScene();
+
+			scene.add( outlinePassScene );
+
+
+			const outlinePassTools = new OutlinePassTool( scene, camera, [ outlinePassScene.children[1] ] )
+
+			const passRenderTargetWidth = canvas.clientWidth * pixelRatio;
+			const passRenderTargetHeight = canvas.clientHeight * pixelRatio;
+
+
+			const depthMaterial = new THREE.MeshDepthMaterial({
+				side: THREE.DoubleSide,
+				depthPacking: THREE.RGBADepthPacking,
+				blending: THREE.NoBlending,
+			});
+
+
+			const renderTargetDepthBuffer = new THREE.WebGLRenderTarget( passRenderTargetWidth, passRenderTargetHeight, { type: THREE.HalfFloatType } );
+			renderTargetDepthBuffer.texture.name = 'OutlinePass.depth';
+			renderTargetDepthBuffer.texture.generateMipmaps = false;
+
+			const prepareMaskUnit = getPrepareMaskUnit();
+
+			const prepareMaskMaterial = prepareMaskUnit.prepareMaskMaterial;
+
+
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+
+			function onPointerDown(e){
+
+				mouse.x = ( event.clientX / canvas.clientWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / canvas.clientHeight ) * 2 + 1;
+
+				raycaster.setFromCamera( mouse, camera );
+
+				const intersects = raycaster.intersectObject( scene, true );
+
+				if ( intersects.length > 0 ) {
+
+					const selectedObject = intersects[ 0 ].object;
+					const index = outlinePassTools.selectedObjects.indexOf( selectedObject );
+
+					if( index === -1 ){
+
+						outlinePassTools.selectedObjects.push( selectedObject );
+					}else{
+
+						outlinePassTools.selectedObjects.splice( index, 1 );
+					}
+				}
+			}
+			canvas.addEventListener( 'pointerdown', onPointerDown );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				depthPacking = {
+					BasicDepthPacking: THREE.BasicDepthPacking,
+					RGBADepthPacking: THREE.RGBADepthPacking,
+				}
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+			}
+
+
+			renderer.setScissorTest( true );
+
+			loop();
+			function loop() {
+
+				renderer.setScissor( 0, 0, canvas.clientWidth, canvas.clientHeight );
+				renderer.setViewport( 0, 0, canvas.clientWidth, canvas.clientHeight );
+				outlinePassTools.changeVisibilityOfSelectedObjects( false );
+
+				scene.overrideMaterial = depthMaterial;
+				renderer.setRenderTarget( renderTargetDepthBuffer );
+				renderer.clear();
+				renderer.render( scene, camera );
+				renderer.setRenderTarget( null );
+
+				// Make selected objects visible
+				outlinePassTools.changeVisibilityOfSelectedObjects( true );
+				outlinePassTools._visibilityCache.clear();
+
+				// Update Texture Matrix for Depth compare
+				outlinePassTools.updateTextureMatrix();
+
+				// Make non selected objects invisible, and draw only the selected objects, by comparing the depth buffer of non selected objects
+				outlinePassTools.changeVisibilityOfNonSelectedObjects( false );
+				scene.overrideMaterial = prepareMaskMaterial;
+				prepareMaskMaterial.uniforms.cameraNearFar.value.set( camera.near, camera.far );
+				prepareMaskMaterial.uniforms.depthTexture.value = renderTargetDepthBuffer.texture;
+				prepareMaskMaterial.uniforms.textureMatrix.value = outlinePassTools.textureMatrix;
+				renderer.clear();
+				renderer.render( scene, camera );
+				scene.overrideMaterial = null;
+				outlinePassTools.changeVisibilityOfNonSelectedObjects( true );
+				outlinePassTools._visibilityCache.clear();
+
+				// 对照原始
+				renderer.setScissor( 0, 0, canvas.clientWidth / 4, canvas.clientHeight / 4 );
+				renderer.setViewport( 0, 0, canvas.clientWidth / 4, canvas.clientHeight / 4 );
+				renderer.render( scene, camera );
+
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>
