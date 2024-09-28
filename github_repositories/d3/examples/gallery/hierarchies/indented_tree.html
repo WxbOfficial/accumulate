@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../logo.svg">
+		<title>indented_tree</title>
+		<link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<script type="text/javascript" src="../../../libs/d3.v7.9.0.js"></script>
+		<script type="module">
+
+			fetch("../../assets/flare-2.json")
+				.then((res)=>{
+
+					return res.json();
+				}).then((json)=>{
+					console.log('json:', json);
+
+					initD3(json)
+				});
+
+
+			function initD3(data){
+
+				const container = document.body;
+
+				const format = d3.format(",");
+				const nodeSize = 17;
+				const root = d3.hierarchy(data)
+											.eachBefore(((i) => {
+												return (d) => {
+													d.index = i++
+												}
+											})(0));
+				const nodes = root.descendants();
+				const width = document.body.clientWidth;
+				const height = (nodes.length + 1) * nodeSize;
+
+				const columns = [
+					{
+						label: "Size",
+						value: (d) => {
+							return d.value;
+						},
+						format,
+						x: 280
+					},
+					{
+						label: "Count",
+						value: d => d.children ? 0 : 1,
+						format: (value, d) => {
+							return d.children ? format(value) : "-";
+						},
+						x: 340
+					}
+				];
+
+				const svg = d3.select(container)
+						.append("svg")
+						.attr("width", width)
+						.attr("height", height)
+						.attr("viewBox", [-nodeSize / 2, -nodeSize * 3 / 2, width, height])
+						.attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; overflow: visible;");
+
+				const link = svg.append("g")
+						.attr("fill", "none")
+						.attr("stroke", "#999")
+					.selectAll()
+					.data(root.links())
+					.join("path")
+						.attr("d", (d) => {
+							return `M${d.source.depth * nodeSize},${d.source.index * nodeSize} V${d.target.index * nodeSize} h${nodeSize}`;
+						});
+
+				const node = svg.append("g")
+					.selectAll()
+					.data(nodes)
+					.join("g")
+						.attr("transform", (d) => {
+							return `translate(0,${d.index * nodeSize})`
+						});
+
+				node.append("circle")
+						.attr("cx", (d) => {
+							return d.depth * nodeSize;
+						})
+						.attr("r", 2.5)
+						.attr("fill", (d) => {
+							return d.children ? null : "#999";
+						});
+
+				node.append("text")
+						.attr("dy", "0.32em")
+						.attr("x", (d) => {
+							return d.depth * nodeSize + 6;
+						})
+						.text((d) => {
+							return d.data.name;
+						});
+
+				node.append("title")
+						.text((d) => {
+							return d.ancestors().reverse().map((d) => {
+								return d.data.name;
+							}).join("/")
+						});
+
+				for (const { label, value, format, x } of columns) {
+					svg.append("text")
+							.attr("dy", "0.32em")
+							.attr("y", -nodeSize)
+							.attr("x", x)
+							.attr("text-anchor", "end")
+							.attr("font-weight", "bold")
+							.text(label);
+
+					node.append("text")
+							.attr("dy", "0.32em")
+							.attr("x", x)
+							.attr("text-anchor", "end")
+							.attr("fill", (d) => {
+								return d.children ? null : "#555";
+							})
+						.data(root.copy().sum(value).descendants())
+							.text((d) => {
+								return format(d.value, d);
+							});
+				}
+
+				return svg.node();
+			}
+		</script>
+	</body>
+</html>

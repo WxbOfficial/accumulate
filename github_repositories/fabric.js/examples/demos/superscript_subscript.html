@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>superscript_subscript</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<div class="absolute">
+			<button id="super" onclick="superScript()">Set superscript on selection</button>
+			<button id="sub" onclick="subScript()">Set subscript on selection</button>
+			<button onclick="remove()">Remove script informations</button>
+		</div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			var canvas = new fabric.Canvas( canvasDom );
+
+			window.remove = function remove() {
+				var active = canvas.getActiveObject();
+				if (!active) {
+					return;
+				}
+				active.setSelectionStyles({
+					fontSize: undefined,
+					deltaY: undefined,
+				});
+				canvas.requestRenderAll();
+			}
+
+			window.superScript = function superScript() {
+				var active = canvas.getActiveObject();
+				if (!active) {
+					return;
+				}
+				active.setSuperscript();
+				canvas.requestRenderAll();
+			}
+
+			window.subScript = function subScript() {
+				var active = canvas.getActiveObject();
+				if (!active) {
+					return;
+				}
+				active.setSubscript();
+				canvas.requestRenderAll();
+			}
+
+			// create a rectangle object
+			var itext = new fabric.IText('This is a IText object', {
+				left: 100,
+				top: 150,
+				fill: '#D81B60',
+				strokeWidth: 2,
+				stroke: "#880E4F",
+			});
+
+			var textbox = new fabric.Textbox('This is a Textbox object', {
+				left: 20,
+				top: 50,
+				fill: '#880E4F',
+				strokeWidth: 2,
+				stroke: "#D81B60",
+			});
+
+			canvas.add(itext, textbox);
+
+		</script>
+	</body>
+</html>

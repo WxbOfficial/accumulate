@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>sliding_ladybugs</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			const canvas = new fabric.Canvas( canvasDom );
+
+			fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+
+			setInterval(function() {
+				fabric.Image.fromURL('../assets/ladybug.png', function(img) {
+					img.set('left', fabric.util.getRandomInt(200, 600)).set('top', -50);
+					img.movingLeft = !!Math.round(Math.random());
+					canvas.add(img);
+				});
+			}, 250);
+
+			(function animate() {
+				canvas.getObjects().concat().forEach(function(obj) {
+					obj.left += (obj.movingLeft ? -1 : 1);
+					obj.top += 1;
+					if (obj.left > 900 || obj.left < -100 || obj.top > 500) {
+						canvas.remove(obj);
+					}
+					else {
+						obj.rotate(obj.get('angle') + 2);
+					}
+				});
+				canvas.renderAll();
+				fabric.util.requestAnimFrame(animate);
+			})();
+		</script>
+	</body>
+</html>

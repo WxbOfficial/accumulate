@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>manage_selection</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<div id="absolute">
+			<button id="group" class="btn btn-info">Group selected objecs</button>
+			<button id="ungroup" class="btn btn-info">Ungroup selected objects</button>
+			<button id="multiselect" class="btn btn-info">Make a multiselection</button>
+			<button id="addmore" class="btn btn-info">Add more shapes</button>
+			<button id="discard" class="btn btn-info">Discard selection</button>
+		</div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			const canvas = new fabric.Canvas( canvasDom );
+
+
+			function add() {
+				var red = new fabric.Rect({
+					top: Math.random() * canvas.height, left: Math.random() * canvas.width, width: 80, height: 50, fill: 'red' });
+				var blue = new fabric.Rect({
+					top: Math.random() * canvas.height, left: Math.random() * canvas.width, width: 50, height: 70, fill: 'blue' });
+				var green = new fabric.Rect({
+					top: Math.random() * canvas.height, left: Math.random() * canvas.width, width: 60, height: 60, fill: 'green' });
+				canvas.add(red, blue, green);
+			}
+
+			var $ = function(id){return document.getElementById(id)};
+
+			var red = new fabric.Rect({
+				top: 100, left: 0, width: 80, height: 50, fill: 'red' });
+			var blue = new fabric.Rect({
+				top: 0, left: 100, width: 50, height: 70, fill: 'blue' });
+			var green = new fabric.Rect({
+				top: 100, left: 100, width: 60, height: 60, fill: 'green' });
+			fabric.Object.prototype.transparentCorners = false;
+			canvas.add(red, blue, green);
+
+			var group = $('group'),
+					ungroup = $('ungroup'),
+					multiselect = $('multiselect'),
+					addmore = $('addmore'),
+					discard = $('discard');
+
+			addmore.onclick = add;
+
+			multiselect.onclick = function() {
+				canvas.discardActiveObject();
+				var sel = new fabric.ActiveSelection(canvas.getObjects(), {
+					canvas: canvas,
+				});
+				canvas.setActiveObject(sel);
+				canvas.requestRenderAll();
+			}
+
+			group.onclick = function() {
+				if (!canvas.getActiveObject()) {
+					return;
+				}
+				if (canvas.getActiveObject().type !== 'activeSelection') {
+					return;
+				}
+				canvas.getActiveObject().toGroup();
+				canvas.requestRenderAll();
+			}
+
+			ungroup.onclick = function() {
+				if (!canvas.getActiveObject()) {
+					return;
+				}
+				if (canvas.getActiveObject().type !== 'group') {
+					return;
+				}
+				canvas.getActiveObject().toActiveSelection();
+				canvas.requestRenderAll();
+			}
+
+			discard.onclick = function() {
+				canvas.discardActiveObject();
+				canvas.requestRenderAll();
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>animation_easing</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<div id="absolute">
+			<select id="easing">
+				<option>easeInQuad</option>
+				<option>easeOutQuad</option>
+				<option>easeInOutQuad</option>
+				<option>easeInCubic</option>
+				<option>easeOutCubic</option>
+				<option>easeInOutCubic</option>
+				<option>easeInQuart</option>
+				<option>easeOutQuart</option>
+				<option>easeInOutQuart</option>
+				<option>easeInQuint</option>
+				<option>easeOutQuint</option>
+				<option>easeInOutQuint</option>
+				<option>easeInSine</option>
+				<option>easeOutSine</option>
+				<option>easeInOutSine</option>
+				<option>easeInExpo</option>
+				<option>easeOutExpo</option>
+				<option>easeInOutExpo</option>
+				<option>easeInCirc</option>
+				<option>easeOutCirc</option>
+				<option>easeInOutCirc</option>
+				<option>easeInElastic</option>
+				<option>easeOutElastic</option>
+				<option>easeInOutElastic</option>
+				<option>easeInBack</option>
+				<option>easeOutBack</option>
+				<option>easeInOutBack</option>
+				<option>easeInBounce</option>
+				<option>easeOutBounce</option>
+				<option>easeInOutBounce</option>
+		  </select>
+		  <button id="animate">Animate</button>
+		</div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			const canvas = new fabric.Canvas( canvasDom );
+
+			var rect = new fabric.Rect({
+				width: 50,
+				height: 50,
+				left: 100,
+				top: 100,
+				stroke: '#aaf',
+				strokeWidth: 5,
+				fill: '#faa',
+				selectable: false
+			});
+			canvas.add(rect);
+
+			var animateBtn = document.getElementById('animate');
+			animateBtn.onclick = function() {
+				animateBtn.disabled = true;
+				rect.animate('left', rect.left === 100 ? 400 : 100, {
+					duration: 1000,
+					onChange: canvas.renderAll.bind(canvas),
+					onComplete: function() {
+						animateBtn.disabled = false;
+					},
+					easing: fabric.util.ease[document.getElementById('easing').value]
+				});
+			};
+		</script>
+	</body>
+</html>

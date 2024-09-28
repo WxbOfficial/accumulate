@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>add_text_on_paths</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			// const canvas = new fabric.Canvas( canvasDom );
+
+			fabric.Object.prototype.objectCaching = true;
+
+			var canvas = new fabric.Canvas(canvasDom, {
+				isDrawingMode: true,
+				freeDrawingBrush: new fabric.PencilBrush({ decimate: 8 })
+			});
+
+			canvas.on('before:path:created', function(opt) {
+				var path = opt.path;
+				var pathInfo = fabric.util.getPathSegmentsInfo(path.path);
+				path.segmentsInfo = pathInfo;
+				var pathLength = pathInfo[pathInfo.length - 1].length;
+				var text = 'This is a demo of text on a path. This text should be small enough to fit in what you drawn.';
+				var fontSize = 2.5 * pathLength / text.length;
+				var text = new fabric.Text(text, { fontSize: fontSize, path: path, top: path.top, left: path.left });
+				canvas.add(text);
+			});
+
+			canvas.on('path:created', function(opt) {
+				canvas.remove(opt.path);
+			})
+
+		</script>
+	</body>
+</html>

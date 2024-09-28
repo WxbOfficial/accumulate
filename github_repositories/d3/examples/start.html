@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="./logo.svg">
+		<title>start</title>
+		<link href="./default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<script type="text/javascript" src="../libs/d3.v7.9.0.js"></script>
+		<script type="module">
+
+			let id = 0;
+			const nodes = [{ id }];
+
+			function addNode(){
+
+				nodes.push({ id: ++id });
+			}
+			function reduceNode( node ){
+
+				nodes.splice( nodes.indexOf(node), 1 );
+			}
+
+			initD3();
+			function initD3(){
+
+				const container = document.body;
+
+				const svg = d3.select(container)
+						.append("svg")
+						.attr("width", "100%")
+						.attr("height", "100%")
+						.attr("viewBox", [0, 0, container.clientWidth, container.clientHeight]);
+
+
+				const gNode = svg.append("g")
+						.attr("class", "nodes")
+						.attr("pointer-events", "all");
+
+				update();
+				function update(){
+
+					const node = gNode.selectAll("g")
+						.data( nodes, (d) => {
+							return d.id;
+						});
+
+					node.exit().remove();
+
+					const nodeEnter = node.enter().append("g")
+							.attr("transform", (d)=>{
+								return `translate(${d.id * 80 + 20},20)`;
+							})
+
+					nodeEnter.append("circle")
+							.attr("r", 20)
+							.attr("fill", "#000000")
+							.attr("stroke-width", 10);
+
+					nodeEnter.append("circle")
+							.attr("cx", "-15px")
+							.attr("cy", "0")
+							.attr("r", 5)
+							.attr("fill", "#ff0000")
+							.attr("cursor", "pointer")
+							.on("click", (event, d)=>{
+								addNode();
+								update();
+							})
+
+					nodeEnter.append("circle")
+							.attr("cx", "15px")
+							.attr("cy", "0")
+							.attr("r", 5)
+							.attr("fill", "#0000ff")
+							.attr("cursor", "pointer")
+							.on("click", (event, d)=>{
+								reduceNode(d);
+								update();
+							})
+
+					nodeEnter.append("text")
+							.attr("dy", "6px")
+							.attr("dx", "24px")
+							.text((d) => {
+								return d.id;
+							})
+							.attr("stroke-linejoin", "round")
+							.attr("stroke-width", 3)
+							.attr("stroke", "white")
+							.attr("paint-order", "stroke");
+				}
+			}
+
+		</script>
+	</body>
+</html>

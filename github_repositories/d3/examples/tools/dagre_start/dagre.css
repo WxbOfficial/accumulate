@@ -1,0 +1,23 @@
+.node{
+	z-index: 2;
+}
+
+.node.parent{
+	z-index: 0;
+}
+
+.node > rect {
+	stroke-width: 1.5px;
+	stroke: #000000;
+	fill: rgba(0, 0, 0, 0);
+}
+
+.node text {
+	font-family: Verdana;
+}
+
+path.link {
+	fill: none;
+	stroke: #000000;
+	stroke-width: 1.5px;
+}

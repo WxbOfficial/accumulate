@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>hovering</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			const canvas = new fabric.Canvas( canvasDom );
+
+			fabric.Object.prototype.transparentCorners = false;
+
+			canvas.on('mouse:over', function(e) {
+				e.target.set('fill', 'red');
+				canvas.renderAll();
+			});
+
+			canvas.on('mouse:out', function(e) {
+				e.target.set('fill', 'green');
+				canvas.renderAll();
+			});
+
+			// add random objects
+			for (var i = 15; i--; ) {
+				var dim = fabric.util.getRandomInt(30, 60);
+				var klass = ['Rect', 'Triangle', 'Circle'][fabric.util.getRandomInt(0,2)];
+				var options = {
+					top: fabric.util.getRandomInt(0, 600),
+					left: fabric.util.getRandomInt(0, 600),
+					fill: 'green'
+				};
+				if (klass === 'Circle') {
+					options.radius = dim;
+				}
+				else {
+					options.width = dim;
+					options.height = dim;
+				}
+				canvas.add(new fabric[klass](options));
+			}
+		</script>
+	</body>
+</html>

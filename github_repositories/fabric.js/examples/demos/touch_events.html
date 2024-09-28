@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../logo.png">
+		<title>touch_events</title>
+		<link href="../default_css.css" rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="../../libs/fabric.js/fabric-with-gestures.4.5.0.js"></script>
+		<style type="text/css">
+			.info{
+				display: flex;
+				flex-direction: row;
+				font-size: 12px;
+				pointer-events: none;
+			}
+		</style>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<div id="absolute" class="info"></div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			// import * as fabric from '../../libs/fabric.js/index.mjs';
+
+			const canvasDom = document.getElementById('renderCanvas');
+			canvasDom.width = canvasDom.clientWidth;
+			canvasDom.height = canvasDom.clientHeight;
+
+			const canvas = new fabric.Canvas( canvasDom );
+
+			fabric.Image.fromURL('../assets/pug_small.jpg', function(img) {
+				img.scale(0.5).set({
+					left: 150,
+					top: 150,
+					angle: -15
+				});
+				canvas.add(img).setActiveObject(img);
+			});
+
+			var info = document.getElementById('absolute');
+
+			canvas.on({
+				'touch:gesture': function() {
+					console.log('touch:gesture');
+					var text = document.createTextNode(' Gesture ');
+					info.insertBefore(text, info.firstChild);
+
+					const activeObject = canvas.getActiveObject();
+
+					if( activeObject ){
+
+						activeObject.set({
+							lockMovementX: true,
+							lockMovementY: true,
+						});
+					}
+
+				},
+				'touch:drag': function() {
+					console.log('touch:drag');
+					var text = document.createTextNode(' Dragging ');
+					// info.insertBefore(text, info.firstChild);
+				},
+				'touch:orientation': function() {
+					console.log('touch:orientation');
+					var text = document.createTextNode(' Orientation ');
+					info.insertBefore(text, info.firstChild);
+				},
+				'touch:shake': function() {
+					console.log('touch:shake');
+					var text = document.createTextNode(' Shaking ');
+					info.insertBefore(text, info.firstChild);
+				},
+				'touch:longpress': function() {
+					console.log('touch:longpress');
+					var text = document.createTextNode(' Longpress ');
+					info.insertBefore(text, info.firstChild);
+				}
+			});
+		</script>
+	</body>
+</html>
