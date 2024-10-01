@@ -1,6 +1,0 @@
-
-
-
-class Reflector extends Mesh {
-
-}
