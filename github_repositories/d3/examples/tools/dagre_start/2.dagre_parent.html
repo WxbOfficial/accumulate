@@ -1,145 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
-		<link rel="icon" href="../../logo.svg">
-		<title>2.dagre_parent</title>
-		<link href="../../default_css.css" rel="stylesheet" type="text/css"/>
-		<link href="./dagre.css" rel="stylesheet" type="text/css"/>
-	</head>
-	<!--
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+	<link rel="icon" href="../../logo.svg">
+	<title>2.dagre_parent</title>
+	<link href="../../../../default_css.css" rel="stylesheet" type="text/css" />
+	<link href="./dagre.css" rel="stylesheet" type="text/css" />
+</head>
+<!--
 
 	-->
-	<body>
-		<script type="text/javascript" src="../../../libs/d3.v7.9.0.js"></script>
-		<script type="text/javascript" src="../../../libs/dagre.js"></script>
-		<script type="module">
-			import createRect from './node/create_rect.js';
-			import createPath, { initPath } from './edge/create_path.js';
 
-			const g = new dagre.graphlib.Graph({
-					compound:true
-				})
-				.setGraph({})
-				.setDefaultEdgeLabel(function() { return {}; });
+<body>
+	<script type="text/javascript" src="../../../libs/d3.v7.9.0.js"></script>
+	<script type="text/javascript" src="../../../libs/dagre.js"></script>
+	<script type="module">
+		import createRect from './node/create_rect.js';
+		import createPath, { initPath } from './edge/create_path.js';
 
-
-			const
-				nodes = [
-					{ id: 'parent1', label: "0.parent1" },
-					{ id: 'parent2', label: "1.parent2" },
-					{ id: 'kspacey', label: "2.Kevin Spacey" },
-					{ id: 'swilliams', label: "3.Saul Williams" },
-					{ id: 'bpitt', label: "4.Brad Pitt" },
-					{ id: 'hford', label: "5.Harrison Ford" },
-					{ id: 'lwilson', label: "6.Luke Wilson" },
-					{ id: 'kbacon', label: "7.Kevin Spacey" },
-				],
-				links = [
-					{ source: 2, target: 3 },
-					{ source: 3, target: 7 },
-					{ source: 4, target: 7 },
-					{ source: 5, target: 6 },
-					{ source: 6, target: 7 },
-				],
-				parents = [
-					{ node: 0, child: 2 },
-					{ node: 0, child: 4 },
-					{ node: 0, child: 5 },
-					{ node: 1, child: 6 },
-					{ node: 1, child: 7 },
-				];
+		const g = new dagre.graphlib.Graph({
+			compound: true
+		})
+			.setGraph({})
+			.setDefaultEdgeLabel(function () { return {}; });
 
 
-			{
-				nodes.forEach(( node )=>{
-					g.setNode( node.id, node );
-				});
+		const
+			nodes = [
+				{ id: 'parent1', label: "0.parent1" },
+				{ id: 'parent2', label: "1.parent2" },
+				{ id: 'kspacey', label: "2.Kevin Spacey" },
+				{ id: 'swilliams', label: "3.Saul Williams" },
+				{ id: 'bpitt', label: "4.Brad Pitt" },
+				{ id: 'hford', label: "5.Harrison Ford" },
+				{ id: 'lwilson', label: "6.Luke Wilson" },
+				{ id: 'kbacon', label: "7.Kevin Spacey" },
+			],
+			links = [
+				{ source: 2, target: 3 },
+				{ source: 3, target: 7 },
+				{ source: 4, target: 7 },
+				{ source: 5, target: 6 },
+				{ source: 6, target: 7 },
+			],
+			parents = [
+				{ node: 0, child: 2 },
+				{ node: 0, child: 4 },
+				{ node: 0, child: 5 },
+				{ node: 1, child: 6 },
+				{ node: 1, child: 7 },
+			];
 
-				links.forEach(( { source, target } )=>{
-					g.setEdge( nodes[source].id, nodes[target].id );
-				});
 
-				parents.forEach(( { node, child } )=>{
-					nodes[node].isParent = true;
-					g.setParent( nodes[child].id, nodes[node].id );
-				});
-			}
+		{
+			nodes.forEach((node) => {
+				g.setNode(node.id, node);
+			});
 
-			initD3();
-			function initD3(){
+			links.forEach(({ source, target }) => {
+				g.setEdge(nodes[source].id, nodes[target].id);
+			});
 
-				const container = document.body;
+			parents.forEach(({ node, child }) => {
+				nodes[node].isParent = true;
+				g.setParent(nodes[child].id, nodes[node].id);
+			});
+		}
 
-				const svgSelection = d3.select(container)
-						.append("svg")
-						.attr("width", '100%')
-						.attr("height", '100%')
+		initD3();
+		function initD3() {
 
-				initPath( svgSelection );
+			const container = document.body;
+
+			const svgSelection = d3.select(container)
+				.append("svg")
+				.attr("width", '100%')
+				.attr("height", '100%')
+
+			initPath(svgSelection);
 
 
-				const gNodes = svgSelection.append('g')
-						.attr("class", "nodes")
-						.attr("pointer-events", "all");
+			const gNodes = svgSelection.append('g')
+				.attr("class", "nodes")
+				.attr("pointer-events", "all");
 
-				const gEdges = svgSelection.append('g')
-						.attr("class", "links")
-						.attr("pointer-events", "all");
+			const gEdges = svgSelection.append('g')
+				.attr("class", "links")
+				.attr("pointer-events", "all");
 
-				update();
-				function update(){
+			update();
+			function update() {
 
-					const nodeData = Object.values( g._nodes );
-					const edgesData = Object.values( g._edgeLabels );
+				const nodeData = Object.values(g._nodes);
+				const edgesData = Object.values(g._edgeLabels);
 
-					const node = gNodes.selectAll("g")
-						.data( nodeData, (d) => {
-							return d.id;
-						}).join((enter)=>{
-							return createRect(enter);
-						});
-
-					const edge = gEdges.selectAll('path')
-						.data(edgesData)
-						.join((enter)=>{
-							return createPath(enter);
-						});
-
-					dagre.layout(g);
-
-					node
-						.attr("transform", function(d) {
-
-							return "translate(" +
-								(d.x - d.width / 2) +
-								"," +
-								(d.y - d.height / 2) +
-								")";
-						})
-						.select('rect')
-							.attr('width', function(d){
-								return d.width;
-							})
-							.attr('height', function(d){
-								return d.height;
-							});
-
-					edge.attr("d", function(d) {
-						return (
-							d3.line()
-								.x((d) => { return d.x })
-								.y((d) => { return d.y })
-								.curve(d3.curveBasis)
-						)(d.points);
+				const node = gNodes.selectAll("g")
+					.data(nodeData, (d) => {
+						return d.id;
+					}).join((enter) => {
+						return createRect(enter);
 					});
 
-					node.exit().remove();
-					edge.exit().remove();
-				}
+				const edge = gEdges.selectAll('path')
+					.data(edgesData)
+					.join((enter) => {
+						return createPath(enter);
+					});
+
+				dagre.layout(g);
+
+				node
+					.attr("transform", function (d) {
+
+						return "translate(" +
+							(d.x - d.width / 2) +
+							"," +
+							(d.y - d.height / 2) +
+							")";
+					})
+					.select('rect')
+					.attr('width', function (d) {
+						return d.width;
+					})
+					.attr('height', function (d) {
+						return d.height;
+					});
+
+				edge.attr("d", function (d) {
+					return (
+						d3.line()
+							.x((d) => { return d.x })
+							.y((d) => { return d.y })
+							.curve(d3.curveBasis)
+					)(d.points);
+				});
+
+				node.exit().remove();
+				edge.exit().remove();
 			}
-		</script>
-	</body>
+		}
+	</script>
+</body>
+
 </html>
