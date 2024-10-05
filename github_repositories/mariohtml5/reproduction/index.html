@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+	<link rel="icon" href="./logo.jpeg">
+	<title>mariohtml5</title>
+	<link href="../../default_css.css" rel="stylesheet" type="text/css" />
+</head>
+<!--
+	mariohtml5 游戏案例
+-->
+
+<body>
+	<canvas id="canvas" width="640" height="480">
+		<p>Your browser does not support the canvas element.</p>
+	</canvas>
+	<script src="./lib/jquery.min.js"></script>
+
+	<!-- engine Includes -->
+	<script src="./src/engine/core.js"></script>
+	<script src="./src/engine/gameCanvas.js"></script>
+	<script src="./src/engine/keyboardInput.js"></script>
+	<script src="./src/engine/resources.js"></script>
+	<script src="./src/engine/drawable.js"></script>
+	<script src="./src/engine/state.js"></script>
+	<script src="./src/engine/gameTimer.js"></script>
+	<script src="./src/engine/camera.js"></script>
+	<script src="./src/engine/drawableManager.js"></script>
+	<script src="./src/engine/sprite.js"></script>
+	<script src="./src/engine/spriteFont.js"></script>
+	<script src="./src/engine/frameSprite.js"></script>
+	<script src="./src/engine/animatedSprite.js"></script>
+	<script src="./src/engine/collideable.js"></script>
+	<script src="./src/engine/application.js"></script>
+
+	<!-- Actual game code -->
+	<script src="./src/code/setup.js"></script>
+	<script src="./src/code/spriteCuts.js"></script>
+	<script src="./src/code/level.js"></script>
+	<script src="./src/code/backgroundGenerator.js"></script>
+	<script src="./src/code/backgroundRenderer.js"></script>
+	<script src="./src/code/improvedNoise.js"></script>
+	<script src="./src/code/notchSprite.js"></script>
+	<script src="./src/code/character.js"></script>
+	<script src="./src/code/levelRenderer.js"></script>
+	<script src="./src/code/levelGenerator.js"></script>
+	<script src="./src/code/spriteTemplate.js"></script>
+	<script src="./src/code/enemy.js"></script>
+	<script src="./src/code/fireball.js"></script>
+	<script src="./src/code/sparkle.js"></script>
+	<script src="./src/code/coinAnim.js"></script>
+	<script src="./src/code/mushroom.js"></script>
+	<script src="./src/code/particle.js"></script>
+	<script src="./src/code/fireFlower.js"></script>
+	<script src="./src/code/bulletBill.js"></script>
+	<script src="./src/code/flowerEnemy.js"></script>
+	<script src="./src/code/shell.js"></script>
+
+	<script src="./src/code/titleState.js"></script>
+	<script src="./src/code/loadingState.js"></script>
+	<script src="./src/code/loseState.js"></script>
+	<script src="./src/code/winState.js"></script>
+	<script src="./src/code/mapState.js"></script>
+	<script src="./src/code/levelState.js"></script>
+
+	<script src="./src/code/music.js"></script>
+
+	<script type="module">
+		import './index.js';
+	</script>
+</body>
+
+</html>
