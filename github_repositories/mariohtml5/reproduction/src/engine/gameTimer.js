@@ -3,21 +3,21 @@
 	Code by Rob Kleffner, 2011
 */
 
-Engine.GameTimer = function () {
-	this.FramesPerSecond = 1000 / 30;
-	this.LastTime = 0;
-	this.IntervalFunc = null;
-	this.UpdateObject = null;
-};
+export default class GameTimer {
+	constructor() {
+		this.FramesPerSecond = 1000 / 30;
+		this.LastTime = 0;
+		this.IntervalFunc = null;
+		this.UpdateObject = null;
+	}
 
-Engine.GameTimer.prototype = {
-	Start: function () {
+	Start() {
 		this.LastTime = new Date().getTime();
 		var self = this;
-		this.IntervalFunc = setInterval(function () { self.Tick() }, this.FramesPerSecond);
-	},
+		this.IntervalFunc = setInterval(function () { self.Tick(); }, this.FramesPerSecond);
+	}
 
-	Tick: function () {
+	Tick() {
 		if (this.UpdateObject != null) {
 			var newTime = new Date().getTime();
 			var delta = (newTime - this.LastTime) / 1000;
@@ -25,9 +25,9 @@ Engine.GameTimer.prototype = {
 
 			this.UpdateObject.Update(delta);
 		}
-	},
+	}
 
-	Stop: function () {
+	Stop() {
 		clearInterval(this.IntervalFunc);
 	}
 };

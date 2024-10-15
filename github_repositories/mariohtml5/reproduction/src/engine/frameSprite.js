@@ -1,17 +1,19 @@
+import Sprite from './sprite.js';
 /**
 	For sprites that are only a portion of an image.
 	Code by Rob Kleffner, 2011
 */
 
-Engine.FrameSprite = function () {
-	this.FrameX = 0;
-	this.FrameY = 0;
-	this.FrameWidth = 0;
-	this.FrameHeight = 0;
-};
+export default class FrameSprite extends Sprite {
+	constructor() {
+		super();
 
-Engine.FrameSprite.prototype = new Engine.Sprite();
-
-Engine.FrameSprite.prototype.Draw = function (context, camera) {
-	context.drawImage(this.Image, this.FrameX, this.FrameY, this.FrameWidth, this.FrameHeight, this.X - camera.X, this.Y - camera.Y, this.FrameWidth, this.FrameHeight);
+		this.FrameX = 0;
+		this.FrameY = 0;
+		this.FrameWidth = 0;
+		this.FrameHeight = 0;
+	}
+	Draw(context, camera) {
+		context.drawImage(this.Image, this.FrameX, this.FrameY, this.FrameWidth, this.FrameHeight, this.X - camera.X, this.Y - camera.Y, this.FrameWidth, this.FrameHeight);
+	}
 };
