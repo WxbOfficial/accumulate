@@ -3,7 +3,9 @@
 	Code by Rob Kleffner, 2011
 */
 
-Engine.Camera = function() {
-	this.X = 0;
-	this.Y = 0;
-};
+export default class Camera {
+	constructor() {
+		this.X = 0;
+		this.Y = 0;
+	}
+}

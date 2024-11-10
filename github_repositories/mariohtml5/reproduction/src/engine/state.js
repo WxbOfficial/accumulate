@@ -3,43 +3,42 @@
 	Code by Rob Kleffner, 2011
 */
 
-Engine.GameStateContext = function(defaultState) {
-    this.State = null;
-    
-    if (defaultState != null) {
-        this.State = defaultState;
-        this.State.Enter();
-    }
-};
+export class GameStateContext {
+	constructor(defaultState) {
+		this.State = null;
 
-Engine.GameStateContext.prototype = {
-    ChangeState: function(newState) {
-        if (this.State != null) {
-            this.State.Exit();
-        }
-        this.State = newState;
-        this.State.Enter();
-    },
-    
-    Update: function(delta) {
-        this.State.CheckForChange(this);
-        this.State.Update(delta);
-    },
-    
-    Draw: function(delta) {
-        this.State.Draw(delta);
-    }
+		if (defaultState != null) {
+			this.State = defaultState;
+			this.State.Enter();
+		}
+	}
+
+	ChangeState(newState) {
+		if (this.State != null) {
+			this.State.Exit();
+		}
+		this.State = newState;
+		this.State.Enter();
+	}
+
+	Update(delta) {
+		this.State.CheckForChange(this);
+		this.State.Update(delta);
+	}
+
+	Draw(delta) {
+		this.State.Draw(delta);
+	}
 };
 
 /**
  * Base game state class to at least ensure that all the functions exist.
- */ 
-Engine.GameState = function() { }
-
-Engine.GameState.prototype = {
-    Enter: function () {},
-    Exit: function() {},
-    Update: function(delta) {},
-    Draw: function(context) {},
-    CheckForChange: function(context) {}
-};
+ */
+export class GameState {
+	constructor() { }
+	Enter() { }
+	Exit() { }
+	Update(delta) { }
+	Draw(context) { }
+	CheckForChange(context) { }
+}

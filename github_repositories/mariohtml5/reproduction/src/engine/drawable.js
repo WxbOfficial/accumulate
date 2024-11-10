@@ -3,10 +3,9 @@
 	Code by Rob Kleffner, 2011
 */
 
-Engine.Drawable = function() {
-    this.ZOrder = 0;
-};
-
-Engine.Drawable.prototype = {
-    Draw: function(context) { }
+export default class Drawable {
+	constructor() {
+		this.ZOrder = 0;
+	}
+	Draw(context) { }
 };

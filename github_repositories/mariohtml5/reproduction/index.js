@@ -1,6 +1,8 @@
+import Application from './src/engine/application.js';
+import LoadingState from './src/code/loadingState.js';
 
 $(document).ready(function () {
-	new Engine.Application().Initialize(
-		new Mario.LoadingState(), 320, 240
+	new Application().Initialize(
+		new LoadingState(), 320, 240
 	)
 });

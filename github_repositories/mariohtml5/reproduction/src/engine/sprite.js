@@ -1,16 +1,18 @@
+import Drawable from './drawable.js';
 /**
 	Represents a simple static sprite.
 	Code by Rob Kleffner, 2011
 */
 
-Engine.Sprite = function() {
-	this.X = 0;
-	this.Y = 0;
-	this.Image = null;
-};
+export default class Sprite extends Drawable {
+	constructor() {
+		super();
 
-Engine.Sprite.prototype = new Engine.Drawable();
-
-Engine.Sprite.prototype.Draw = function(context, camera) {
-	context.drawImage(this.Image, this.X - camera.X, this.Y - camera.Y);
+		this.X = 0;
+		this.Y = 0;
+		this.Image = null;
+	}
+	Draw(context, camera) {
+		context.drawImage(this.Image, this.X - camera.X, this.Y - camera.Y);
+	}
 };
