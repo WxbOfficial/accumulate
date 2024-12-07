@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="./assets/su.ico">
+		<title>curvature</title>
+		<link href="../../examples/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../examples/module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, GLTFLoader } from '../../examples/jsm/jsm.js';
+			import myMessageToThreeObject3D from '../../examples/tools/deal_scene_data/my_message_to_three_object3d.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setPixelRatio( 1.5 );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100000 );
+
+			camera.position.set( -4.78, 1.51, 0 );
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const ambient = new THREE.AmbientLight( 0xffffff );
+			scene.add( ambient );
+
+
+			let uniforms = null;
+
+			const loader = new THREE.FileLoader();
+			const url = './assets/models/radar.json';
+
+			loader.responseType = 'json';
+			loader.load(url, function( json ){
+
+				console.log('json:', json);
+
+				const model = myMessageToThreeObject3D( json.message, json.assets,
+				);
+
+				scene.add( model );
+				scene.add( new THREE.AxesHelper( 10000 ) );
+
+				console.log( '模型加载完成:', model );
+
+				// model.material = new THREE.MeshStandardMaterial();
+
+				uniforms = model.material.uniforms;
+
+				initGui( uniforms );
+			});
+
+
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( uniforms.opacity, 'value', 0, 1 ).name('opacity');
+				gui.addColor( uniforms.vColor, 'value' ).name('vColor');
+
+				return gui;
+			}
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop(0);
+			function loop(delta) {
+
+				if( uniforms ){
+
+					uniforms.time.value = delta / 1000;
+				}
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

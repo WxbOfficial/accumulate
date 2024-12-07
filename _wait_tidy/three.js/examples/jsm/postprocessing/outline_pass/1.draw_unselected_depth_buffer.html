@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>draw_unselected_depth_buffer</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, OutlinePass } from '../../jsm.js';
+			import { createOutlinePassScene, OutlinePassTool } from './outline_pass_tool.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+			renderer.setClearColor( 0xffffff, 1 );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const outlinePassScene = createOutlinePassScene();
+
+			scene.add( outlinePassScene );
+
+			const outlinePassTools = new OutlinePassTool( scene, camera, [ outlinePassScene.children[1] ] )
+
+			outlinePassTools.changeVisibilityOfSelectedObjects( false );
+
+
+			scene.overrideMaterial = new THREE.MeshDepthMaterial({
+				side: THREE.DoubleSide,
+				depthPacking: THREE.RGBADepthPacking,
+				blending: THREE.NoBlending,
+			});
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				depthPacking = {
+					BasicDepthPacking: THREE.BasicDepthPacking,
+					RGBADepthPacking: THREE.RGBADepthPacking,
+				}
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					overrideMaterial = scene.overrideMaterial,
+					param = {
+						useOverrideMaterial: true,
+					};
+
+				gui.add( param, 'useOverrideMaterial' ).onChange((use)=>{
+
+					if( use ){
+						scene.overrideMaterial = overrideMaterial;
+					}else{
+						scene.overrideMaterial = null;
+					}
+				});
+
+				initMeshDepthMaterial( gui, scene.overrideMaterial, 'scene.overrideMaterial' );
+				initSelectedObjectsGui( gui, outlinePassScene.children, outlinePassTools, 'selectedObjects' );
+			}
+
+			function initMeshDepthMaterial( gui, material, name ){
+
+				const
+					meshDepthMaterialFolder = gui.addFolder( name ),
+					onChange = ()=>{
+						material.needsUpdate = true;
+					};
+
+				meshDepthMaterialFolder.add( material, 'depthPacking', depthPacking ).onChange(onChange);
+			}
+
+			function initSelectedObjectsGui( gui, meshes, outlinePassTools, name ){
+
+				const
+					selectedObjectsFolder = gui.addFolder(name),
+					param = {};
+
+				meshes.forEach((mesh, index)=>{
+					param[index] = mesh.visible;
+
+					selectedObjectsFolder.add(param, index).onChange((show)=>{
+
+						const indexOf = outlinePassTools.selectedObjects.indexOf( mesh );
+
+
+						mesh.visible = show;
+						if( show ){
+							outlinePassTools.selectedObjects.splice( indexOf, 1 );
+						}else{
+
+							outlinePassTools.selectedObjects.push( mesh );
+						}
+					});
+				});
+			}
+
+
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

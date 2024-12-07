@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../../favicon.ico">
+		<title>learn_load_format</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示 babylon load 导入 ,
+		感觉光照这块有点问题，不是很清楚, 以后有空加强学习
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../../module.js";
+			import createAxesBox from '../../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			BABYLON.Engine.ShadersRepository = '../../../source/Shaders/';
+
+			BABYLON.SceneLoader.Load("../../assets/scenes/learn_format/", "learn_load_format.babylon", engine, function (scene) {
+
+				scene.activeCamera.attachControl(canvas);
+
+				window.scene = scene;
+
+				createAxesBox(scene, 10, 0.5);
+
+				engine.runRenderLoop(()=>{
+
+					scene.render();
+
+					stats.update();
+				});
+
+			});
+
+		</script>
+	</body>
+</html>

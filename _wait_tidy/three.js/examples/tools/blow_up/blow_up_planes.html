@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>blow_up_planes</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			import BlowUp from './blow_up.js';
+
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.01, 10000 );
+
+			camera.position.z = 10
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			scene.add( new THREE.AxesHelper(20) );
+
+
+			const
+				group = new THREE.Group(),
+
+				planeGeometry = new THREE.PlaneGeometry(1, 1),
+				planeMaterial1 = new THREE.MeshBasicMaterial({
+					color: 0xff0000,
+					side: THREE.DoubleSide,
+				}),
+				planeMaterial2 = new THREE.MeshBasicMaterial({
+					color: 0xff0000,
+					side: THREE.DoubleSide,
+				}),
+				planeMaterial3 = new THREE.MeshBasicMaterial({
+					color: 0x00ff00,
+					side: THREE.DoubleSide,
+				}),
+				planeMaterial4 = new THREE.MeshBasicMaterial({
+					color: 0x00ff00,
+					side: THREE.DoubleSide,
+				}),
+				planeMaterial5 = new THREE.MeshBasicMaterial({
+					color: 0x0000ff,
+					side: THREE.DoubleSide,
+				}),
+				planeMaterial6 = new THREE.MeshBasicMaterial({
+					color: 0x0000ff,
+					side: THREE.DoubleSide,
+				});
+
+			const plane1 = new THREE.Mesh( planeGeometry, planeMaterial1 );
+			plane1.position.x = 0.5;
+			plane1.rotation.y = Math.PI / 2;
+			group.add( plane1 );
+
+			const plane2 = new THREE.Mesh( planeGeometry, planeMaterial2 );
+			plane2.position.x = -0.5;
+			plane2.rotation.y = -Math.PI / 2;
+			group.add( plane2 );
+
+			const plane3 = new THREE.Mesh( planeGeometry, planeMaterial3 );
+			plane3.position.y = 0.5;
+			plane3.rotation.x = -Math.PI / 2;
+			group.add( plane3 );
+
+			const plane4 = new THREE.Mesh( planeGeometry, planeMaterial4 );
+			plane4.position.y = -0.5;
+			plane4.rotation.x = Math.PI / 2;
+			group.add( plane4 );
+
+			const plane5 = new THREE.Mesh( planeGeometry, planeMaterial5 );
+			plane5.position.z = 0.5;
+			group.add( plane5 );
+
+			const plane6 = new THREE.Mesh( planeGeometry, planeMaterial6 );
+			plane6.position.z = -0.5;
+			plane6.rotation.y = Math.PI;
+			group.add( plane6 );
+
+			scene.add( group );
+
+			group.position.set(1, 1, 1);
+			group.rotation.set(Math.PI / 4, Math.PI / 4, Math.PI / 4);
+			group.scale.set(1, 1.5, 2);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const
+					blowUp = new BlowUp( group, scene ),
+					parmas = {
+						skew: 0,
+						resetModelMessage(){
+
+							blowUp.blowUpMeshes(0);
+							blowUp.resetModelMessage();
+							blowUp.blowUpMeshes(parmas.skew);
+						}
+					},
+					gui = new lil.GUI();
+
+
+				gui.add( parmas, 'skew', 0, 1 ).onChange( blowUp.blowUpMeshes );
+				gui.add( parmas, 'resetModelMessage' );
+
+				initObject3DGui( gui, group, 'group' );
+			}
+
+			function initObject3DGui( gui, object3D, name ){
+
+				const
+					object3DFolder = gui.addFolder( name ),
+					angleParam = {
+						x: object3D.rotation.x / Math.PI * 180,
+						y: object3D.rotation.y / Math.PI * 180,
+						z: object3D.rotation.z / Math.PI * 180,
+					}
+
+				object3DFolder.add(object3D.position, 'x', -3, 3).name('position.x');
+				object3DFolder.add(object3D.position, 'y', -3, 3).name('position.y');
+				object3DFolder.add(object3D.position, 'z', -3, 3).name('position.z');
+
+				object3DFolder.add(angleParam, 'x', -180, 180).name('rotation.x').onChange(( angle )=>{
+
+					object3D.rotation.x = angle / 180 * Math.PI;
+				});
+				object3DFolder.add(angleParam, 'y',  -180, 180).name('rotation.y').onChange(( angle )=>{
+
+					object3D.rotation.y = angle / 180 * Math.PI;
+				});
+				object3DFolder.add(angleParam, 'z',  -180, 180).name('rotation.z').onChange(( angle )=>{
+
+					object3D.rotation.z = angle / 180 * Math.PI;
+				});
+
+				object3DFolder.add(object3D.scale, 'x', -2, 2).name('scale.x');
+				object3DFolder.add(object3D.scale, 'y', -2, 2).name('scale.y');
+				object3DFolder.add(object3D.scale, 'z', -2, 2).name('scale.z');
+			}
+			loop(0);
+			function loop(delta) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>
+

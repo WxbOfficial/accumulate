@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>luminosity_high_pass_shader_separable_blur_mips</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+
+			const fullscreenTriangleGeometry = new THREE.BufferGeometry();
+
+			fullscreenTriangleGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				- 1, 3, 0,
+				- 1, - 1, 0,
+				3, - 1, 0
+			] ), 3 ) );
+			fullscreenTriangleGeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( [
+				0, 2,
+				0, 0,
+				2, 0
+			] ), 2 ) );
+
+			const fullScreenQuad = new THREE.Mesh( fullscreenTriangleGeometry,  null );
+
+
+			const luminosityRtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio
+			);
+			const luminosityShader = new THREE.RawShaderMaterial({
+				uniforms: {
+					map: {
+						value: luminosityRtTexture.texture,
+					},
+					luminosityThreshold: {
+						value: 0.85
+					},
+					smoothWidth: {
+						value: 0.01
+					},
+					defaultColor: {
+						value: new THREE.Color( 0x000000 )
+					},
+					defaultOpacity: {
+						value: 1.0
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main(void) {
+
+						vUv = uv;
+
+						gl_Position = vec4( position.xyz, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform	sampler2D	map;
+					uniform vec3 defaultColor;
+					uniform float defaultOpacity;
+					uniform float luminosityThreshold;
+					uniform float smoothWidth;
+
+					varying vec2 vUv;
+
+					void main() {
+
+						vec4 texel = texture2D( map, vUv );
+
+						// 亮度计算, 曾经最流行的方法
+						vec3 luma = vec3( 0.299, 0.587, 0.114 );
+						float v = dot( texel.xyz, luma );
+
+						vec4 outputColor = vec4( defaultColor.rgb, defaultOpacity );
+
+						float alpha = smoothstep( luminosityThreshold, luminosityThreshold + smoothWidth, v );
+
+						gl_FragColor = mix( outputColor, texel, alpha );
+
+						// gl_FragColor = vec4( 0.299, 0.587, 0.114, 1.0);
+
+						// gl_FragColor = texel;
+					}
+				`,
+			});
+
+
+			const separableBlurRtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio
+			);
+
+			const renderTargetsHorizontal = [];
+			const renderTargetsVertical = [];
+			const nMips = 5;
+			let resx = Math.round( canvas.clientWidth * pixelRatio / 2 );
+			let resy = Math.round( canvas.clientHeight * pixelRatio / 2 );
+
+			for ( let i = 0; i < nMips; i ++ ) {
+
+				const renderTargetHorizonal = new THREE.WebGLRenderTarget( resx, resy, { type: THREE.HalfFloatType } );
+
+				renderTargetHorizonal.texture.name = 'UnrealBloomPass.h' + i;
+				renderTargetHorizonal.texture.generateMipmaps = false;
+				renderTargetsHorizontal.push( renderTargetHorizonal );
+
+				const renderTargetVertical = new THREE.WebGLRenderTarget( resx, resy, { type: THREE.HalfFloatType } );
+
+				renderTargetVertical.texture.name = 'UnrealBloomPass.v' + i;
+				renderTargetVertical.texture.generateMipmaps = false;
+				renderTargetsVertical.push( renderTargetVertical );
+
+				resx = Math.round( resx / 2 );
+				resy = Math.round( resy / 2 );
+			}
+
+
+			const separableBlurMaterials = [];
+			const kernelSizeArray = [ 3, 5, 7, 9, 11 ];
+			resx = Math.round( canvas.clientWidth * pixelRatio / 2 );
+			resy = Math.round( canvas.clientHeight * pixelRatio / 2 );
+
+			for ( let i = 0; i < nMips; i ++ ) {
+
+				separableBlurMaterials.push( getSeperableBlurMaterial( kernelSizeArray[ i ] ) );
+
+				separableBlurMaterials[ i ].uniforms[ 'invSize' ].value = new THREE.Vector2( 1 / resx, 1 / resy );
+
+				resx = Math.round( resx / 2 );
+				resy = Math.round( resy / 2 );
+			}
+
+			function getSeperableBlurMaterial( kernelRadius ){
+
+				const coefficients = [];
+
+				for ( let i = 0; i < kernelRadius; i ++ ) {
+
+					coefficients.push( 0.39894 * Math.exp( - 0.5 * i * i / ( kernelRadius * kernelRadius ) ) / kernelRadius );
+
+				}
+
+				return new THREE.RawShaderMaterial( {
+
+					defines: {
+						'KERNEL_RADIUS': kernelRadius
+					},
+
+					uniforms: {
+						'colorTexture': {
+							value: null
+						},
+						'invSize': {
+							value: new THREE.Vector2( 0.5, 0.5 )
+						}, // inverse texture size
+						'direction': {
+							value: new THREE.Vector2( 1.0, 0.0 )
+						},
+						'gaussianCoefficients': {
+							value: coefficients
+						} // precomputed Gaussian coefficients
+					},
+
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+						attribute vec2 uv;
+
+						varying vec2 vUv;
+
+						void main() {
+							vUv = uv;
+
+							gl_Position = vec4( position, 1.0 );
+						}
+					`,
+
+					fragmentShader: `
+
+						precision mediump float;
+
+						varying vec2 vUv;
+
+						uniform sampler2D colorTexture;
+						uniform vec2 invSize;
+						uniform vec2 direction;
+						uniform float gaussianCoefficients[KERNEL_RADIUS];
+
+						void main() {
+
+							float weightSum = gaussianCoefficients[0];
+
+							vec3 diffuseSum = texture2D( colorTexture, vUv ).rgb * weightSum;
+
+							for( int i = 1; i < KERNEL_RADIUS; i ++ ) {
+
+								float x = float(i);
+								float w = gaussianCoefficients[i];
+
+								vec2 uvOffset = direction * invSize * x;
+
+								vec3 sample1 = texture2D( colorTexture, vUv + uvOffset ).rgb;
+								vec3 sample2 = texture2D( colorTexture, vUv - uvOffset ).rgb;
+
+								diffuseSum += (sample1 + sample2) * w;
+
+								weightSum += 2.0 * w;
+							}
+							gl_FragColor = vec4(diffuseSum/weightSum, 1.0);
+						}`
+				} );
+			}
+
+			const mapShader = new THREE.RawShaderMaterial({
+				uniforms: {
+					map: {
+						value: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+					},
+				},
+
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+
+						gl_Position = vec4( position, 1.0 );
+					}
+				`,
+
+				fragmentShader: `
+					precision mediump float;
+
+					varying vec2 vUv;
+
+					uniform sampler2D map;
+
+					void main() {
+
+						vec4 color = texture2D( map, vUv );
+
+						gl_FragColor = color;
+					}`
+			})
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initLuminosityHighPassGui( gui, luminosityShader.uniforms, 'luminosityHighPass' );
+			}
+
+			function initLuminosityHighPassGui( gui, uniforms, name ){
+
+				const luminosityHighPassFolder = gui.addFolder( name );
+
+				luminosityHighPassFolder.addColor( uniforms.defaultColor, 'value' ).name('defaultColor');
+
+				luminosityHighPassFolder.add( uniforms.defaultOpacity, 'value', 0, 1 ).name('defaultOpacity');
+
+				luminosityHighPassFolder.add( uniforms.luminosityThreshold, 'value', 0, 1 ).name('luminosityThreshold');
+
+				luminosityHighPassFolder.add( uniforms.smoothWidth, 'value', 0, 10 ).name('smoothWidth');
+			}
+
+
+			const BlurDirectionX = new THREE.Vector2( 1.0, 0.0 );
+			const BlurDirectionY = new THREE.Vector2( 0.0, 1.0 );
+
+			renderer.setScissorTest( true );
+			const widthStep = canvas.clientWidth / 5;
+			const heightStep = canvas.clientHeight / 2;
+
+			loop();
+			function loop() {
+
+				renderer.setViewport( 0 , 0, canvas.clientWidth, canvas.clientHeight );
+
+				renderer.setRenderTarget(luminosityRtTexture);
+				renderer.render( scene, camera );
+				renderer.setRenderTarget(null);
+
+				fullScreenQuad.material = luminosityShader;
+				renderer.setRenderTarget(separableBlurRtTexture);
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget(null);
+
+
+				let inputRenderTarget = separableBlurRtTexture;
+
+				for ( let i = 0; i < nMips; i ++ ) {
+
+					fullScreenQuad.material = separableBlurMaterials[ i ];
+
+					separableBlurMaterials[ i ].uniforms.colorTexture.value = inputRenderTarget.texture;
+					separableBlurMaterials[ i ].uniforms.direction.value = BlurDirectionX;
+					renderer.setRenderTarget( renderTargetsHorizontal[ i ] );
+					renderer.clear();
+					renderer.render( fullScreenQuad, camera );
+
+					separableBlurMaterials[ i ].uniforms.colorTexture.value = renderTargetsHorizontal[ i ].texture;
+					separableBlurMaterials[ i ].uniforms.direction.value = BlurDirectionY;
+
+					renderer.setRenderTarget( renderTargetsVertical[ i ] );
+					renderer.clear();
+					renderer.render( fullScreenQuad, camera );
+
+					inputRenderTarget = renderTargetsVertical[ i ];
+				}
+
+				renderer.setRenderTarget( null );
+
+
+				fullScreenQuad.material = mapShader;
+
+				for ( let i = 0; i < nMips; i ++ ) {
+
+					mapShader.uniforms.map.value = renderTargetsHorizontal[ i ].texture;
+
+					renderer.setScissor( widthStep * i , heightStep, widthStep, heightStep );
+					renderer.setViewport( widthStep * i , heightStep, widthStep, heightStep );
+					renderer.render( fullScreenQuad, camera );
+
+					mapShader.uniforms.map.value = renderTargetsVertical[ i ].texture;
+
+					renderer.setScissor( widthStep * i , 0, widthStep, heightStep );
+					renderer.setViewport( widthStep * i , 0, widthStep, heightStep );
+					renderer.render( fullScreenQuad, camera );
+				}
+
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

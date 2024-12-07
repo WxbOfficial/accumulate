@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>color_buffer</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.sortObjects = false;
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 3;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+
+			const plane = new THREE.PlaneGeometry(1, 1, 1, 1);
+
+			const texture = new THREE.TextureLoader().load('../../../../assets/images/logo1.jpg' );	//白咕咕
+
+			const material = new THREE.RawShaderMaterial( {
+				uniforms: {
+					texture: {
+						value: texture
+					}
+				},
+				vertexShader: `
+
+					precision mediump float;
+
+					uniform mat4 modelMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 projectionMatrix;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+
+					precision mediump float;
+
+					varying vec2 vUv;
+
+					uniform sampler2D texture;
+
+					void main() {
+
+						gl_FragColor =  vec4(texture2D(texture, vUv).xyz, 1);
+					}
+				`,
+				side: THREE.DoubleSide,
+			} );
+
+			const mesh = new THREE.Mesh( plane, material );
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMaterialStateGui(gui, material, 'material(白咕咕)');
+			}
+
+			function initMaterialStateGui(gui, material, name){
+
+				const materialStateFolder = gui.addFolder(name);
+
+				materialStateFolder.add( material, 'colorWrite' );
+
+				// 需要改相关源码
+				// material.colorWrite = {
+				// 	r: true,
+				// 	g: true,
+				// 	b: true,
+				// 	a: true,
+				// }
+
+				// materialStateFolder.add( material.colorWrite, 'r' );
+				// materialStateFolder.add( material.colorWrite, 'g' );
+				// materialStateFolder.add( material.colorWrite, 'b' );
+				// materialStateFolder.add( material.colorWrite, 'a' );
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop);
+			}
+		</script>
+	</body>
+</html>

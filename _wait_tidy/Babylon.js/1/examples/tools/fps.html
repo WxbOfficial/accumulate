@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>fps</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+		<style type="text/css">
+			#renderMessage{
+				position: absolute;
+				top: 0;
+				left: 0;
+				font-size: 14px;
+			}
+		</style>
+	</head>
+	<!-- 展示帧率等渲染信息 -->
+	<body>
+		<div id="renderMessage"></div>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js";
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+		    // Backgrounds
+		    var background0 = new BABYLON.Layer(
+		    	"back0", "../assets/images/Layer0_0.png",
+		    	scene, true, new BABYLON.Color4(1, 1, 1, 1));
+		    // var background1 = new BABYLON.Layer("back1", "../../../assets/images/Layer1_0.png", scene);
+		    // var foreground = new BABYLON.Layer("back0", "../../../assets/images/Layer2_0.png", scene, true, new BABYLON.Color4(1, 0, 0, 1));
+
+				createAxesBox(scene);
+
+				return { scene, background0 };
+			}
+
+			const { scene, background0 } = CreateScene(engine);
+
+
+			let renderMessage = document.getElementById('renderMessage');
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+				scene.render();
+
+				stats.update();
+				// Background
+				background0.texture.uOffset += 0.001;
+
+				// renderMessage
+	      renderMessage.innerHTML =
+	      		BABYLON.Tools.GetFps().toFixed() + " fps <br>"
+	      		+ "Total vertices: " + scene.getTotalVertices() + "<br>"
+	          + "Active vertices: " + scene.getActiveVertices() + "<br>"
+	          + "Active particles: " + scene.getActiveParticles() + "<br><br>"
+	          + "Frame duration: " + scene.getLastFrameDuration() + " ms<br><br>"
+	          + "<i>Evaluate Active Meshes duration:</i> " + scene.getEvaluateActiveMeshesDuration() + " ms<br>"
+	          + "<i>Render Targets duration:</i> " + scene.getRenderTargetsDuration() + " ms<br>"
+	          + "<i>Particles duration:</i> " + scene.getParticlesDuration() + " ms<br>"
+	          + "<i>Sprites duration:</i> " + scene.getSpritesDuration() + " ms<br>"
+	          + "<i>Render duration:</i> " + scene.getRenderDuration() + " ms";
+			});
+
+		</script>
+	</body>
+</html>

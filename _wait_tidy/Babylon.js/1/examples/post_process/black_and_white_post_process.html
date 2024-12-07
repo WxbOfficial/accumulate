@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>black_and_white_post_process</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 简单展示 BlackAndWhitePostProcess 效果 -->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				var boxMat = new BABYLON.StandardMaterial('Box', scene);
+
+				boxMat.diffuseColor = new BABYLON.Color3(1, 0, 0);
+				boxMat.emissiveColor = new BABYLON.Color3(0.2, 0, 0);
+				boxMat.emissiveTexture = new BABYLON.Texture(
+					// '../assets/images/heightMap.png',
+					// "../assets/images/logo1.jpg",
+					"../assets/images/logo.jpeg",
+					scene, true, true
+				);
+
+				box.material = boxMat;
+				var bwPostProcess = new BABYLON.BlackAndWhitePostProcess("Black and White", 1.0, camera);
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+
+		</script>
+	</body>
+</html>

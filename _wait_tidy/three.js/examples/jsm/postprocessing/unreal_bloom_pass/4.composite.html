@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>composite</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+			const rtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio
+			);
+
+			const fullscreenTriangleGeometry = new THREE.BufferGeometry();
+
+			fullscreenTriangleGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				- 1, 3, 0,
+				- 1, - 1, 0,
+				3, - 1, 0
+			] ), 3 ) );
+			fullscreenTriangleGeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( [
+				0, 2,
+				0, 0,
+				2, 0
+			] ), 2 ) );
+
+			const fullScreenQuad = new THREE.Mesh( fullscreenTriangleGeometry, new THREE.RawShaderMaterial({
+				defines: {
+					NUM_MIPS: 5
+				},
+				uniforms: {
+					blurTexture1: {
+						value: rtTexture.texture
+					},
+					blurTexture2: {
+						value: rtTexture.texture
+					},
+					blurTexture3: {
+						value: rtTexture.texture
+					},
+					blurTexture4: {
+						value: rtTexture.texture
+					},
+					blurTexture5: {
+						value: rtTexture.texture
+					},
+					bloomStrength: {
+						value: 1.0
+					},
+					bloomFactors: {
+						value: [ 1.0, 0.8, 0.6, 0.4, 0.2 ]
+					},
+					bloomTintColors: {
+						value: [
+							new THREE.Color( 0xffffff ),
+							new THREE.Color( 0xffffff ),
+							new THREE.Color( 0xffffff ),
+							new THREE.Color( 0xffffff ),
+							new THREE.Color( 0xffffff )
+						],
+					},
+					bloomRadius: {
+						value: 0.0
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main(void) {
+
+						vUv = uv;
+
+						gl_Position = vec4( position.xyz, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform sampler2D blurTexture1;
+					uniform sampler2D blurTexture2;
+					uniform sampler2D blurTexture3;
+					uniform sampler2D blurTexture4;
+					uniform sampler2D blurTexture5;
+
+					uniform float bloomStrength;
+					uniform float bloomRadius;
+					uniform float bloomFactors[NUM_MIPS];
+					uniform vec3 bloomTintColors[NUM_MIPS];
+
+					varying vec2 vUv;
+
+					float lerpBloomFactor(const in float factor) {
+						float mirrorFactor = 1.2 - factor;
+						return mix(factor, mirrorFactor, bloomRadius);
+					}
+
+					void main() {
+						gl_FragColor = bloomStrength * (
+							lerpBloomFactor(bloomFactors[0]) * vec4(bloomTintColors[0], 1.0) * texture2D(blurTexture1, vUv) +
+							lerpBloomFactor(bloomFactors[1]) * vec4(bloomTintColors[1], 1.0) * texture2D(blurTexture2, vUv) +
+							lerpBloomFactor(bloomFactors[2]) * vec4(bloomTintColors[2], 1.0) * texture2D(blurTexture3, vUv) +
+							lerpBloomFactor(bloomFactors[3]) * vec4(bloomTintColors[3], 1.0) * texture2D(blurTexture4, vUv) +
+							lerpBloomFactor(bloomFactors[4]) * vec4(bloomTintColors[4], 1.0) * texture2D(blurTexture5, vUv)
+						);
+					}
+				`,
+			}) );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initCompositePassGui( gui, fullScreenQuad.material, 'composite' );
+			}
+
+			function initCompositePassGui( gui, material, name ){
+
+				const
+					compositePassFolder = gui.addFolder( name ),
+					uniforms = material.uniforms,
+					onChange = ()=>{
+						// material.needsUpdate = true;
+					};
+
+				compositePassFolder.add( uniforms.bloomStrength, 'value', 0, 2 ).name('bloomStrength');
+				compositePassFolder.add( uniforms.bloomRadius, 'value', 0, 5 ).name('bloomRadius');
+
+				compositePassFolder.addColor( uniforms.bloomTintColors.value, '0' ).name('bloomTintColor1');
+				compositePassFolder.add( uniforms.bloomFactors.value, [0], 0, 1 ).name('bloomFactors1')
+
+				compositePassFolder.addColor( uniforms.bloomTintColors.value, '1' ).name('bloomTintColor2');
+				compositePassFolder.add( uniforms.bloomFactors.value, [1], 0, 1 ).name('bloomFactors2')
+
+				compositePassFolder.addColor( uniforms.bloomTintColors.value, '2' ).name('bloomTintColor3');
+				compositePassFolder.add( uniforms.bloomFactors.value, [2], 0, 1 ).name('bloomFactors3')
+
+				compositePassFolder.addColor( uniforms.bloomTintColors.value, '3' ).name('bloomTintColor4');
+				compositePassFolder.add( uniforms.bloomFactors.value, [3], 0, 1 ).name('bloomFactors4')
+
+				compositePassFolder.addColor( uniforms.bloomTintColors.value, '4' ).name('bloomTintColor5');
+				compositePassFolder.add( uniforms.bloomFactors.value, [4], 0, 1 ).name('bloomFactors5');
+			}
+
+
+			loop();
+			function loop() {
+
+				renderer.setRenderTarget(rtTexture);
+				renderer.render( scene, camera );
+				renderer.setRenderTarget(null);
+
+				renderer.render( fullScreenQuad, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

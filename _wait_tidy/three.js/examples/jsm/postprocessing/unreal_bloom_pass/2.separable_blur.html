@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>separable_blur</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+			const rtTexture = new THREE.WebGLRenderTarget(
+				canvas.clientWidth * pixelRatio, canvas.clientHeight * pixelRatio
+			);
+
+			const fullscreenTriangleGeometry = new THREE.BufferGeometry();
+
+			fullscreenTriangleGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				- 1, 3, 0,
+				- 1, - 1, 0,
+				3, - 1, 0
+			] ), 3 ) );
+			fullscreenTriangleGeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( [
+				0, 2,
+				0, 0,
+				2, 0
+			] ), 2 ) );
+
+			const kernelRadius = 11;
+
+			const BlurDirectionX = new THREE.Vector2( 1.0, 0.0 );
+			const BlurDirectionY = new THREE.Vector2( 0.0, 1.0 );
+
+			const fullScreenQuad = new THREE.Mesh( fullscreenTriangleGeometry, new THREE.RawShaderMaterial( {
+					defines: {
+						KERNEL_RADIUS: kernelRadius
+					},
+					uniforms: {
+						colorTexture: {
+							value: rtTexture.texture
+						},
+						invSize: {
+							value: new THREE.Vector2( 1 / canvas.clientWidth, 1 / canvas.clientHeight )
+						}, // inverse texture size
+						direction: {
+							value: new THREE.Vector2( 1.0, 0.0 )
+						},
+						gaussianCoefficients: {
+							value: getCoefficients(kernelRadius)
+						} // precomputed Gaussian coefficients
+					},
+
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+						attribute vec2 uv;
+
+						varying vec2 vUv;
+
+						void main() {
+							vUv = uv;
+
+							gl_Position = vec4( position, 1.0 );
+						}
+					`,
+					fragmentShader: `
+						precision mediump float;
+
+						varying vec2 vUv;
+
+						uniform sampler2D colorTexture;
+						uniform vec2 invSize;
+						uniform vec2 direction;
+						uniform float gaussianCoefficients[KERNEL_RADIUS];
+
+						void main() {
+
+							float weightSum = gaussianCoefficients[0];
+
+							vec3 diffuseSum = texture2D( colorTexture, vUv ).rgb * weightSum;
+
+							for( int i = 1; i < KERNEL_RADIUS; i ++ ) {
+
+								float x = float(i);
+								float w = gaussianCoefficients[i];
+
+								vec2 uvOffset = direction * invSize * x;
+
+								vec3 sample1 = texture2D( colorTexture, vUv + uvOffset ).rgb;
+								vec3 sample2 = texture2D( colorTexture, vUv - uvOffset ).rgb;
+
+								diffuseSum += (sample1 + sample2) * w;
+
+								weightSum += 2.0 * w;
+							}
+							gl_FragColor = vec4(diffuseSum/weightSum, 1.0);
+						}`
+				} ) );
+
+			function getCoefficients( kernelRadius ){
+
+				const coefficients = [];
+
+				for ( let i = 0; i < kernelRadius; i ++ ) {
+
+					coefficients.push( 0.39894 * Math.exp( - 0.5 * i * i / ( kernelRadius * kernelRadius ) ) / kernelRadius );
+				}
+
+				return coefficients;
+			}
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					material = fullScreenQuad.material,
+					uniforms = material.uniforms;
+
+				gui.add( material.defines, 'KERNEL_RADIUS', 3, 11, 1 ).onChange(( number )=>{
+
+					material.uniforms.gaussianCoefficients.value = getCoefficients( number );
+
+					material.needsUpdate = true;
+				});
+
+				gui.add( uniforms.invSize.value, 'x', 0, 1, 0.0001 ).name('invSize.x');
+				gui.add( uniforms.invSize.value, 'y', 0, 1, 0.0001 ).name('invSize.y');
+
+				gui.add( uniforms.direction.value, 'x', 0, 1 ).name('direction.x');
+				gui.add( uniforms.direction.value, 'y', 0, 1 ).name('direction.y');
+			}
+
+
+			loop();
+			function loop() {
+
+				renderer.setRenderTarget(rtTexture);
+				renderer.render( scene, camera );
+				renderer.setRenderTarget(null);
+
+				renderer.render( fullScreenQuad, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

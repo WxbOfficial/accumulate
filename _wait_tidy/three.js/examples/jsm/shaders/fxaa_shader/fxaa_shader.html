@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>fxaa_shader</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, RenderPass, ShaderPass, FXAAShader } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				0.1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+
+			const composer = new EffectComposer( renderer );
+
+			// RenderPass
+			composer.addPass({
+
+				isPass: true,
+				enabled: true,
+				needsSwap: true,
+				clear: true,
+				renderToScreen: false,
+
+				clearDepth: false,
+				needsSwap: false,
+
+				setSize(){  },
+
+				render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ){
+
+					const oldAutoClear = renderer.autoClear;
+					renderer.autoClear = false;
+
+					renderer.setRenderTarget( this.renderToScreen ? null : readBuffer );
+
+					if ( this.clear === true ) {
+
+						renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+					}
+
+					renderer.render( scene, camera );
+
+					renderer.autoClear = oldAutoClear;
+				}
+			});
+
+
+			const	fxaaPass = new ShaderPass( FXAAShader );
+
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			fxaaPass.material.uniforms[ 'resolution' ].value.x = 1 / ( canvas.offsetWidth * pixelRatio );
+			fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / ( canvas.offsetHeight * pixelRatio );
+
+			composer.addPass( fxaaPass );
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					param = {
+						pixelRatio: renderer.getPixelRatio(),
+					};
+
+				gui.add( param, 'pixelRatio', 0, 2 ).onChange((pixelRatio)=>{
+
+					renderer.setPixelRatio(pixelRatio)
+				})
+
+				initFxaaPassGui( gui, fxaaPass, 'fxaaPass' );
+			}
+
+			function initFxaaPassGui( gui, fxaaPass, name ){
+
+				const fxaaPassFolder = gui.addFolder(name);
+
+				fxaaPassFolder.add( fxaaPass, 'enabled' );
+			}
+
+
+			loop();
+			function loop() {
+
+				const halfWidth = canvas.offsetWidth / 2;
+
+				// renderer.setScissorTest( true );
+				// renderer.setScissor( 0, 0, halfWidth - 1, canvas.offsetHeight );
+
+				// renderer.render( scene, camera );
+
+
+				// renderer.setScissor( halfWidth, 0, halfWidth, canvas.offsetHeight );
+
+				composer.render();
+
+				// renderer.setScissorTest( false );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

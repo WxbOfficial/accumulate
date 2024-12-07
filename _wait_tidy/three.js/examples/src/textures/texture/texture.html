@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>texture</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		待了解参数
+			format
+			type
+			unpackAlignment
+
+			anisotropy
+
+			colorSpace
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 10000 );
+
+			camera.position.z = 6;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const imageCanvas = document.createElement( "canvas" ),
+				context = imageCanvas.getContext( "2d" );
+
+			// const width = imageCanvas.width = 300;
+			// const height = imageCanvas.height = 300;
+
+			const width = imageCanvas.width = 2;
+			const height = imageCanvas.height = 2;
+
+			context.fillStyle = "#f00";
+			context.fillRect( 0, 0, width / 2, height / 2 );
+			context.fillRect( width / 2, height / 2, width / 2, height / 2 );
+
+			context.fillStyle = "#0f0";
+			context.fillRect( width / 2, 0, width, height / 2);
+
+			context.fillStyle = "#00f";
+			context.fillRect( 0, height / 2, width / 2, height);
+
+			const texture = new THREE.Texture( imageCanvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping );
+
+			texture.needsUpdate = true;
+			texture.repeat.set( 10, 10 );
+
+			texture.flipY = true;
+			texture.repeat.set( 1, 1 );
+
+			const plane = new THREE.PlaneGeometry(8, 8, 1, 1);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: texture
+				})
+			);
+			scene.add(mesh);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			const
+				MagnificationFilters = {
+					NearestFilter: THREE.NearestFilter,
+					LinearFilter: THREE.LinearFilter,
+				},
+				MinificationFilters = {
+					NearestFilter: THREE.NearestFilter,
+					NearestMipmapNearestFilter: THREE.NearestMipmapNearestFilter,
+					NearestMipmapLinearFilter: THREE.NearestMipmapLinearFilter,
+					LinearFilter: THREE.LinearFilter,
+					LinearMipmapNearestFilter: THREE.LinearMipmapNearestFilter,
+					LinearMipmapLinearFilter: THREE.LinearMipmapLinearFilter,
+				},
+				wrap = {
+					RepeatWrapping: THREE.RepeatWrapping,
+					ClampToEdgeWrapping: THREE.ClampToEdgeWrapping,
+					MirroredRepeatWrapping: THREE.MirroredRepeatWrapping,
+				};
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initObjectGui(gui, mesh, 'object');
+
+				initTextureGui(gui, texture, 'texture');
+			}
+
+			function initObjectGui(gui, object, name){
+
+				const objectFolder = gui.addFolder(name);
+
+				objectFolder.add(object.rotation, 'z', -Math.PI, Math.PI  ).name('rotation.z');
+			}
+
+			function initTextureGui(gui, texture, name){
+
+				const textureFolder = gui.addFolder(name);
+
+				function change(){
+					texture.needsUpdate = true;
+				}
+
+				textureFolder.add( texture, 'flipY' ).onChange(change);
+
+				textureFolder.add( texture, 'generateMipmaps').onChange(change);
+				textureFolder.add( texture, 'minFilter', MinificationFilters ).onChange(change);
+				textureFolder.add( texture, 'magFilter', MagnificationFilters ).onChange(change);
+
+				textureFolder.add( texture, 'wrapS', wrap ).onChange(change);
+				textureFolder.add( texture, 'wrapT', wrap ).onChange(change);
+
+				textureFolder.add( texture.offset, 'x', -2, 2 ).name('offset.x');
+				textureFolder.add( texture.offset, 'y', -2, 2 ).name('offset.y');
+
+				textureFolder.add( texture.repeat, 'x', 0, 10, 1 ).name('repeat.x');
+				textureFolder.add( texture.repeat, 'y', 0, 10, 1 ).name('repeat.y');
+			}
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

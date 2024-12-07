@@ -1,0 +1,359 @@
+{
+	"autoClear": true,
+	"clearColor": [0.2, 0.2, 0.3],
+	"ambientColor": [1, 1, 1],
+
+	"gravity": [0, 0.9, 0],
+
+	"fogMode": 0,
+	"fogColor": [0, 0, 0],
+	"fogStart": 0,
+	"fogEnd": 1000,
+	"fogDensity": 0.1,
+
+	"lights": [
+		{
+			"type": 1,
+			"name": "directionalLight1Name",
+
+			"direction": [1, 1, 1],
+			"position": [0, 0, -100],
+
+			"id": "directionalLight1Id",
+
+			"intensity": 3,
+
+			"diffuse": [1, 1, 1],
+			"specular": [1, 1, 1]
+		}
+	],
+
+	"cameras": [
+		{
+			"name": "camera1Name",
+			"id": "cameraiId",
+			"position": [0, 0, 20],
+			"target": [0, 0, 0],
+			"fov": 45,
+			"minZ": 0.001,
+			"maxZ": 10000,
+			"speed": 2.0,
+			"inertia": 0.9,
+			"checkCollisions": false,
+			"applyGravity": false,
+			"ellipsoid": [0.5, 1, 0.5]
+		}
+	],
+
+	"activeCameraID": "cameraiId",
+
+	"meshes": [
+		{
+			"name": "plane1",
+			"id": "mesh1Id",
+
+			"position": [-10, 0, 0],
+			"rotation": [0, 0, 0],
+			"scaling": [1, 1, 1],
+
+			"localMatrix": null,
+
+			"isEnabled": true,
+			"isVisible": true,
+
+			"receiveShadows": false,
+
+			"billboardMode": 0,
+
+			"visibility": 1,
+
+			"checkCollisions": false,
+
+			"positions": [-2.5, -2.5, 0, 2.5, -2.5, 0, 2.5, 2.5, 0, -2.5, 2.5, 0],
+			"normals": [0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
+			"uvs": [0, 0, 1, 0, 1, 1, 0, 1],
+			"uvs2": null,
+			"colors": [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+			"matricesIndices": null,
+			"matricesWeights": null,
+			"indices": [0, 1, 2, 0, 2, 3],
+
+			"parentId": null,
+			"materialId": "multiMaterial1Id",
+			"skeletonId": -1,
+
+			"subMeshes": [
+				{
+					"materialIndex": 0,
+					"verticesStart": 0,
+					"verticesCount": 4,
+					"indexStart": 0,
+					"indexCount": 3
+				},
+				{
+
+					"materialIndex": 1,
+					"verticesStart": 0,
+					"verticesCount": 4,
+					"indexStart": 3,
+					"indexCount": 3
+				}
+			],
+
+			"animations": null,
+			"autoAnimate": null
+		},
+		{
+			"name": "plane2",
+			"id": "mesh2Id",
+
+			"position": [0, 0, 0],
+			"rotation": [0, 0, 0],
+			"scaling": [1, 1, 1],
+
+			"localMatrix": null,
+
+			"isEnabled": true,
+			"isVisible": true,
+
+			"receiveShadows": true,
+
+			"billboardMode": 0,
+
+			"visibility": 1,
+
+			"checkCollisions": false,
+
+			"positions": [-2.5, -2.5, 0, 2.5, -2.5, 0, 2.5, 2.5, 0, -2.5, 2.5, 0],
+			"normals": [0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
+			"uvs": [0, 0, 1, 0, 1, 1, 0, 1],
+			"uvs2": null,
+			"colors": [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+			"matricesIndices": null,
+			"matricesWeights": null,
+			"indices": [0, 1, 2, 0, 2, 3],
+
+			"parentId": null,
+			"materialId": "material1",
+			"skeletonId": -1,
+			"subMeshes": null,
+
+			"animations": null,
+			"autoAnimate": true,
+			"autoAnimateFrom": 0,
+			"autoAnimateTo": 60,
+			"autoAnimateLoop": true
+		},
+		{
+			"name": "plane3",
+			"id": "mesh3Id",
+
+			"position": [0, 0, 0],
+			"rotation": [0, 0, 0],
+			"scaling": [1, 1, 1],
+
+			"localMatrix": null,
+
+			"isEnabled": true,
+			"isVisible": true,
+
+			"receiveShadows": false,
+
+			"billboardMode": 0,
+
+			"visibility": 1,
+
+			"checkCollisions": false,
+
+			"positions": [-20, -20, -20, 20, -20, -20, 20, 20, -20, -20, 20, -20],
+			"normals": [0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1],
+			"uvs": [0, 0, 1, 0, 1, 1, 0, 1],
+			"uvs2": null,
+			"colors": [1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0],
+			"matricesIndices": null,
+			"matricesWeights": null,
+			"indices": [0, 1, 2, 0, 2, 3],
+
+			"parentId": null,
+			"materialId": "material2",
+			"skeletonId": -1,
+			"subMeshes": null,
+
+			"animations": null,
+			"autoAnimate": true,
+			"autoAnimateFrom": 0,
+			"autoAnimateTo": 60,
+			"autoAnimateLoop": true
+		}
+	],
+	"materials": [
+		{
+			"id": "material1",
+
+			"ambient": [0, 0, 0],
+			"diffuse": [1, 1, 1],
+			"specular": [1, 1, 1],
+			"specularPower": 1,
+			"emissive": [0, 0, 0],
+
+			"alpha": 1,
+
+			"backFaceCulling": false,
+
+			"diffuseTexture": null,
+			"ambientTexture": null,
+			"opacityTexture": null,
+			"reflectionTexture": null,
+			"emissiveTexture": {
+				"isCube": false,
+				"name": "../../images/logo1.jpg",
+
+				"hasAlpha": false,
+				"level": 1,
+				"coordinatesIndex": 0,
+				"coordinatesMode": 0,
+
+				"uOffset": 0,
+				"vOffset": 0,
+
+				"uScale": 1,
+				"vScale": 1,
+
+				"uAng": 0,
+				"vAng": 0,
+				"wAng": 0,
+
+				"wrapU": 1,
+				"wrapV": 1,
+
+				"animations": [{
+					"name": "animations1Name",
+					"property": "vOffset",
+					"framePerSecond": 60,
+					"dataType": 0,
+					"loopBehavior": 1,
+					"keys": [
+						{
+							"frame": 0,
+							"values": [0]
+						},
+						{
+							"frame": 60,
+							"values": [1]
+						}
+					]
+				}]
+			},
+			"specularTexture": null,
+			"bumpTexture": null
+		},
+		{
+			"id": "material2",
+
+			"ambient": [0, 0, 0],
+			"diffuse": [1, 0, 0],
+			"specular": [1, 1, 1],
+			"specularPower": 2,
+			"emissive": [0, 0, 0],
+
+			"alpha": 1,
+
+			"backFaceCulling": false,
+
+			"diffuseTexture": {
+				"isCube": false,
+				"name": "../../images/Ground.jpg",
+
+				"hasAlpha": false,
+				"level": 1,
+				"coordinatesIndex": 0,
+				"coordinatesMode": 0,
+
+				"uOffset": 0,
+				"vOffset": 0,
+
+				"uScale": 1,
+				"vScale": 1,
+
+				"uAng": 0,
+				"vAng": 0,
+				"wAng": 0,
+
+				"wrapU": 1,
+				"wrapV": 1,
+
+				"animations": null
+			},
+			"ambientTexture": null,
+			"opacityTexture": null,
+			"reflectionTexture": null,
+			"emissiveTexture": null,
+			"specularTexture": null,
+			"bumpTexture": null
+		}
+	],
+	"multiMaterials": [
+		{
+			"name": "multiMaterial1Name",
+			"id": "multiMaterial1Id",
+			"materials": [
+				"material2",
+				"material1"
+			]
+		}
+	],
+	"particleSystems": [
+		{
+			"emitterId": "mesh2Id",
+			"name": "particleSystems1",
+			"capacity": 1,
+			"textureName": "../../images/logo.jpeg",
+
+			"minAngularSpeed": -0.5,
+			"maxAngularSpeed": 0.5,
+
+			"minSize": 1,
+			"maxSize": 1,
+
+			"minLifeTime": 3,
+			"maxLifeTime": 3,
+
+			"emitRate": 300,
+
+			"minEmitBox": [-2, -2, 1],
+			"maxEmitBox": [2, 2, 1],
+
+			"gravity": [0, -0.5, 0],
+
+			"direction1": [0, 1, 0],
+			"direction2": [0, 1, 0],
+
+			"color1": [1, 1, 1, 1],
+			"color2": [1, 1, 1, 1],
+			"colorDead": [0, 0, 0, 1],
+
+			"updateSpeed": 0.01,
+
+			"targetStopFrame": 0,
+
+			"textureMask": [1, 1, 1, 1],
+
+			"blendMode": 1
+		}
+	],
+
+	"skeletons": [
+
+	],
+
+	"shadowGenerators": [{
+		"lightId": "directionalLight1Id",
+		"mapSize": 256,
+		"renderList": [
+			"mesh1Id", "mesh2Id"
+		],
+
+		"useVarianceShadowMap": false
+	}]
+
+}

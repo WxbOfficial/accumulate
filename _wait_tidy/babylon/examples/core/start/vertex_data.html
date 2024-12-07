@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../favicon.ico" />
+    <title>vertex_data</title>
+    <link href="../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!-- 
+    抄了 https://playground.babylonjs.com/#VKBJN#14
+    参考文档 https://doc.babylonjs.com/features/featuresDeepDive/mesh/creation/custom/custom
+
+    简单的通过设定材质、几何体进行构建模型
+   -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+  
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 5, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        camera.attachControl(canvas, true);
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 0; // 设置为 0 
+
+        const localConnected = localAxes(50);
+
+        const light = new BABYLON.HemisphericLight("light", 
+            new BABYLON.Vector3(0, 1, 0), 
+            scene);
+        // Dim the light a small amount 0 - 1
+        // light.intensity = 0.7;
+
+        // 自定义模型
+        const customMesh = new BABYLON.Mesh("custom", scene);
+
+        const positions = [
+          -1.0, -1.0,  0.0,
+           1.0, -1.0,  0.0,
+          -1.0,  1.0,  0.0,
+           1.0,  1.0,  0.0,
+        ];
+        const indices = [
+          0, 2, 1,
+          1, 2, 3
+        ];
+        const uvs = [
+          0.0, 0.0,
+          1.0, 0.0,
+          0.0, 1.0,
+          1.0, 1.0,
+        ];
+
+        const vertexData = new BABYLON.VertexData();
+
+        vertexData.positions = positions;
+        vertexData.indices = indices;
+        vertexData.uvs = uvs;
+
+        vertexData.applyToMesh(customMesh);
+
+        const mat = new BABYLON.StandardMaterial("mat", scene);
+
+        mat.backFaceCulling = false; // 有点不理解为什么要这样参数设定，有点不大爽
+        mat.diffuseTexture = new BABYLON.Texture("../../assets/logo1.JPG", scene);
+
+        customMesh.material = mat;
+        customMesh.showBoundingBox = true;
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        return scene;
+      }
+
+    </script>
+  </body>
+</html>

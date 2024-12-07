@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>skeleton_animation</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示骨骼动画效果
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, 90));
+				camera.attachControl(canvas);
+
+				createAxesBox(scene);
+
+				initSkeletonMesh(scene)
+
+				return scene;
+			}
+
+
+			function initSkeletonMesh(scene){
+
+				const
+					positions = [
+						-25, -25, 0,
+						25, -25, 0,
+						25, 25, 0,
+						-25, 25, 0
+					],
+					normals = [
+						0, 0, -1,
+						0, 0, -1,
+						0, 0, -1,
+						0, 0, -1
+					],
+					colors = [
+						1, 0, 0,
+						1, 0, 0,
+						1, 0, 0,
+						1, 0, 0,
+					],
+					uvs = [
+						0, 0,
+						1, 0,
+						1, 1,
+						0, 1
+					],
+					uvs2 = [
+						1, 0,
+						0, 0,
+						0, 1,
+						1, 1,
+					],
+					indices = [
+						0, 1, 2,
+						0, 2, 3
+					],
+
+					matricesIndices = [
+						1, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+					],
+
+					matricesWeights = [
+						1, 0, 0, 0,
+						1, 0, 0, 0,
+						1, 0, 0, 0,
+						1, 0, 0, 0,
+					],
+
+					mesh = new BABYLON.Mesh('SkeletonMesh', scene);
+
+				mesh.setVerticesData(positions, BABYLON.VertexBuffer.PositionKind, false);
+				mesh.setVerticesData(normals, BABYLON.VertexBuffer.NormalKind, false);
+				mesh.setVerticesData(colors, BABYLON.VertexBuffer.ColorKind, false);
+				mesh.setVerticesData(uvs, BABYLON.VertexBuffer.UVKind, false);
+				mesh.setVerticesData(uvs2, BABYLON.VertexBuffer.UV2Kind, false);
+				mesh.setIndices(indices);
+
+				mesh.setVerticesData(matricesIndices, BABYLON.VertexBuffer.MatricesIndicesKind, false);
+				mesh.setVerticesData(matricesWeights, BABYLON.VertexBuffer.MatricesWeightsKind, false);
+
+				const
+					material = new BABYLON.StandardMaterial('SkeletonMeshMat', scene),
+
+					emissiveTexture = new BABYLON.Texture(
+						'../assets/images/logo1.jpg',
+						scene,
+					),
+
+					skeleton = new BABYLON.Skeleton('skeletonName', 'skeletonId', scene),
+
+					parentBoneMatrixArray = [
+						1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1,
+					],
+
+					boneMatrixArray = [
+						1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1,
+					],
+
+					parentBoneMatrix = BABYLON.Matrix.FromArray(parentBoneMatrixArray),
+
+					boneMatrix = BABYLON.Matrix.FromArray(boneMatrixArray),
+
+					parentBone = new BABYLON.Bone('parentBoneName', skeleton, null, parentBoneMatrix),
+
+					bone = new BABYLON.Bone('boneName', skeleton, parentBone, boneMatrix);
+
+
+
+				material.emissiveTexture = emissiveTexture
+				material.backFaceCulling = false;
+				// material.wireframe = true;
+
+				mesh.material = material;
+
+				mesh.skeleton = skeleton;
+
+
+
+				var boneAnimation = new BABYLON.Animation("bone4", "_matrix", 60,
+					// BABYLON.Animation.ANIMATIONTYPE_FLOAT
+					// BABYLON.Animation.ANIMATIONTYPE_VECTOR3
+					// BABYLON.Animation.ANIMATIONTYPE_QUATERNION
+					BABYLON.Animation.ANIMATIONTYPE_MATRIX,
+
+					// BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE,
+					BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE,
+					// BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+				);
+
+
+				boneAnimation.setKeys([
+					{
+						frame: 0,
+						value: BABYLON.Matrix.FromArray([
+							1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, 1, 0,
+							0, 0, 0, 1,
+						])
+					},
+					{
+						frame: 15, value: BABYLON.Matrix.FromArray([
+						1.5, 0, 0, 0,
+						0, 1.5, 0, 0,
+						0, 0, 1.5, 0,
+						0, 0, 0, 1,
+						])
+					},
+					{
+						frame: 30,
+						value: BABYLON.Matrix.FromArray([
+							1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, 1, 0,
+							0, 0, 0, 1,
+						])
+					},
+					{
+						frame: 45,
+						value: BABYLON.Matrix.FromArray([
+							0.5, 0, 0, 0,
+							0, 0.5, 0, 0,
+							0, 0, 0.5, 0,
+							0, 0, 0, 1,
+						])
+					},
+					{
+						frame: 60,
+						value: BABYLON.Matrix.FromArray([
+							1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, 1, 0,
+							0, 0, 0, 1,
+						])
+					},
+				]);
+
+				bone.animations.push(boneAnimation);
+
+				scene.beginAnimation(
+					bone,
+					0, 60, true, 1,
+				);
+				// window.skeleton = skeleton;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

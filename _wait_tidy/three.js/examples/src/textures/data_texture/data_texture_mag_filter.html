@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>data_texture_mag_filter</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100000 );
+
+			camera.position.z = 6;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			const width = 2;
+			const height = 2;
+			const color = new Uint8Array([
+					255,	0,		0,		255,
+					0,		255,	0,		255,
+					0,		0,		255,	255,
+					255,	0,		0,		255,
+				]);
+
+			const texture = new THREE.DataTexture( color,	width,	height );
+
+			texture.needsUpdate = true;
+
+			const plane = new THREE.PlaneGeometry(8, 8, 1, 1);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: texture
+				})
+			);
+			scene.add(mesh);
+
+
+			const planeFlag = new THREE.PlaneGeometry(0.1, 0.1, 1, 1);
+
+			const
+				flag1 = new THREE.Mesh( planeFlag,
+					new THREE.MeshBasicMaterial({
+						color: 0x000000,
+						depthTest: false
+					})
+				),
+				flag2 = flag1.clone(),
+				flag3 = flag1.clone(),
+				flag4 = flag1.clone(),
+				flag5 = flag1.clone();
+
+			flag2.position.set( 2, 2, 0 );
+			flag3.position.set( -2, 2, 0 );
+			flag4.position.set( 2, -2, 0 );
+			flag5.position.set( -2, -2, 0 );
+
+			scene.add(flag1);
+			scene.add(flag2);
+			scene.add(flag3);
+			scene.add(flag4);
+			scene.add(flag5);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				MagnificationFilters = {
+					NearestFilter: THREE.NearestFilter,
+					LinearFilter: THREE.LinearFilter,
+				};
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initTextureGui(gui, texture, 'texture');
+			}
+
+			function initTextureGui(gui, texture, name){
+
+				const textureFolder = gui.addFolder(name);
+
+				function change(){
+					texture.needsUpdate = true;
+				}
+
+				textureFolder.add( texture, 'magFilter', MagnificationFilters ).onChange(change);
+			}
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

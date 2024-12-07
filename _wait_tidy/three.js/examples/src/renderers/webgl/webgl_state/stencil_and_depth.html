@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>stencil_and_depth</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true,
+				stencil: true,
+			});
+
+			renderer.sortObjects = false;
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 3;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+
+			const plane = new THREE.PlaneGeometry(1, 1, 1, 1);
+
+			const texture1 = new THREE.TextureLoader().load('../../../../assets/images/logo1.jpg' );	//白咕咕
+			const texture2 = new THREE.TextureLoader().load('../../../../assets/images/logo.jpeg' );	//鱼鱼
+
+			const material1 = new THREE.RawShaderMaterial( {
+				uniforms: {
+					texture: {
+						value: texture1,
+					}
+				},
+				vertexShader: `
+
+					precision mediump float;
+
+					uniform mat4 modelMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 projectionMatrix;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+
+					precision mediump float;
+
+					varying vec2 vUv;
+
+					uniform sampler2D texture;
+
+					void main() {
+
+						gl_FragColor =  vec4(texture2D(texture, vUv).xyz, 1.0);
+					}
+				`,
+				side: THREE.DoubleSide,
+				stencilWrite: true,
+				stencilFunc: THREE.EqualStencilFunc,
+			} );
+
+			const material2 = material1.clone();
+			material2.uniforms.texture.value = texture2;
+			material2.stencilRef = 1;
+			material2.stencilFunc = THREE.AlwaysStencilFunc;
+			material2.stencilZPass = THREE.ReplaceStencilOp;
+
+			const mesh1 = new THREE.Mesh( plane, material1 );
+			const mesh2 = new THREE.Mesh( plane, material2 );
+
+			mesh1.name = '白咕咕';
+			mesh1.position.x = 0.5;
+			mesh1.position.z = 1;
+
+			mesh2.name = '鱼鱼';
+
+			scene.add(mesh2);
+			scene.add(mesh1);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			function showOpaqueMeshRenderOrder(){
+
+				console.log( renderer.renderLists.get( scene, 0 ).opaque.map(( { object } )=>{
+
+					return object.name;
+				}) );
+			};
+
+			renderer.showOpaqueMeshRenderOrder = showOpaqueMeshRenderOrder;
+
+			const
+				DepthMode = {
+					NeverDepth: THREE.NeverDepth,
+					AlwaysDepth: THREE.AlwaysDepth,
+					LessDepth: THREE.LessDepth,
+					LessEqualDepth: THREE.LessEqualDepth,
+					GreaterEqualDepth: THREE.GreaterEqualDepth,
+					GreaterDepth: THREE.GreaterDepth,
+					NotEqualDepth: THREE.NotEqualDepth,
+				},
+				StencilFunctions = {
+					NeverStencilFunc: THREE.NeverStencilFunc,
+					LessStencilFunc: THREE.LessStencilFunc,
+					EqualStencilFunc: THREE.EqualStencilFunc,
+					LessEqualStencilFunc: THREE.LessEqualStencilFunc,
+					GreaterStencilFunc: THREE.GreaterStencilFunc,
+					NotEqualStencilFunc: THREE.NotEqualStencilFunc,
+					GreaterEqualStencilFunc: THREE.GreaterEqualStencilFunc,
+					AlwaysStencilFunc: THREE.AlwaysStencilFunc,
+				},
+				StencilOperations = {
+					ZeroStencilOp: THREE.ZeroStencilOp,
+					KeepStencilOp: THREE.KeepStencilOp,
+					ReplaceStencilOp: THREE.ReplaceStencilOp,
+					IncrementStencilOp: THREE.IncrementStencilOp,
+					DecrementStencilOp: THREE.DecrementStencilOp,
+					IncrementWrapStencilOp: THREE.IncrementWrapStencilOp,
+					DecrementWrapStencilOp: THREE.DecrementWrapStencilOp,
+					InvertStencilOp: THREE.InvertStencilOp,
+				};
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( renderer, 'sortObjects' );
+
+				gui.add( renderer, 'showOpaqueMeshRenderOrder' ).name('打印 mesh 渲染顺序');
+
+				gui.add( mesh1.position, 'x', 0, 0.5, 0.5 ).name('白咕咕 x');
+				gui.add( mesh1.position, 'z', 0, 1, 1 ).name('白咕咕 z');
+
+				initMaterialStateGui(gui, material1, 'material1(白咕咕)');
+				initMaterialStateGui(gui, material2, 'material2(鱼鱼)');
+			}
+
+			function initMaterialStateGui(gui, material, name){
+
+				const materialStateFolder = gui.addFolder(name);
+
+				materialStateFolder.add( material, 'depthTest' );
+				materialStateFolder.add( material, 'depthWrite' );
+				materialStateFolder.add( material, 'depthFunc', DepthMode );
+
+				const params = {
+					consoleStencilRefStencilFunc: ()=>{
+						console.log( material.stencilRef & material.stencilFuncMask );
+					}
+				}
+				// stencilWrite: 是否写入模板缓冲，默认 false
+				// stencilWriteMask: 模板写入的掩码，默认为 0xff
+				// stencilFunc: 模板比较使用的函数，默认是 AlwaysStencilFunc。stencilRef & stencilFuncMask 的值与缓冲区已存在的模板值按照stencilFunc比较，如果符合函数关系，则返回 true，片元会通过渲染流水线；否则，返回false，渲染流水线会中断，不会再往下执行，深度和颜色不会被写入深度缓冲及颜色缓冲
+				// stencilRef: 模板参考值
+				// stencilFuncMask: 模板测试的掩码，默认 0xff
+				// stencilFail: 模板测试的话，如何操作
+				// stencilZFail: 模板测试通过，深度测试不通过的操作
+				// stencilZPass: 模板测试和深度测试都通过的操作
+
+				materialStateFolder.add( material, 'stencilWrite' );
+
+				materialStateFolder.add( params, 'consoleStencilRefStencilFunc' ).name( '打印 stencilRef & stencilFuncMask' );
+
+				materialStateFolder.add( material, 'stencilWriteMask', 0, 255, 1 );
+				materialStateFolder.add( material, 'stencilFunc', StencilFunctions );
+				materialStateFolder.add( material, 'stencilRef', 0, 255, 1 );
+				materialStateFolder.add( material, 'stencilFuncMask', 0, 255, 1 );
+
+				materialStateFolder.add( material, 'stencilFail', StencilOperations );
+				materialStateFolder.add( material, 'stencilZFail', StencilOperations );
+				materialStateFolder.add( material, 'stencilZPass', StencilOperations );
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop);
+			}
+		</script>
+	</body>
+</html>

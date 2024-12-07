@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../../favicon.ico" />
+    <title>cube</title>
+    <link href="../../../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style type="text/css">
+      .preview{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 128px;
+        height: 128px;
+      }
+    </style>
+  </head>
+  <!--
+    用于预览 cube 纹理信息,主要是通过  BABYLON.TextureTools.GetTextureDataAsync 实现
+  -->
+  <body>
+    <canvas id="preview1" class="preview"></canvas>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      let { scene, material } = createScene();
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+        // scene.useRightHandedSystem = true;
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        camera.attachControl(canvas, true);
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 0; // 设置为 0
+
+        const localConnected = localAxes(50);
+
+        const light = new BABYLON.HemisphericLight("light",
+            new BABYLON.Vector3(0, 1, 0),
+            scene);
+        // Dim the light a small amount 0 - 1
+        // light.intensity = 0.7;
+
+        // 天空盒模型
+        const skybox = BABYLON.Mesh.CreateBox('skybox', 5, scene, false, BABYLON.Constants.MATERIAL_CounterClockWiseSideOrientation);
+
+        const mat = new BABYLON.PBRMaterial("mat", scene);
+
+        mat.backFaceCulling = false;
+        // mat.emissiveIntensity = 1;
+        // mat.emissiveColor.set(1,1,1);
+
+        skybox.material = mat;
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        return { scene, material: mat };
+      }
+
+      BABYLON.Effect.ShadersStore.lodPixelShader = "\n#extension GL_EXT_shader_texture_lod : enable\n\nprecision highp float;\n\nconst float GammaEncodePowerApprox = 1.0 / 2.2;\n\nvarying vec2 vUV;\nuniform sampler2D textureSampler;\nuniform float lod;\nuniform vec2 texSize;\nuniform bool gamma;\nvoid main(void)\n{\n    gl_FragColor = textureLod(textureSampler,vUV,lod);\n    if (!gamma) {\n        gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(GammaEncodePowerApprox));\n    }\n}";
+      BABYLON.Effect.ShadersStore.lodCubePixelShader = "\nprecision highp float;\n\nconst float GammaEncodePowerApprox = 1.0 / 2.2;\n\nvarying vec2 vUV;\nuniform samplerCube textureSampler;\nuniform float lod;\nuniform bool gamma;\nvoid main(void)\n{\n    vec2 uv=vUV*2.0-1.0;\n    #ifdef POSITIVEX\n    gl_FragColor=textureCube(textureSampler,vec3(1.001,uv.y,uv.x),lod);\n    #endif\n    #ifdef NEGATIVEX\n    gl_FragColor=textureCube(textureSampler,vec3(-1.001,uv.y,uv.x),lod);\n    #endif\n    #ifdef POSITIVEY\n    gl_FragColor=textureCube(textureSampler,vec3(uv.y,1.001,uv.x),lod);\n    #endif\n    #ifdef NEGATIVEY\n    gl_FragColor=textureCube(textureSampler,vec3(uv.y,-1.001,uv.x),lod);\n    #endif\n    #ifdef POSITIVEZ\n    gl_FragColor=textureCube(textureSampler,vec3(uv,1.001),lod);\n    #endif\n    #ifdef NEGATIVEZ\n    gl_FragColor=textureCube(textureSampler,vec3(uv,-1.001),lod);\n    #endif\n    if (!gamma) {\n        gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(GammaEncodePowerApprox));\n    }\n}";
+
+      const CubeTextureTypes = {
+        dds: '.dds',
+        hdr: '.hdr',
+      }
+
+      function loadCubeTexture(file, onLoad = ()=>{}){
+
+        const
+          fileName = file.name,
+          fields = fileName.split('.'),
+          extension = fields[fields.length - 1].toLowerCase(),
+          forcedExtension = '.' + extension,
+          fileURL = URL.createObjectURL(file);
+
+        let texture = null;
+
+
+        switch( forcedExtension ){
+          case CubeTextureTypes.hdr:
+
+            texture = new BABYLON.HDRCubeTexture(
+              fileURL, scene, 512,
+              void 0, void 0, void 0, void 0,
+              ()=>{
+                texture.name = fileName;
+                onLoad(texture);
+                URL.revokeObjectURL(fileURL);
+              },
+              ()=>{
+                console.error('HDRCube 加载失败');
+
+                texture.dispose();
+                URL.revokeObjectURL(fileURL);
+              }, void 0
+            );
+            break;
+          case CubeTextureTypes.dds:
+
+            texture = new BABYLON.CubeTexture(
+              fileURL, scene,
+              void 0, void 0, void 0,
+              ()=>{
+                texture.name = fileName;
+                onLoad(texture);
+                URL.revokeObjectURL(fileURL);
+              },
+              ()=>{
+                console.error('DDSCube 加载失败');
+
+                texture.dispose();
+                URL.revokeObjectURL(fileURL);
+              }, void 0, void 0,
+              forcedExtension,
+              void 0, void 0, void 0, void 0, void 0,
+            );
+            break;
+          default:
+            console.error(`非法后缀 ${forcedExtension} CubeTexture的后缀应该是 ${CubeTextureTypes.hdr} 或者 ${CubeTextureTypes.dds} `);
+            break;
+        }
+
+        return texture;
+      }
+
+      const
+        canvasImage = document.getElementById('preview1'),
+        width = 128, height = 128, allSize = width * height * 4;
+
+      canvasImage.width = width;
+      canvasImage.height = height;
+
+      function preViewTexture(texture){
+        console.log('texture:', texture);
+        // material.emissiveTexture = texture;
+
+        material.reflectionTexture = texture;
+        material.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+        BABYLON.TextureTools.GetTextureDataAsync(
+          texture,
+          width, height,
+          2,
+        ).then(function(data){
+          const
+            context = canvasImage.getContext("2d"),
+            arrayBuffer = new ArrayBuffer(allSize),
+            pixels = new Uint8ClampedArray(arrayBuffer);
+
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+
+              const p = (y * width + x) * 4;
+              // const d = ((height - y) * width + x) * 4;
+
+              pixels[p] = data[p];
+              pixels[p+1] = data[p+1];
+              pixels[p+2] = data[p+2];
+              pixels[p+3] = data[p+3];
+            }
+          }
+
+          const imageData = new ImageData(pixels, width, height);
+          context.putImageData(imageData, 0, 0);
+        });
+      }
+
+
+      const texture = new BABYLON.CubeTexture("https://playground.babylonjs.com/textures/environment.dds", scene, void 0, false);
+      preViewTexture(texture);
+
+      canvas.addEventListener('dragstart', (e)=>{
+        e.preventDefault();
+      });
+      canvas.addEventListener('dragover', (e)=>{
+        e.preventDefault();
+      });
+      canvas.addEventListener('drop', (e)=>{
+        e.preventDefault();
+
+        const
+          files = e.dataTransfer.files,
+          file = files[0],
+
+          texture = loadCubeTexture(file, ()=>{
+            preViewTexture(texture);
+          });
+
+      });
+
+
+    </script>
+  </body>
+</html>

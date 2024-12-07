@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>outline_pass.render_target</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, OutlinePass } from '../../jsm.js';
+			import {
+				createOutlinePassScene,
+				OutlinePassTool
+			} from './outline_pass_tool.js';
+			import getPrepareMaskUnit from './outline_pass_units/prepare_mask.js';
+			import getEdgeDetectionUnit from './outline_pass_units/edge_detection.js';
+			import getSeperableBlurUnit from './outline_pass_units/seperable_blur.js';
+			import getMapRawShaderMaterial from './outline_pass_units/map_shader.js';
+			import getOverlayUnit from './outline_pass_units/overlay.js';
+
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+			renderer.setClearColor( 0xffffff, 1 );
+
+			const pixelRatio = renderer.getPixelRatio();
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+
+			const outlinePassScene = createOutlinePassScene();
+
+			scene.add( outlinePassScene );
+
+			const passRenderTargetWidth = canvas.clientWidth * pixelRatio;
+			const passRenderTargetHeight = canvas.clientHeight * pixelRatio;
+
+
+			const fullscreenTriangleGeometry = new THREE.BufferGeometry();
+
+			fullscreenTriangleGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				- 1, 3, 0,
+				- 1, - 1, 0,
+				3, - 1, 0
+			] ), 3 ) );
+			fullscreenTriangleGeometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( [
+				0, 2,
+				0, 0,
+				2, 0
+			] ), 2 ) );
+
+			const fullScreenQuad = new THREE.Mesh( fullscreenTriangleGeometry,  null );
+
+
+			const outlinePassTools = new OutlinePassTool( scene, camera, [ outlinePassScene.children[1] ] )
+
+
+			const depthMaterial = new THREE.MeshDepthMaterial({
+				side: THREE.DoubleSide,
+				depthPacking: THREE.RGBADepthPacking,
+				blending: THREE.NoBlending,
+			});
+
+
+			const renderTargetDepthBuffer = new THREE.WebGLRenderTarget( passRenderTargetWidth, passRenderTargetHeight, { type: THREE.HalfFloatType } );
+			renderTargetDepthBuffer.texture.name = 'OutlinePass.depth';
+			renderTargetDepthBuffer.texture.generateMipmaps = false;
+
+			const prepareMaskUnit = getPrepareMaskUnit( renderTargetDepthBuffer.texture );
+
+			const prepareMaskMaterial = prepareMaskUnit.prepareMaskMaterial;
+
+
+			const renderTargetMaskBuffer = new THREE.WebGLRenderTarget(passRenderTargetWidth, passRenderTargetHeight, { type: THREE.HalfFloatType });
+			renderTargetMaskBuffer.texture.name = 'OutlinePass.mask';
+			renderTargetMaskBuffer.texture.generateMipmaps = false;
+
+			const mapShader = getMapRawShaderMaterial();
+
+
+			const renderTargetMaskDownSampleBuffer = new THREE.WebGLRenderTarget( passRenderTargetWidth / 2, passRenderTargetHeight / 2 );
+			renderTargetMaskDownSampleBuffer.texture.name = 'OutlinePass.depthDownSample';
+			renderTargetMaskDownSampleBuffer.texture.generateMipmaps = false;
+
+
+			const edgeDetectionUnit = getEdgeDetectionUnit(renderTargetMaskDownSampleBuffer.texture, renderTargetMaskDownSampleBuffer.width, renderTargetMaskDownSampleBuffer.height);
+
+			const edgeDetectionMaterial = edgeDetectionUnit.edgeDetectionMaterial;
+
+
+			const renderTargetEdgeBuffer1 = new THREE.WebGLRenderTarget( passRenderTargetWidth / 2, passRenderTargetHeight / 2, { type: THREE.HalfFloatType } );
+			renderTargetEdgeBuffer1.texture.name = 'OutlinePass.edge1';
+			renderTargetEdgeBuffer1.texture.generateMipmaps = false;
+
+			const renderTargetEdgeBuffer2 = new THREE.WebGLRenderTarget( passRenderTargetWidth / 4, passRenderTargetHeight / 4, { type: THREE.HalfFloatType } );
+			renderTargetEdgeBuffer1.texture.name = 'OutlinePass.edge1';
+			renderTargetEdgeBuffer1.texture.generateMipmaps = false;
+
+
+			const MAX_EDGE_THICKNESS = 4;
+			const MAX_EDGE_GLOW = 4;
+
+			const seperableBlurUnit1 = getSeperableBlurUnit( MAX_EDGE_THICKNESS );
+			const separableBlurMaterial1 = seperableBlurUnit1.seperableBlurMaterial;
+			separableBlurMaterial1.uniforms.kernelRadius.value = 1;
+			separableBlurMaterial1.uniforms.texSize.value.set( passRenderTargetWidth / 2, passRenderTargetHeight / 2 );
+
+			const seperableBlurUnit2 = getSeperableBlurUnit( MAX_EDGE_GLOW );
+			const separableBlurMaterial2 = seperableBlurUnit2.seperableBlurMaterial;
+			separableBlurMaterial2.uniforms.kernelRadius.value = MAX_EDGE_GLOW;
+			separableBlurMaterial2.uniforms.texSize.value.set( passRenderTargetWidth / 4, passRenderTargetHeight / 4 );
+
+			const renderTargetBlurBuffer1 = new THREE.WebGLRenderTarget( passRenderTargetWidth / 2, passRenderTargetHeight / 2, { type: THREE.HalfFloatType } );
+			renderTargetBlurBuffer1.texture.name = 'OutlinePass.blur1';
+			renderTargetBlurBuffer1.texture.generateMipmaps = false;
+
+			const renderTargetBlurBuffer2 = new THREE.WebGLRenderTarget( passRenderTargetWidth / 4, passRenderTargetHeight / 4, { type: THREE.HalfFloatType } );
+			renderTargetBlurBuffer2.texture.name = 'OutlinePass.blur2';
+			renderTargetBlurBuffer2.texture.generateMipmaps = false;
+
+			const BlurDirectionX = new THREE.Vector2( 1.0, 0.0 );
+			const BlurDirectionY = new THREE.Vector2( 0.0, 1.0 );
+
+
+			const overlayUnit = getOverlayUnit();
+			const overlayMaterial = overlayUnit.overlayMaterial;
+			overlayMaterial.blending = THREE.AdditiveBlending;
+			overlayMaterial.depthTest = false;
+			overlayMaterial.depthWrite = false;
+			overlayMaterial.transparent = true
+
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+
+			function onPointerDown(e){
+
+				mouse.x = ( event.clientX / canvas.clientWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / canvas.clientHeight ) * 2 + 1;
+
+				raycaster.setFromCamera( mouse, camera );
+
+				const intersects = raycaster.intersectObject( scene, true );
+
+				if ( intersects.length > 0 ) {
+
+					const selectedObject = intersects[ 0 ].object;
+					const index = outlinePassTools.selectedObjects.indexOf( selectedObject );
+
+					if( index === -1 ){
+
+						outlinePassTools.selectedObjects.push( selectedObject );
+					}else{
+
+						outlinePassTools.selectedObjects.splice( index, 1 );
+					}
+				}
+			}
+			canvas.addEventListener( 'pointerdown', onPointerDown );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				depthPacking = {
+					BasicDepthPacking: THREE.BasicDepthPacking,
+					RGBADepthPacking: THREE.RGBADepthPacking,
+				}
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initEdgeDetectionMaterialGui( gui, edgeDetectionMaterial, 'edgeDetectionMaterial' );
+
+				initSeperableBlurGui( gui, separableBlurMaterial1.uniforms, 'separableBlurMaterial1' );
+				initSeperableBlurGui( gui, separableBlurMaterial2.uniforms, 'separableBlurMaterial2' );
+
+				initOverlayGui( gui, overlayMaterial.uniforms, 'overlay' );
+			}
+
+			function initEdgeDetectionMaterialGui(gui, material, name){
+
+				const edgeDetectionMaterialFolder = gui.addFolder( name );
+
+				edgeDetectionMaterialFolder.addColor( material.uniforms.visibleEdgeColor, 'value' ).name('visibleEdgeColor');
+				edgeDetectionMaterialFolder.addColor( material.uniforms.hiddenEdgeColor, 'value' ).name('hiddenEdgeColor');
+			}
+
+			function initSeperableBlurGui(gui, uniforms, name){
+
+				const seperableBlurFolder = gui.addFolder( name );
+
+				seperableBlurFolder.add( uniforms.kernelRadius, 'value', 0, 10, 0.01 ).name('kernelRadius');
+
+				seperableBlurFolder.add( uniforms.direction.value, 'x', 0, 1 ).name('direction.x');
+				seperableBlurFolder.add( uniforms.direction.value, 'y', 0, 1 ).name('direction.y');
+			}
+
+			function initOverlayGui(gui, uniforms, name){
+
+				const overlayFolder = gui.addFolder( name );
+
+				overlayFolder.add( uniforms.edgeStrength, 'value', 0.01, 10 ).name('edgeStrength');
+				overlayFolder.add( uniforms.edgeGlow, 'value', 0.0, 1 ).name('edgeGlow');
+			}
+
+
+
+			renderer.setScissorTest( true );
+
+			loop();
+			function loop() {
+
+				renderer.setScissor( 0, 0, canvas.clientWidth, canvas.clientHeight );
+				renderer.setViewport( 0, 0, canvas.clientWidth, canvas.clientHeight );
+				outlinePassTools.changeVisibilityOfSelectedObjects( false );
+
+				// 1. Draw Non Selected objects in the depth buffer
+				scene.overrideMaterial = depthMaterial;
+				renderer.setRenderTarget( renderTargetDepthBuffer );
+				renderer.clear();
+				renderer.render( scene, camera );
+				renderer.setRenderTarget( null );
+
+
+				// Make selected objects visible
+				outlinePassTools.changeVisibilityOfSelectedObjects( true );
+				outlinePassTools._visibilityCache.clear();
+
+				// Update Texture Matrix for Depth compare
+				outlinePassTools.updateTextureMatrix();
+
+				// Make non selected objects invisible, and draw only the selected objects, by comparing the depth buffer of non selected objects
+				outlinePassTools.changeVisibilityOfNonSelectedObjects( false );
+				scene.overrideMaterial = prepareMaskMaterial;
+				prepareMaskMaterial.uniforms.cameraNearFar.value.set( camera.near, camera.far );
+				prepareMaskMaterial.uniforms.textureMatrix.value = outlinePassTools.textureMatrix;
+				renderer.setRenderTarget( renderTargetMaskBuffer );
+				renderer.clear();
+				renderer.render( scene, camera );
+				renderer.setRenderTarget( null );
+
+				scene.overrideMaterial = null;
+				outlinePassTools.changeVisibilityOfNonSelectedObjects( true );
+				outlinePassTools._visibilityCache.clear();
+
+				// 2. Downsample to Half resolution
+				fullScreenQuad.material = mapShader;
+				mapShader.uniforms.map.value = renderTargetMaskBuffer.texture;
+				renderer.setRenderTarget( renderTargetMaskDownSampleBuffer );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+
+				// 3. Apply Edge Detection Pass
+				fullScreenQuad.material = edgeDetectionMaterial;
+
+				// edgeDetectionMaterial.uniforms[ 'visibleEdgeColor' ].value = this.tempPulseColor1;
+				// edgeDetectionMaterial.uniforms[ 'hiddenEdgeColor' ].value = this.tempPulseColor2;
+				renderer.setRenderTarget( renderTargetEdgeBuffer1 );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+				// 4. Apply Blur on Half res
+				fullScreenQuad.material = separableBlurMaterial1;
+				separableBlurMaterial1.uniforms.colorTexture.value = renderTargetEdgeBuffer1.texture;
+				separableBlurMaterial1.uniforms.direction.value = BlurDirectionX;
+				// separableBlurMaterial1.uniforms.kernelRadius.value = this.edgeThickness;
+				renderer.setRenderTarget( renderTargetBlurBuffer1 );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+				separableBlurMaterial1.uniforms.colorTexture.value = renderTargetBlurBuffer1.texture;
+				separableBlurMaterial1.uniforms.direction.value = BlurDirectionY;
+				renderer.setRenderTarget( renderTargetEdgeBuffer1 );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+				// Apply Blur on quarter res
+				fullScreenQuad.material = separableBlurMaterial2;
+				separableBlurMaterial2.uniforms.colorTexture.value = renderTargetEdgeBuffer1.texture;
+				separableBlurMaterial2.uniforms.direction.value = BlurDirectionX;
+				renderer.setRenderTarget( renderTargetBlurBuffer2 );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+				separableBlurMaterial2.uniforms.colorTexture.value = renderTargetBlurBuffer2.texture;
+				separableBlurMaterial2.uniforms.direction.value = BlurDirectionY;
+				renderer.setRenderTarget( renderTargetEdgeBuffer2 );
+				renderer.clear();
+				renderer.render( fullScreenQuad, camera );
+				renderer.setRenderTarget( null );
+
+
+				renderer.autoClear = false;
+
+				fullScreenQuad.material = overlayMaterial;
+				overlayMaterial.uniforms.maskTexture.value = renderTargetMaskBuffer.texture;
+				overlayMaterial.uniforms.edgeTexture1.value = renderTargetEdgeBuffer1.texture;
+				overlayMaterial.uniforms.edgeTexture2.value = renderTargetEdgeBuffer2.texture;
+
+				renderer.render( scene, camera );
+				renderer.render( fullScreenQuad, camera );
+
+				renderer.autoClear = true;
+
+
+
+				// // 对照原始
+				renderer.setScissor( 0, 0, canvas.clientWidth / 4, canvas.clientHeight / 4 );
+				renderer.setViewport( 0, 0, canvas.clientWidth / 4, canvas.clientHeight / 4 );
+				renderer.render( scene, camera );
+
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

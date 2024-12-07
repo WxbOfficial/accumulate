@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>reflect</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 2;
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+			const plane = new THREE.BufferGeometry();
+			plane.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( [
+				-1.0, -1.0,  0.0,
+				 1.0, -1.0,  0.0,
+				-1.0,  1.0,  0.0,
+				 1.0,  1.0,  0.0,
+			] ), 3 ) );
+
+			plane.setIndex( [
+				1, 3, 2,
+				2, 0, 1
+			] );
+
+			const rawShaderMaterial = new THREE.RawShaderMaterial({
+				uniforms: {
+					I: {
+						value: new THREE.Vector2(-1, 1),
+					},
+					N: {
+						value: new THREE.Vector2(0, 1),
+					},
+					halfLineWidth: {
+						value: 0.03
+					}
+				},
+				vertexShader: `
+					precision mediump float;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+					attribute vec3 color;
+
+					uniform mat4 projectionMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 modelMatrix;
+
+					varying vec3 vPos;
+
+					void main(void) {
+						vPos = position;
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+					precision mediump float;
+
+					uniform vec2 I;
+					uniform vec2 N;
+					uniform float halfLineWidth;
+
+					varying vec3 vPos;
+
+					bool isInLineRange( vec2 point ){
+
+						float pointRatio = point.x == 0.0 ? 0.0 : point.y / point.x;
+
+						return abs(vPos.y - pointRatio * vPos.x) <= halfLineWidth &&
+
+							(( vPos.x >= 0.0 && vPos.x <= point.x && vPos.y >= 0.0 && vPos.y <= point.y ) ||
+							( vPos.x <= 0.0 && vPos.x >= point.x && vPos.y <= 0.0 && vPos.y >= point.y ) ||
+							( vPos.x <= 0.0 && vPos.x >= point.x && vPos.y >= 0.0 && vPos.y <= point.y ) ||
+							( vPos.x >= 0.0 && vPos.x <= point.x && vPos.y <= 0.0 && vPos.y >= point.y ));
+					}
+
+					void main() {
+
+						vec2 nI = normalize( I );
+						vec2 nN = normalize( N );
+
+						vec2 tReflect = reflect(-nI, nN);
+
+						gl_FragColor =
+								isInLineRange( nI ) ? vec4( 1.0, 1.0, 1.0, 1.0 ) :
+								isInLineRange( nN ) ? vec4( 0.0, 0.0, 1.0, 1.0 ) :
+								isInLineRange( tReflect ) ? vec4( 0.0, 0.0, 0.0, 1.0 ) : vec4( 1.0, 0.0, 0.0, 1.0 );
+					}
+				`,
+			})
+			const mesh = new THREE.Mesh( plane, rawShaderMaterial );
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( rawShaderMaterial.uniforms.halfLineWidth, 'value', 0, 0.1 ).name('name');
+
+				gui.add( rawShaderMaterial.uniforms.I.value, 'x', -1, 1 ).name( 'incidence.x' );
+				gui.add( rawShaderMaterial.uniforms.I.value, 'y', -1, 1 ).name( 'incidence.y' );
+
+				gui.add( rawShaderMaterial.uniforms.N.value, 'x', -1, 1 ).name( 'normal.x' );
+				gui.add( rawShaderMaterial.uniforms.N.value, 'y', -1, 1 ).name( 'normal.y' );
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

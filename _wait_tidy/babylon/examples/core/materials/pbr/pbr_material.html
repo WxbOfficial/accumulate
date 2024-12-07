@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <link rel="icon" type="image/png" href="../../../favicon.ico" />
+    <title>pbr_material</title>
+    <link href="../../../default_css.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+  <!--
+    设置环境天空盒自定义几何体生成一个球，添加 PBRMaterial 材质和相关贴图。
+    主要用于了解 BABYLON 中的 PBRMaterial。
+
+    PBR 材质相关文档
+      https://doc.babylonjs.com/features/featuresDeepDive/materials/using/introToPBR
+      https://doc.babylonjs.com/features/featuresDeepDive/materials/using/masterPBR
+   -->
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module">
+      const canvas = document.getElementById("renderCanvas");
+
+      const engine = new BABYLON.Engine(canvas, true);
+      engine.setSize( window.innerWidth, window.innerHeight );
+
+      const scene = createScene();
+      // scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+      engine.runRenderLoop(function () {
+        scene.render();
+      });
+
+      window.addEventListener("resize", function () {
+        engine.setSize( window.innerWidth, window.innerHeight );
+        engine.resize();
+      });
+
+      function createScene() {
+  
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color3( 0, 0, 0);
+        scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 5, BABYLON.Vector3.Zero(), scene);
+
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        camera.attachControl(canvas, true);
+
+        // alpha 鼠标左右操作对应的移动
+        // camera.lowerAlphaLimit = 0;
+        // camera.upperAlphaLimit = Math.PI * 2;
+
+        // beta 鼠标上下操作对应的移动
+        camera.lowerBetaLimit = 0;
+        camera.upperBetaLimit = Math.PI;
+
+        // 最小缩放
+        camera.lowerRadiusLimit = 2;
+        // 最大缩放
+        camera.upperRadiusLimit = 200;
+
+        camera.inertia = 0;
+        camera.angularSensibilityX = 108;
+        camera.angularSensibilityY = 108;
+
+        camera.panningInertia = 0;
+        camera.panningSensibility = 0; // 设置为 0 
+
+        const localConnected = localAxes(50);
+
+        const environmentTextureUrl = "https://playground.babylonjs.com/textures/environment.dds";
+        // const environmentTextureUrl = "http://localhost:7999/business/editor3d/public/test-cube-dx10-rgba32f.dds";
+        const pbrSphereUrl = "https://playground.babylonjs.com/textures/room.hdr";
+
+        // 初始化环境
+        initEnvironment(scene, environmentTextureUrl);
+        // 初始化 Pbr 材质球
+        // initPbrSphere(scene, pbrSphereUrl);
+
+
+
+        //Local Axes
+        function localAxes(size) {
+          const axisX = BABYLON.Mesh.CreateLines("axisX", [ 
+            new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0),
+          ], scene);
+          axisX.color = new BABYLON.Color3(1, 0, 0);
+
+          const axisY = BABYLON.Mesh.CreateLines("axisY", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0),
+          ], scene);
+          axisY.color = new BABYLON.Color3(0, 1, 0);
+
+          const axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+              new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size),
+          ], scene);
+          axisZ.color = new BABYLON.Color3(0, 0, 1);
+        }
+
+        return scene;
+      }
+
+      canvas.addEventListener('dragstart', (e)=>{
+        e.preventDefault();
+      })
+      canvas.addEventListener('dragover', (e)=>{
+        e.preventDefault();
+      })
+      canvas.addEventListener('drop', (e)=>{
+        e.preventDefault();
+
+        let
+          files = e.dataTransfer.files,
+          file = files[0],
+          fileURL = URL.createObjectURL(file);
+
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+
+        initEnvironment(scene, fileURL);
+
+        // reader.onload = () => {
+
+        //   const environmentTexture = new BABYLON.RawCubeTexture(scene, reader.result);
+
+        //   scene.environmentTexture = environmentTexture;
+
+        //   // CreateBox API 说明: https://doc.babylonjs.com/typedoc/classes/BABYLON.Mesh#CreateBox
+        //   const skybox = BABYLON.Mesh.CreateBox('skybox', 1000, scene, false, BABYLON.Constants.MATERIAL_CounterClockWiseSideOrientation);
+
+        //   // 之后可以对 skyboxMaterial 材质设置相关属性，改变展示天空盒效果
+        //   const skyboxMaterial = new BABYLON.PBRMaterial('skyboxMaterial', scene);
+        //   // skyboxMaterial.backFaceCulling = false;
+        //   // 不克隆的话，球上的反射贴图就会静止不动
+        //   skyboxMaterial.reflectionTexture = environmentTexture.clone();
+        //   skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+        //   skybox.material = skyboxMaterial;
+        //   skybox.infiniteDistance = true;
+        // }
+
+        // initPbrSphere(scene, fileURL);
+      })
+
+      function initEnvironment(scene, cubeTextureUrl){
+        // const environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(cubeTextureUrl, scene, '.dds');
+        // const environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(cubeTextureUrl, scene, '.dds');
+
+        const environmentTexture = new BABYLON.CubeTexture(cubeTextureUrl, scene, '.dds');
+
+        scene.environmentTexture = environmentTexture;
+
+        // CreateBox API 说明: https://doc.babylonjs.com/typedoc/classes/BABYLON.Mesh#CreateBox
+        const skybox = BABYLON.Mesh.CreateBox('skybox', 1000, scene, false, BABYLON.Constants.MATERIAL_CounterClockWiseSideOrientation);
+
+        // 之后可以对 skyboxMaterial 材质设置相关属性，改变展示天空盒效果
+        const skyboxMaterial = new BABYLON.PBRMaterial('skyboxMaterial', scene);
+        // skyboxMaterial.backFaceCulling = false;
+        // 不克隆的话，球上的反射贴图就会静止不动
+        skyboxMaterial.reflectionTexture = environmentTexture.clone();
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+        skybox.material = skyboxMaterial;
+        skybox.infiniteDistance = true;
+      }
+
+      function initPbrSphere(scene, reflectionTextureUrl){
+
+        // 用于展示材质效果的球体
+        const sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
+
+        // PBRMaterial API 说明: https://doc.babylonjs.com/typedoc/classes/BABYLON.PBRMaterial
+        const pbr = new BABYLON.PBRMaterial("pbr", scene);
+
+        window.pbr = pbr;
+        console.log('pbr:', pbr);
+
+        // 没有 512 这个参数的话，会是黑的
+        const reflectionTexture = new BABYLON.HDRCubeTexture(reflectionTextureUrl, scene, 512);
+
+        pbr.backFaceCulling = false;
+        pbr.reflectionTexture = reflectionTexture;
+        pbr.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+        pbr.enableSpecularAntiAliasing = true;
+        pbr.twoSidedLighting = true;
+        pbr.alpha = 0.2;
+        pbr.metallic = 1;
+        pbr.roughness = 0;
+
+        sphere.material = pbr;
+
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>mesh_depth_material</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 2;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+			const plane = new THREE.PlaneGeometry( 2, 2, 32, 32 );
+
+
+			const heightMap = new THREE.TextureLoader().load('../../../assets/images/heightMap.png');
+
+			const meshDepthMaterial = new THREE.MeshDepthMaterial({
+				displacementMap: heightMap,
+				displacementScale: 0,
+				displacementBias: 0,
+			});
+
+			const mesh = new THREE.Mesh( plane, meshDepthMaterial );
+
+			scene.add(mesh);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMeshDepthMaterialGui( gui, meshDepthMaterial, 'meshDepthMaterial' );
+			}
+
+			function initMeshDepthMaterialGui(gui, material, name){
+
+				const materialFolder = gui.addFolder(name);
+
+				materialFolder.add( material, 'displacementScale', 0, 3 );
+				materialFolder.add( material, 'displacementBias', 0, 1 );
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

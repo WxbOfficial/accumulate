@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>directional_light</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../module.js';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+			// renderer.shadowMapSoft = true;
+
+
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+			// renderer.setPixelRatio( window.devicePixelRatio );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			camera.position.z = 10;
+
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			scene.add( new THREE.AxesHelper(80) );
+
+			const ground = new THREE.Mesh(
+				new THREE.PlaneGeometry( 10, 10 ),
+				new THREE.MeshStandardMaterial( {
+					// color: 0xff0000,
+					// side: THREE.DoubleSide
+				} )
+			);
+
+			ground.rotation.x = -Math.PI / 2;
+			ground.position.y = -1;
+
+			scene.add( ground );
+
+
+			const sphere = new THREE.Mesh(
+				new THREE.SphereGeometry( 2, 32, 16 ),
+
+				new THREE.MeshStandardMaterial( {
+					// color: 0x000000,
+					// side: THREE.DoubleSide
+				} )
+			);
+
+			sphere.position.set( 2, 2, 2 );
+
+
+			scene.add( sphere );
+
+			const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			scene.add( directionalLight );
+
+			const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight );
+			scene.add( directionalLightHelper );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initDirectionLightGui( gui, directionalLight, directionalLightHelper, 'directionalLight' )
+			}
+
+			function initDirectionLightGui( gui, directionalLight, directionalLightHelper, name ){
+
+				const directionalLightFolder = gui.addFolder( name ),
+					changeHelper = ()=>{
+
+						directionalLightHelper.update();
+					};
+
+
+
+				directionalLightFolder.addColor(directionalLight, 'color');
+
+				directionalLightFolder.add(directionalLight, 'intensity', 0, 1);
+
+				directionalLightFolder.add( directionalLight, 'castShadow' );
+
+				directionalLightFolder.add(directionalLight.position, 'x', -10, 10).name('position.x').onChange(changeHelper);;
+				directionalLightFolder.add(directionalLight.position, 'y', -10, 10).name('position.y').onChange(changeHelper);;
+				directionalLightFolder.add(directionalLight.position, 'z', -10, 10).name('position.z').onChange(changeHelper);;
+
+				directionalLightFolder.add(directionalLight.target.position, 'x', -10, 10).name('target.x').onChange(changeHelper);
+				directionalLightFolder.add(directionalLight.target.position, 'y', -10, 10).name('target.y').onChange(changeHelper);
+				directionalLightFolder.add(directionalLight.target.position, 'z', -10, 10).name('target.z').onChange(changeHelper);
+			}
+
+
+			loop(0);
+			function loop(t) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>cube_texture</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			let camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100 );
+
+			camera.position.z = 10;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			scene.add( new THREE.AxesHelper(8) );
+
+			const cubeTexture = new THREE.CubeTextureLoader().load(
+				[
+					"px.jpg", "nx.jpg",
+					"py.jpg", "ny.jpg",
+					"pz.jpg", "nz.jpg"
+				].map((url)=>{
+					 	return "../../../assets/images/cube/skybox/" + url;
+				}),
+			);
+
+			var planeGeometry = new THREE.BufferGeometry();
+
+			planeGeometry.setAttribute( "position", new THREE.BufferAttribute(new Float32Array([
+				-4, 4, 0,
+				 4, 4, 0,
+				-4,-4, 0,
+				 4,-4, 0,
+			]), 3) );
+
+			planeGeometry.setAttribute( "cubeUv", new THREE.BufferAttribute( new Float32Array([
+				-1, 1, 1,
+				1, 1, 1,
+				-1, -1, 1,
+				1, -1, 1,
+			]), 3) );
+
+			planeGeometry.setIndex( new THREE.BufferAttribute(new Uint16Array([
+				0, 2, 3,
+				3, 1, 0
+			]), 1) );
+
+			const plane = new THREE.Mesh(
+				planeGeometry,
+				new THREE.RawShaderMaterial( {
+					name: 'BackgroundCubeMaterial',
+					uniforms: {
+						cubeTexture: {
+							value: cubeTexture,
+						},
+						backgroundRotation: {
+							value: new THREE.Matrix3(),
+						},
+						isBackground: {
+							value: false,
+						}
+					},
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+						attribute vec3 cubeUv;
+
+						uniform mat4 modelMatrix;
+						uniform mat4 viewMatrix;
+						uniform mat4 projectionMatrix;
+
+						varying vec3 vCubeUv;
+
+						void main() {
+
+							vCubeUv = cubeUv;
+
+							gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+						}
+					`,
+					fragmentShader: `
+						precision mediump float;
+
+						uniform mat3 backgroundRotation;
+						uniform samplerCube cubeTexture;
+
+						varying vec3 vCubeUv;
+
+						void main() {
+							vec4 texColor = textureCube(
+								cubeTexture,
+								backgroundRotation * vCubeUv
+							);
+
+							gl_FragColor = texColor;
+						}
+					`,
+					side: THREE.DoubleSide,
+				} )
+			);
+
+			scene.add( plane );
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initCubeTextureGui( gui, plane.material, 'cubeTexture' )
+			}
+
+			function initCubeTextureGui( gui, material, name ){
+
+				const
+					cubeTextureFolder = gui.addFolder( name ),
+					rotation = new THREE.Euler(),
+					params = {
+						rotationX: 0,
+						rotationY: 0,
+						rotationZ: 0,
+					},
+					_matrix4 = new THREE.Matrix4(),
+
+					changeRatation = ()=>{
+
+						material.uniforms.backgroundRotation.value.setFromMatrix4( _matrix4.makeRotationFromEuler( rotation ) );
+					};
+
+				cubeTextureFolder.add( params, 'rotationX', -180, 180 ).onChange(( angle )=>{
+
+					rotation.x = angle / 180 * Math.PI;
+					changeRatation();
+				});
+				cubeTextureFolder.add( params, 'rotationY', -180, 180 ).onChange(( angle )=>{
+
+					rotation.y = angle / 180 * Math.PI;
+					changeRatation();
+				});
+				cubeTextureFolder.add( params, 'rotationZ', -180, 180 ).onChange(( angle )=>{
+
+					rotation.z = angle / 180 * Math.PI;
+					changeRatation();
+				});
+			}
+
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

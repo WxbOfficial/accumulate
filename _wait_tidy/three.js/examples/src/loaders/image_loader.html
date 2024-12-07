@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>image_loader</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		THREE.Cache.enabled = true 的话, loader 再次加载就会直接复用 Cache 中的对象
+			本地请求不启用的话马上执行会请求两次
+			跨源请求马上或者短时间内延迟请求的话只请求一次; 长时间延迟之后请求的话请求两次
+
+		ImageLoader 的异步请求应该是 crossorigin 而不是 crossOrigin
+	-->
+	<body>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+
+			const
+				url = 'https://camo.githubusercontent.com/cb4a25bb419f26be099dee96cc7d392a5280f335297f1599ba138ce6474296da/68747470733a2f2f747765656e6a732e6769746875622e696f2f747765656e2e6a732f6173736574732f6578616d706c65732f30305f68656c6c6f5f776f726c642e706e67',
+				// url = '../../assets/images/logo1.jpg',
+				loader = new THREE.ImageLoader();
+
+			// setTimeout(()=>{
+
+			// 	const image = new Image();
+			// 	image.src = url;
+			// 	image.crossorigin = 'Anonymous';
+
+			// 	// document.body.appendChild(image);
+			// }, 2000);
+
+			// THREE.Cache.enabled = true;
+
+			function load(){
+				loader.load( url,
+					(cached)=>{
+						console.log('onLoad:', cached);
+					},
+					(event)=>{
+						console.log('onProgress:', event);
+					},
+					(event)=>{
+						console.log('onError:', event);
+					}
+				);
+
+			}
+
+			loader.load(
+				url,
+				(cached)=>{
+					console.log('第一次加载 onLoad:', cached);
+
+					setTimeout(()=>{
+
+						loader.load(
+							url,
+							(cached)=>{
+								console.log('第二次加载 onLoad:', cached);
+							},
+							(event)=>{
+								console.log('onProgress:', event);
+							},
+							(event)=>{
+								console.log('onError:', event);
+							}
+						);
+
+					}, 1000)
+
+				},
+				(event)=>{
+					console.log('onProgress:', event);
+				},
+				(event)=>{
+					console.log('onError:', event);
+				}
+			);
+		</script>
+	</body>
+</html>

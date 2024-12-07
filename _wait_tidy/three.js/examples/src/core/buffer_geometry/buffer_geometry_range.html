@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>buffer_geometry_range</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../../module.js';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var scene = new THREE.Scene();
+
+			var renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			var camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 1000
+			);
+
+			camera.position.z = 2;
+
+			var orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			var plane = new THREE.PlaneGeometry(1,1,2,2);
+
+			// var plane = new THREE.BufferGeometry(1,1,2,2);
+
+			var mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+					envMap: new THREE.CubeTextureLoader().load(
+						[
+							"px.jpg", "nx.jpg",
+							"py.jpg", "ny.jpg",
+							"pz.jpg", "nz.jpg"
+						].map((url)=>{
+							 	return "../../../assets/images/cube/Escher/" + url;
+						})
+					),
+				})
+			);
+
+			scene.add(mesh);
+
+			var stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initGeometryGui( gui, plane, 'geometry' );
+			}
+			function initGeometryGui(gui, geometry, name){
+
+				console.log('geometry:', geometry);
+
+				const count =
+					geometry.index ? geometry.index.count :
+					geometry.attributes?.position ? geometry.attributes?.position.count : -1;
+
+				const geometryFolder = gui.addFolder( name );
+
+				geometryFolder.add( geometry.drawRange, 'start', 0, count, 1 )
+				geometryFolder.add( geometry.drawRange, 'count', 0, count, 1 )
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

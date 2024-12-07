@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>depth_and_polygon_offset</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.sortObjects = false;
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 3;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+
+			const plane = new THREE.PlaneGeometry(1, 1, 1, 1);
+
+			const texture1 = new THREE.TextureLoader().load('../../../../assets/images/logo1.jpg' );	//白咕咕
+			const texture2 = new THREE.TextureLoader().load('../../../../assets/images/logo.jpeg' );	//鱼鱼
+
+			const material1 = new THREE.RawShaderMaterial( {
+				uniforms: {
+					texture: {
+						value: texture1,
+					},
+					opaity: {
+						value: 1,
+					}
+				},
+				vertexShader: `
+
+					precision mediump float;
+
+					uniform mat4 modelMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 projectionMatrix;
+
+					attribute vec3 position;
+					attribute vec2 uv;
+
+					varying vec2 vUv;
+
+					void main() {
+						vUv = uv;
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+
+					precision mediump float;
+
+					varying vec2 vUv;
+
+					uniform sampler2D texture;
+
+					uniform float opaity;
+
+					void main() {
+
+						gl_FragColor =  vec4(texture2D(texture, vUv).xyz, opaity);
+					}
+				`,
+				side: THREE.DoubleSide,
+			} );
+
+			const material2 = material1.clone();
+			material2.uniforms.texture.value = texture2;
+
+			const mesh1 = new THREE.Mesh( plane, material1 );
+			const mesh2 = new THREE.Mesh( plane, material2 );
+
+			mesh1.name = '白咕咕';
+			mesh1.position.x = 0.5;
+
+			mesh2.name = '鱼鱼';
+
+			scene.add(mesh2);
+			scene.add(mesh1);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			function showOpaqueMeshRenderOrder(){
+
+				console.log( renderer.renderLists.get( scene, 0 ).opaque.map(( { object } )=>{
+
+					return object.name;
+				}) );
+			};
+
+			renderer.showOpaqueMeshRenderOrder = showOpaqueMeshRenderOrder;
+
+			const
+				DepthMode = {
+					NeverDepth: THREE.NeverDepth,
+					AlwaysDepth: THREE.AlwaysDepth,
+					LessDepth: THREE.LessDepth,
+					LessEqualDepth: THREE.LessEqualDepth,
+					GreaterEqualDepth: THREE.GreaterEqualDepth,
+					GreaterDepth: THREE.GreaterDepth,
+					NotEqualDepth: THREE.NotEqualDepth,
+				};
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( renderer, 'sortObjects' );
+
+				gui.add( renderer, 'showOpaqueMeshRenderOrder' );
+
+				gui.add( mesh1.position, 'x', 0, 0.5, 0.5 ).name('白咕咕 x');
+				gui.add( mesh1.position, 'z', 0, 1, 1 ).name('白咕咕 z');
+
+				initMaterialStateGui(gui, material1, 'material1(白咕咕)');
+				initMaterialStateGui(gui, material2, 'material2(鱼鱼)');
+			}
+
+			function initMaterialStateGui(gui, material, name){
+
+				const materialStateFolder = gui.addFolder(name);
+
+				materialStateFolder.add( material, 'depthTest' );
+				materialStateFolder.add( material, 'depthWrite' );
+				materialStateFolder.add( material, 'depthFunc', DepthMode );
+
+				materialStateFolder.add( material, 'polygonOffset' );
+				materialStateFolder.add( material, 'polygonOffsetFactor', -3, 3 );
+				materialStateFolder.add( material, 'polygonOffsetUnits', -3, 3 );
+
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop);
+			}
+		</script>
+	</body>
+</html>

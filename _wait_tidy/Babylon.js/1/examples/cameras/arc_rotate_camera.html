@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>arc_rotate_camera</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示 ArcRotateCamera 案例效果
+		添加了 ArcRotateCamera 部分参数的 gui 操作
+			lowerAlphaLimit
+			upperAlphaLimit
+			lowerBetaLimit
+			upperBetaLimit
+			lowerRadiusLimit
+			upperRadiusLimit
+
+		竖直旋转为负的话，会有镜像变化的情况
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js"
+			import createAxesBox from '../mesh/helper/axes_box_helper.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 50, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				createAxesBox(scene);
+
+				const gui = new lil.GUI();
+
+				initCameraGui(gui, camera);
+				initArcRotateCameraGui(gui, camera);
+
+				return scene;
+			}
+
+			function initCameraGui(gui, camera){
+
+				const cameraFolder = gui.addFolder('Camera');
+
+				cameraFolder.add( camera, 'inertia', 0, 1 ).name('惯性');
+
+				cameraFolder.add( camera, 'fov', 0, 1 ).name('fov');
+
+				cameraFolder.add( camera, 'minZ', 0, 10 ).name('minZ');
+				cameraFolder.add( camera, 'maxZ', 10, 10000 ).name('minZ');
+			}
+
+			function initArcRotateCameraGui(gui, camera){
+
+				const cameraFolder = gui.addFolder('ArcRotateCamera');
+
+				camera.lowerAlphaLimit = -Math.PI / 2;
+				camera.upperAlphaLimit = Math.PI / 2;
+				cameraFolder.add( camera, 'lowerAlphaLimit', -Math.PI, Math.PI ).name('水平旋转最小角度');
+				cameraFolder.add( camera, 'upperAlphaLimit', -Math.PI, Math.PI ).name('水平旋转最大角度');
+
+				camera.lowerBetaLimit = 0.01;
+				camera.upperBetaLimit = Math.PI / 4;
+				cameraFolder.add( camera, 'lowerBetaLimit', -Math.PI, Math.PI ).name('竖直旋转最小角度');
+				cameraFolder.add( camera, 'upperBetaLimit', -Math.PI, Math.PI ).name('竖直旋转最大角度');
+
+
+				camera.lowerRadiusLimit = 0;
+				camera.upperRadiusLimit = 100;
+				cameraFolder.add( camera, 'lowerRadiusLimit', 0, 100 ).name('最小视角距离半径');
+				cameraFolder.add( camera, 'upperRadiusLimit', 100, 300 ).name('最大视角距离半径');
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

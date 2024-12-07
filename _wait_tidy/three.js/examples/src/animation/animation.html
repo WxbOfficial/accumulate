@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>animation</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../module.js';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			scene.add( new THREE.AxesHelper(7) );
+
+			const plane = new THREE.PlaneGeometry(2, 2, 1, 1);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../assets/images/logo.jpeg'),
+				})
+			);
+
+			mesh.name = 'planeMesh'
+			scene.add(mesh);
+
+
+			const	clock = new THREE.Clock();
+			const mixer = new THREE.AnimationMixer( scene );
+
+			mixer.clipAction(
+				new THREE.AnimationClip(
+					'planeMeshMove', undefined, [
+					new THREE.VectorKeyframeTrack(
+						'planeMesh.position',
+						[
+							0, 1, 2,
+							3, 4, 5,
+							6, 7, 8
+						],
+						[
+							0, 0, 0, 3, 0, 0, 6, 0, 0,
+
+							6, 3, 0, 6, 6, 0, 3, 6, 0,
+
+							0, 6, 0, 0, 3, 0, 0, 0, 0,
+						],
+					)
+				])
+			).play();
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			loop(0);
+			function loop(t) {
+
+				mixer.update( clock.getDelta() );
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

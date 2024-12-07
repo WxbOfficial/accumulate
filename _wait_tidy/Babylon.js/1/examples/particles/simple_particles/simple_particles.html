@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../../favicon.ico">
+		<title>simple_particles</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 为了学习 ParticleSystem 仿写的一个简单案例
+
+		遗留问题:
+			将 particle.render() 放到 scene.render() 前就会渲染不出来被覆盖。根据需要加强对 webgl 渲染机制的了解
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../../module.js"
+
+			import SimpleParticles from './simple_particles.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				var particle = new SimpleParticles(scene);
+
+				particle.particleTexture = new BABYLON.Texture("../../assets/images/logo.jpeg", scene);
+
+				BABYLON.Engine.ShadersRepository = '../../../source/Shaders/';
+				var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				// var material = new BABYLON.StandardMaterial("boxMat", scene);
+
+				return { scene, particle };
+			}
+
+			const { scene, particle } = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+				particle.render();
+
+				stats.update();
+			});
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>data_texture_min_filter</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		看不懂
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 100000 );
+
+			camera.position.z = 6;
+			// camera.rotation.x = -Math.PI / 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			const width = 900;
+			const height = 900;
+
+			const colorArr = [];
+
+			for( let i = 1; i <= width; i++ ){
+				for( let j = 1; j <= height; j++ ){
+					// if( i % 2 === 0 && j % 2 === 0 ){
+					// 	colorArr.push(255, 0, 0, 255);
+					// }else if( i % 2 === 0 && j % 2 === 1 ){
+					// 	colorArr.push(0, 255, 0, 255);
+					// }else if( i % 2 === 1 && j % 2 === 0 ){
+					// 	colorArr.push(0, 0, 255, 255);
+					// }else if( i % 2 === 1 && j % 2 === 1 ){
+					// 	colorArr.push(255, 0, 0, 255);
+					// }
+
+					if( i <= width / 2 && j <= height / 2 ){
+						colorArr.push(255, 0, 0, 255);
+					}else if( i > width / 2 && j <= height / 2 ){
+						colorArr.push(0, 255, 0, 255);
+					}else if( i <= width / 2 && j > height / 2 ){
+						colorArr.push(0, 0, 255, 255);
+					}else if( i > width / 2 && j > height / 2 ){
+						colorArr.push(255, 0, 0, 255);
+					}
+				}
+			}
+
+			const color = new Uint8Array(colorArr);
+
+			const texture = new THREE.DataTexture( color,	width,	height );
+
+			texture.needsUpdate = true;
+
+			const plane = new THREE.PlaneGeometry(8, 8, 1, 1);
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: texture
+				})
+			);
+			scene.add(mesh);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const
+				MinificationFilters = {
+					NearestFilter: THREE.NearestFilter,
+					NearestMipmapNearestFilter: THREE.NearestMipmapNearestFilter,
+					NearestMipmapLinearFilter: THREE.NearestMipmapLinearFilter,
+					LinearFilter: THREE.LinearFilter,
+					LinearMipmapNearestFilter: THREE.LinearMipmapNearestFilter,
+					LinearMipmapLinearFilter: THREE.LinearMipmapLinearFilter,
+				};
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initTextureGui(gui, texture, 'texture');
+			}
+
+			function initTextureGui(gui, texture, name){
+
+				const textureFolder = gui.addFolder(name);
+
+				function change(){
+					texture.needsUpdate = true;
+				}
+
+				textureFolder.add( texture, 'generateMipmaps').onChange(change);
+				textureFolder.add( texture, 'minFilter', MinificationFilters ).onChange(change);
+			}
+
+			loop();
+			function loop() {
+
+				orbitControls.update();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

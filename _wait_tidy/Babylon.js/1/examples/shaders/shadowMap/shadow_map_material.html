@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../../favicon.ico">
+		<title>shadow_map_material</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		以 shadowMap shader 为基础的材质效果
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../../module.js";
+			import createAxesBox from '../../mesh/helper/axes_box_helper.js';
+			import ShadowMapMaterial from './shadow_map_material.js';
+
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 100, BABYLON.Vector3.Zero(), scene);
+
+				window.camera = camera;
+				// camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				createAxesBox(scene, 20);
+
+				var directionalLight = new BABYLON.DirectionalLight("light1",
+					new BABYLON.Vector3(-0.01, -1, 0),
+				scene);
+
+				directionalLight.position.x = 1;
+				directionalLight.position.y = 100;
+				directionalLight.setEnabled(false);
+
+				var sphere = BABYLON.Mesh.CreateSphere("Sphere", 16, 20, scene);
+
+				var sphereMat = new ShadowMapMaterial('shadowMap', scene, false, directionalLight);
+
+
+				sphere.material = sphereMat;
+
+				initLightGui(directionalLight);
+
+				return {
+					scene,
+					directionalLight,
+					shadowMap: sphereMat
+				};
+			}
+
+
+			function initLightGui(
+				directionalLight,
+			){
+				const gui = new lil.GUI();
+
+
+				const directionalFolder = gui.addFolder('DirectionalLight');
+
+				directionalFolder.add( directionalLight, '_isEnabled' ).name('isEnabled');
+				directionalFolder.add( directionalLight.direction, 'x', -1, 1 ).name('direction.x');
+				directionalFolder.add( directionalLight.direction, 'y', -1, 1 ).name('direction.y');
+				directionalFolder.add( directionalLight.direction, 'z', -1, 1 ).name('direction.z');
+
+				directionalFolder.add( directionalLight.position, 'x', -500, 500 ).name('position.x');
+				directionalFolder.add( directionalLight.position, 'y', -500, 500 ).name('position.y');
+				directionalFolder.add( directionalLight.position, 'z', -500, 500 ).name('position.z');
+
+				directionalFolder.addColor( directionalLight, 'diffuse' );
+				directionalFolder.addColor( directionalLight, 'specular' );
+			}
+
+			const { scene, shadowMap } = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+
+		</script>
+	</body>
+</html>

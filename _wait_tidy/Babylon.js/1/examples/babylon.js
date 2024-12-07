@@ -1,0 +1,6 @@
+
+window.BABYLON = {
+	module: true
+};
+
+

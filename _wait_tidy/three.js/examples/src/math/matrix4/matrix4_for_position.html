@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>matrix4_for_position</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'three';
+			import '../../../module.js';
+			import { OrbitControls } from '../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			// const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000 );
+
+			const camera = new THREE.OrthographicCamera(
+				-20, 20,
+				20, -20,
+				-20, 20
+			);
+
+			camera.position.z = 10;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			scene.add( new THREE.AxesHelper(80) );
+
+			const plane = new THREE.BoxGeometry(1, 1, 1);
+
+			const color =  new THREE.BufferAttribute( new Float32Array( [
+				1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+				1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0,
+
+				0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+				0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0,
+
+				0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+				1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+			] ), 3 );
+
+			plane.setAttribute( 'color', color);
+
+
+			const mesh = new THREE.Mesh( plane,
+				new THREE.MeshBasicMaterial({
+					vertexColors: true,
+				})
+			);
+			scene.add(mesh);
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMatrix4Gui( gui, mesh );
+			}
+
+			function initMatrix4Gui( gui, mesh ){
+
+				const
+					_matrix4 = new THREE.Matrix4(),
+					_quaternion = new THREE.Quaternion(),
+
+					param = {
+						position: mesh.position.clone(),
+						rotation: mesh.rotation.clone(),
+						rotationAngle: {
+							x: 0, y: 0, z: 0,
+						},
+						scale: mesh.scale.clone(),
+
+						positionApplyMatrix4(){
+
+							_matrix4.compose(
+								this.position,
+								_quaternion.setFromEuler(this.rotation),
+								this.scale
+							);
+							mesh.position.applyMatrix4( _matrix4 );
+						}
+					},
+					matrix4Folder = gui.addFolder('Matrix4');
+
+				matrix4Folder.add( param.position, 'x', -1, 1 ).name('position.x');
+				matrix4Folder.add( param.position, 'y', -1, 1 ).name('position.y');
+				matrix4Folder.add( param.position, 'z', -1, 1 ).name('position.z');
+
+				matrix4Folder.add( param.rotationAngle, 'x', -180, 180, 1 ).name('rotationAngle.x').onChange(( angle )=>{
+					param.rotation.x = angle / 180 * Math.PI;
+				});
+				matrix4Folder.add( param.rotationAngle, 'y', -180, 180, 1 ).name('rotationAngle.x').onChange(( angle )=>{
+					param.rotation.y = angle / 180 * Math.PI;
+				});
+				matrix4Folder.add( param.rotationAngle, 'z', -180, 180, 1 ).name('rotationAngle.x').onChange(( angle )=>{
+					param.rotation.z = angle / 180 * Math.PI;
+				});
+
+				matrix4Folder.add( param.scale, 'x', -2, 2 ).name('scale.x');
+				matrix4Folder.add( param.scale, 'y', -2, 2 ).name('scale.y');
+				matrix4Folder.add( param.scale, 'z', -2, 2 ).name('scale.z');
+
+				matrix4Folder.add( param, 'positionApplyMatrix4' );
+			}
+
+			loop(0);
+			function loop(t) {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>camera_model_z_allocation</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		抄自 https://threejs.org/examples/#webgl_camera
+			主要是通过相机投影矩阵和相机视图矩阵，将 ndc 的八个顶点转化为世界坐标，获得相机视锥体模型。
+	-->
+	<body>
+		<script type="importmap">
+				{
+						"imports": {
+							"three": "../../../source/src/THREE.js"
+						}
+				}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			import CameraModel from './camera_model.js';
+
+
+			const renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );//设置背景颜色
+			renderer.setClearColor( 0x000000, 1.0);
+			renderer.autoClear = false;
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.autoClear = false;
+			document.body.appendChild( renderer.domElement );
+
+			const scene = new THREE.Scene();
+
+
+			scene.add( new THREE.AxesHelper( 500 ) );
+
+			const mesh = new THREE.Mesh(
+				new THREE.SphereGeometry( 100, 16, 8 ),
+				new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } )
+			);
+			scene.add( mesh );
+
+			const mesh2 = new THREE.Mesh(
+				new THREE.SphereGeometry( 50, 16, 8 ),
+				new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } )
+			);
+			mesh2.position.y = 150;
+			mesh.add( mesh2 );
+
+			const mesh3 = new THREE.Mesh(
+				new THREE.SphereGeometry( 5, 16, 8 ),
+				new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
+			);
+			mesh3.position.z = 150;
+			mesh.add( mesh3 );
+
+
+			let SCREEN_WIDTH = window.innerWidth,
+					SCREEN_HEIGHT = window.innerHeight,
+					aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+			const camera = new THREE.PerspectiveCamera( 50, 0.5 * aspect, 1, 1000000 );
+			camera.position.set(0, 0, 2500);
+
+			const startPFov = 50;
+			const startPNear = 150;
+			const startPFar = 1000;
+			const perspectiveTestCamera = new THREE.PerspectiveCamera( startPFov, 0.5 * aspect, startPNear, startPFar );
+			perspectiveTestCamera.position.set(0, 0, 1000);
+
+			const startOLeft = -150;
+			const startORight = 150;
+			const startOTop = 150;
+			const startOBottom = -150;
+			const startONear = -150;
+			const startOFar = 150;
+			const orthographicTestCamera = new THREE.OrthographicCamera(startOLeft, startORight, startOTop, startOBottom, startONear, startOFar);
+
+			let activeCamera = perspectiveTestCamera;
+
+			const cameraModel = new CameraModel( activeCamera );
+			scene.add( cameraModel );
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+
+			const plane = new THREE.PlaneGeometry( 1000, 1000 );
+			const material = new THREE.MeshBasicMaterial({
+				color: 0xff0000,
+				side: THREE.DoubleSide,
+			})
+
+			const planeMesh = new THREE.Mesh( plane, material );
+			const planeMesh1 = new THREE.Mesh( plane, material );
+			const planeMesh2 = new THREE.Mesh( plane, material );
+			const planeMesh3 = new THREE.Mesh( plane, material );
+
+			mesh.add( planeMesh );
+			mesh.add( planeMesh1 );
+			mesh.add( planeMesh2 );
+			mesh.add( planeMesh3 );
+
+			const
+				planeMesh1Ndc = new THREE.Vector3( 0, 0, -0.5 ),
+				planeMesh2Ndc = new THREE.Vector3( 0, 0, 0 ),
+				planeMesh3Ndc = new THREE.Vector3( 0, 0, 0.5 ),
+				planeMesh4Ndc = new THREE.Vector3( 0, 0, 0.999 );
+
+			function updatePlaneMeshPosZ(){
+
+				planeMesh.position.copy(planeMesh1Ndc).unproject( activeCamera );
+				planeMesh1.position.copy(planeMesh2Ndc).unproject( activeCamera );
+				planeMesh2.position.copy(planeMesh3Ndc).unproject( activeCamera );
+				planeMesh3.position.copy(planeMesh4Ndc).unproject( activeCamera );
+			}
+			updatePlaneMeshPosZ();
+
+			function updatePlaneMeshVisible( visible ){
+
+				planeMesh.visible = visible;
+				planeMesh1.visible = visible;
+				planeMesh2.visible = visible;
+				planeMesh3.visible = visible;
+			}
+			updatePlaneMeshVisible( false );
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			loop();
+			function loop() {
+				renderer.clear();
+
+				cameraModel.visible = false;
+
+				renderer.setViewport( 0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT );
+				renderer.render( scene, activeCamera );
+
+				cameraModel.visible = true;
+
+				renderer.setViewport( SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT );
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame( loop );
+			}
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					param = {
+						isPerspective: true,
+						showPlaneMesh: false
+					};
+
+				gui.add(param, 'isPerspective').onChange((data)=>{
+					if(data){
+						activeCamera = perspectiveTestCamera;
+					}else{
+						activeCamera = orthographicTestCamera;
+					}
+					cameraModel.update(activeCamera);
+
+					updatePlaneMeshPosZ();
+				});
+
+				gui.add( param, 'showPlaneMesh').onChange((data)=>{
+
+					updatePlaneMeshVisible( data );
+				});
+
+				initPerspectiveGui( gui, perspectiveTestCamera, '透视相机' );
+				initOrthographicGui( gui, orthographicTestCamera, '正交相机' );
+
+				iniPlaneMeshZ( gui, planeMesh1Ndc, 'planeMesh1' );
+				iniPlaneMeshZ( gui, planeMesh2Ndc, 'planeMesh2' );
+				iniPlaneMeshZ( gui, planeMesh3Ndc, 'planeMesh3' );
+				iniPlaneMeshZ( gui, planeMesh4Ndc, 'planeMesh4' );
+			}
+
+			function onUpdateCamera(){
+
+				activeCamera.updateProjectionMatrix();
+				cameraModel.update(activeCamera);
+				updatePlaneMeshPosZ();
+			}
+
+			function initPerspectiveGui(gui, camera, name){
+
+				const perspectiveFolder = gui.addFolder(name);
+
+				perspectiveFolder.add( camera, 'fov', 0.01, 180 ).onChange(onUpdateCamera);
+
+				perspectiveFolder.add( camera, 'near', 0.001, startPNear ).onChange(onUpdateCamera);
+
+				perspectiveFolder.add( camera, 'far', startPNear, 2 * startPFar ).onChange(onUpdateCamera);
+			}
+
+			function initOrthographicGui(gui, camera, name){
+
+				const orthographicFolder = gui.addFolder(name);
+
+				orthographicFolder.add( camera, 'left', startOLeft * 2, startORight ).onChange(onUpdateCamera);
+				orthographicFolder.add( camera, 'right', startOLeft, startORight * 2 ).onChange(onUpdateCamera);
+				orthographicFolder.add( camera, 'top', startOBottom, startOTop * 2 ).onChange(onUpdateCamera);
+				orthographicFolder.add( camera, 'bottom', startOBottom * 2, startOTop).onChange(onUpdateCamera);
+				orthographicFolder.add( camera, 'near', startONear * 2, startOFar ).onChange(onUpdateCamera);
+				orthographicFolder.add( camera, 'far', startONear, startOFar * 2 ).onChange(onUpdateCamera);
+			}
+
+			function iniPlaneMeshZ(gui, planeMeshNdc, name){
+
+				const planeMeshFolder = gui.addFolder(name);
+
+				planeMeshFolder.add( planeMeshNdc, 'z', -1, 1 ).onChange( updatePlaneMeshPosZ )
+			}
+		</script>
+	</body>
+</html>

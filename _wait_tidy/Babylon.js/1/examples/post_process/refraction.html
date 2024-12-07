@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../favicon.ico">
+		<title>refraction</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		简单展示 refraction 效果
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../module.js";
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			BABYLON.Engine.ShadersRepository = '../../source/Shaders/';
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 100, new BABYLON.Vector3(0, 0, 0), scene);
+
+				camera.setPosition(new BABYLON.Vector3(-60, 60, 0));
+				camera.lowerBetaLimit = (Math.PI / 2) * 0.8;
+				camera.attachControl(canvas);
+
+
+				var light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -1, -0.2), scene);
+				var light2 = new BABYLON.DirectionalLight("dir02", new BABYLON.Vector3(-1, -2, -1), scene);
+				light.position = new BABYLON.Vector3(0, 30, 0);
+				light2.position = new BABYLON.Vector3(10, 20, 10);
+
+				light.intensity = 0.6;
+				light2.intensity = 0.6;
+
+				// 添加之后会警告，且无效，不清楚为什么
+				// // Skybox
+				// var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
+				// var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+				// skyboxMaterial.backFaceCulling = false;
+				// skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("../assets/images/snow/snow", scene);
+				// skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+				// skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+				// skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+				// skybox.material = skyboxMaterial;
+
+
+				// Spheres
+				var sphere0 = BABYLON.Mesh.CreateSphere("Sphere0", 16, 10, scene);
+				var sphere1 = BABYLON.Mesh.CreateSphere("Sphere1", 16, 10, scene);
+				var sphere2 = BABYLON.Mesh.CreateSphere("Sphere2", 16, 10, scene);
+
+				sphere0.material = new BABYLON.StandardMaterial("red", scene);
+				sphere0.material.specularColor = new BABYLON.Color3(0, 0, 0);
+				sphere0.material.diffuseColor = new BABYLON.Color3(1.0, 0, 0);
+
+				sphere1.material = new BABYLON.StandardMaterial("green", scene);
+				sphere1.material.specularColor = new BABYLON.Color3(0, 0, 0);
+				sphere1.material.diffuseColor = new BABYLON.Color3(0, 1.0, 0);
+
+				sphere2.material = new BABYLON.StandardMaterial("blue", scene);
+				sphere2.material.specularColor = new BABYLON.Color3(0, 0, 0);
+				sphere2.material.diffuseColor = new BABYLON.Color3(0, 0, 1.0);
+
+
+				// Post-process
+				var postProcess = new BABYLON.RefractionPostProcess("Refraction",
+					"../assets/images/refMap.jpg",
+					new BABYLON.Color3(1.0, 1.0, 1.0),
+					0.5, 0.5, 1.0,
+					camera);
+
+				// Animations
+				var alpha = 0;
+				scene.registerBeforeRender(function() {
+					sphere0.position = new BABYLON.Vector3(20 * Math.sin(alpha), 0, 20 * Math.cos(alpha));
+					sphere1.position = new BABYLON.Vector3(20 * Math.sin(alpha), 0, -20 * Math.cos(alpha));
+					sphere2.position = new BABYLON.Vector3(20 * Math.cos(alpha), 0, 20 * Math.sin(alpha));
+
+					alpha += 0.01;
+				});
+
+				return scene;
+			}
+
+			const scene = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+				scene.render();
+
+				stats.update();
+			});
+		</script>
+	</body>
+</html>

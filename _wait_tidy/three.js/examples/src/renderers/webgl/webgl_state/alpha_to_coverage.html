@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>alpha</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		alphaToCoverage 参数相关的几个参数，调节查看效果，还不是很清楚原理，感觉需要深入了解 MeshStandardMaterial shader
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+
+			renderer.sortObjects = false;
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			renderer.domElement.id = 'renderCanvas';
+
+			document.body.appendChild( renderer.domElement );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 200 );
+
+			camera.position.z = 3;
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+
+
+			const plane = new THREE.PlaneGeometry(1, 1, 1, 1);
+
+			const texture1 = new THREE.TextureLoader().load('../../../../assets/images/logo1.jpg' );	//白咕咕
+			const texture2 = new THREE.TextureLoader().load('../../../../assets/images/logo.jpeg' );	//鱼鱼
+
+			const material1 = new THREE.MeshStandardMaterial({
+				transparent: true,
+				map: texture1,
+				alphaMap: texture1,
+				emissiveMap: texture1,
+				lightMap: texture1,
+			});
+
+			const mesh1 = new THREE.Mesh( plane, material1 );
+			const mesh2 = new THREE.Mesh( plane, new THREE.RawShaderMaterial({
+				vertexShader: `
+
+					precision mediump float;
+
+					uniform mat4 modelMatrix;
+					uniform mat4 viewMatrix;
+					uniform mat4 projectionMatrix;
+
+					attribute vec3 position;
+
+					void main() {
+
+						gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+					}
+				`,
+				fragmentShader: `
+
+					precision mediump float;
+
+					void main() {
+
+						gl_FragColor =  vec4(1.0, 0.0, 0.0, 1);
+					}
+				`,
+			}) );
+
+			mesh1.position.z = 1;
+			mesh2.scale.set( 2, 2, 2 );
+
+			scene.add(mesh1);
+			scene.add(mesh2);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initMaterialStateGui(gui, material1, 'material1(白咕咕)');
+			}
+
+			function initMaterialStateGui(gui, material, name){
+
+				const materialStateFolder = gui.addFolder(name);
+
+				materialStateFolder.add( material, 'transparent');
+				materialStateFolder.add( material, 'alphaTest', 0, 1 );
+				materialStateFolder.add( material, 'alphaToCoverage' );
+				materialStateFolder.add( material, 'opacity', 0, 1);
+			}
+
+			loop();
+			function loop() {
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop);
+			}
+		</script>
+	</body>
+</html>

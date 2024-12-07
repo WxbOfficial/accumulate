@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>texture_projection</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+		抄自 https://observablehq.com/@severo/texture-projection
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<video id="video" loop crossOrigin="anonymous" playsinline style="display:none">
+				<source src="../../../source/examples/textures/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
+				<source src="../../../source/examples/textures/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+		</video>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true,
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+			renderer.autoClear = false;
+
+			const camera = new THREE.PerspectiveCamera(
+				60, canvas.clientWidth / canvas.clientHeight / 2,
+				0.01, 1000
+			);
+
+			// camera.position.z = 10;
+			camera.position.set(2, 1, 2).setLength(15);
+
+			scene.add(camera);
+
+			const controls = new OrbitControls( camera, renderer.domElement );
+			controls.target.set(0, 0, 0);
+
+			scene.add(new THREE.AxesHelper( 100 ));
+
+			// texture project
+			const projCamera = new THREE.PerspectiveCamera(35, canvas.clientWidth / canvas.clientHeight / 2, 0.01, 20);
+			// const projCamera = new THREE.OrthographicCamera(- 5, 5, 3, - 4, -5, 20);
+			projCamera.position.set(0, 0, 10);
+
+			const cameraHelper = new THREE.CameraHelper(projCamera);
+			scene.add(cameraHelper);
+
+			const videoDom = document.getElementById('video');
+			const videoTex = new THREE.VideoTexture(videoDom);
+
+			const uniforms = {
+				baseColor: {
+					value: new THREE.Color(0xcccccc)
+				},
+				cameraMatrix: {
+					type: 'm4',
+					value: projCamera.matrixWorldInverse
+				},
+				projMatrix: {
+					type: 'm4',
+					value: projCamera.projectionMatrix
+				},
+				myTexture: {
+					value: videoTex
+				}
+			};
+			const screen = new THREE.Mesh(
+				new THREE.BoxGeometry(16, 9, 2),
+				new THREE.RawShaderMaterial({
+					uniforms,
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+
+						uniform mat4 projectionMatrix;
+						uniform mat4 viewMatrix;
+						uniform mat4 modelMatrix;
+
+						varying vec4 vWorldPos;
+
+						void main() {
+
+							vWorldPos = modelMatrix * vec4(position, 1.0);
+							gl_Position = projectionMatrix * viewMatrix * vWorldPos;
+						}`,
+					fragmentShader: `
+						precision mediump float;
+
+						uniform vec3 baseColor;
+						uniform sampler2D myTexture;
+						uniform mat4 cameraMatrix;
+						uniform mat4 projMatrix;
+
+						varying vec4 vWorldPos;
+
+						void main() {
+
+							vec4 texc = projMatrix * cameraMatrix * vWorldPos;
+							vec2 uv = texc.xy / texc.w / 2.0 + 0.5;
+							vec3 color;
+
+							if( max( uv.x, uv.y ) <= 1. && min( uv.x, uv.y ) >= 0. ){
+								gl_FragColor = vec4(texture2D(myTexture, uv).rgb, 1.0);
+							}else {
+								gl_FragColor = vec4(baseColor, 1.0);
+							}
+
+							// gl_FragColor = vec4( texc.xy, 0.0, 1.0 );
+						}`,
+					// side: THREE.FrontSide
+				})
+			);
+			scene.add(screen);
+
+			var stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const
+					gui = new lil.GUI(),
+					param = {
+						playVide: false,
+						isControlPro: false,
+					};
+
+				gui.add(param, 'playVide').onChange((data)=>{
+					if( data ){
+						videoDom.play();
+					} else {
+						videoDom.pause();
+					}
+				});
+				gui.add(param, 'isControlPro').onChange((data)=>{
+					if( data ){
+						controls.object = projCamera;
+					}else{
+						controls.object = camera;
+					}
+				});
+				gui.open();
+
+			}
+
+			loop();
+			function loop() {
+				renderer.clear();
+
+				cameraHelper.visible = false;
+
+				renderer.setViewport( 0, 0, canvas.clientWidth / 2, canvas.clientHeight );
+				renderer.render( scene, projCamera );
+
+				cameraHelper.visible = true;
+
+				renderer.setViewport( canvas.clientWidth / 2, 0, canvas.clientWidth / 2, canvas.clientHeight );
+				renderer.render( scene, camera );
+
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

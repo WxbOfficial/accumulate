@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>batched_mesh</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			// var renderer = new THREE.WebGLRenderer2(true);
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			camera.position.z = 10;
+
+			scene.add(camera);
+
+
+			const box = new THREE.BoxGeometry( 1, 1, 1 );
+			const sphere = new THREE.SphereGeometry( 0.5, 32, 16 );
+			box.name = 'box';
+			sphere.name = 'sphere';
+
+			const material = new THREE.MeshBasicMaterial( {
+				color: 0xffffff,
+				map: new THREE.TextureLoader().load('../../assets/images/logo1.jpg')
+			} );
+
+			// initialize and add geometries into the batched mesh
+			const batchedMesh = new THREE.BatchedMesh( 2, 5000, 10000, material );
+			const boxId = batchedMesh.addGeometry( box );
+			const sphereId = batchedMesh.addGeometry( sphere );
+
+			const boxMatrix = new THREE.Matrix4();
+			const sphereMatrix = new THREE.Matrix4();
+
+			boxMatrix.setPosition( 2, 0, 0 );
+			sphereMatrix.setPosition( -2, 0, 0 );
+
+			// position the geometries
+			batchedMesh.setMatrixAt( boxId, boxMatrix );
+			batchedMesh.setMatrixAt( sphereId, sphereMatrix );
+
+			scene.add( batchedMesh );
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initObjectGui(gui, batchedMesh, 'batchedMesh');
+
+				initBatchedMeshGui(gui, batchedMesh, boxId, boxMatrix, 'box');
+				initBatchedMeshGui(gui, batchedMesh, sphereId, sphereMatrix, 'sphere');
+			}
+
+			function initObjectGui( gui, object, name ){
+
+				const
+					objectFolder = gui.addFolder(name),
+					angleParam = {
+						x: object.rotation.x / Math.PI * 180,
+						y: object.rotation.y / Math.PI * 180,
+						z: object.rotation.z / Math.PI * 180,
+					};
+
+				objectFolder.add(object.position, 'x', -5, 5).name('position.x').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(object.position, 'y', -5, 5).name('position.y').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(object.position, 'z', -5, 5).name('position.z').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+
+				objectFolder.add(angleParam, 'x', -180, 180).name('rotation.x').onChange(( angle )=>{
+
+					object.rotation.x = angle / 180 * Math.PI;
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(angleParam, 'y',  -180, 180).name('rotation.y').onChange(( angle )=>{
+
+					object.rotation.y = angle / 180 * Math.PI;
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(angleParam, 'z',  -180, 180).name('rotation.z').onChange(( angle )=>{
+
+					object.rotation.z = angle / 180 * Math.PI;
+					object.updateMatrixWorld();
+				});
+
+				objectFolder.add(object.scale, 'x', -3, 3).name('scale.x').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(object.scale, 'y', -3, 3).name('scale.y').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+				objectFolder.add(object.scale, 'z', -3, 3).name('scale.z').onChange(()=>{
+					object.updateMatrixWorld();
+				});
+			}
+
+
+			function initBatchedMeshGui(gui, mesh, id, matrix4, name){
+
+				const
+					batchedMeshFolder = gui.addFolder( name ),
+					position = new THREE.Vector3(),
+					rotation = new THREE.Euler(),
+					quaternion = new THREE.Quaternion(),
+					scale = new THREE.Vector3(),
+					rotationAngle = {
+						_x: 0, _y: 0, _z: 0,
+
+						get x(){
+
+							return this._x;
+						},
+						get y(){
+
+							return this._y;
+						},
+						get z(){
+
+							return this._z;
+						},
+
+						set x( val ){
+
+							this._x = val;
+							rotation.x = val / 180 * Math.PI;
+						},
+						set y( val ){
+
+							this._y = val;
+							rotation.y = val / 180 * Math.PI;
+						},
+						set z( val ){
+
+							this._z = val;
+							rotation.z = val / 180 * Math.PI;
+						}
+					},
+					_matrix4 = new THREE.Matrix4();
+
+				rotation._onChange( ()=>{
+
+					quaternion.setFromEuler( rotation, false );
+					rotationAngle._x = rotation.x / Math.PI * 180;
+					rotationAngle._y = rotation.y / Math.PI * 180;
+					rotationAngle._z = rotation.z / Math.PI * 180;
+				} );
+				quaternion._onChange( ()=>{
+
+					rotation.setFromQuaternion( quaternion, undefined, false );
+				} );
+
+				matrix4.decompose( position, quaternion, scale );
+
+				function changeMatrix(){
+
+					_matrix4.compose( position, quaternion, scale );
+					batchedMesh.setMatrixAt( id, _matrix4 );
+				}
+
+				batchedMeshFolder.add(position, 'x', -10, 10).name('position.x').onChange( changeMatrix );
+				batchedMeshFolder.add(position, 'y', -10, 10).name('position.y').onChange( changeMatrix );
+				batchedMeshFolder.add(position, 'z', -10, 10).name('position.z').onChange( changeMatrix );
+
+				batchedMeshFolder.add(rotationAngle, 'x', -180, 180).name('rotationAngle.x').onChange( changeMatrix );
+				batchedMeshFolder.add(rotationAngle, 'y', -180, 180).name('rotationAngle.y').onChange( changeMatrix );
+				batchedMeshFolder.add(rotationAngle, 'z', -180, 180).name('rotationAngle.z').onChange( changeMatrix );
+
+				batchedMeshFolder.add(scale, 'x', -10, 10).name('scale.x').onChange( changeMatrix );
+				batchedMeshFolder.add(scale, 'y', -10, 10).name('scale.y').onChange( changeMatrix );
+				batchedMeshFolder.add(scale, 'z', -10, 10).name('scale.z').onChange( changeMatrix );
+			}
+
+
+
+			loop();
+			function loop() {
+
+				// mesh.rotation.y += 0.001;
+				// mesh.updateMatrix();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

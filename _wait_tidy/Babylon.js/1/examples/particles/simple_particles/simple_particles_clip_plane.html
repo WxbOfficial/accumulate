@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" type="image/png" href="../../../../favicon.ico">
+		<title>simple_particles_clip_plane</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!-- 为了学习 ParticleSystem 仿写的一个简单案例
+
+		遗留问题:
+			将 particle.render() 放到 scene.render() 前就会渲染不出来被覆盖。根据需要加强对 webgl 渲染机制的了解
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="module">
+			import "../../module.js"
+
+			import SimpleParticles from './simple_particles.js';
+			import { createMathPlane, updateMathPlane } from '../../mesh/helper/plane_helper.js';
+
+
+			const canvas = document.getElementById('renderCanvas');
+
+			var engine = new BABYLON.Engine(canvas, true);
+
+			window.engine = engine;
+
+			// 强制绘制线
+			// engine.forceWireframe = true;
+
+			var CreateScene = function (engine) {
+
+				var scene = new BABYLON.Scene(engine);
+
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, BABYLON.Vector3.Zero(), scene);
+
+				camera.setPosition(new BABYLON.Vector3(0, 0, -30));
+				camera.attachControl(canvas);
+
+				var box = BABYLON.Mesh.CreateBox("Box", 0.2, scene);
+
+				const mathPlane = createMathPlane('mathPlane',
+					 1, -3, 2, -1,
+					-1,  1, 1,  1,
+					-1, -1, 1, -1,
+					scene,
+				);
+
+				const mathPlaneMat = new BABYLON.StandardMaterial('mathPlaneMat', scene);
+
+				mathPlaneMat.backFaceCulling = true;
+
+				mathPlaneMat.emissiveTexture = new BABYLON.Texture(
+					// '../assets/images/heightMap.png',
+					"../../assets/images/logo1.jpg",
+					// "../../assets/images/logo.jpeg",
+					scene
+				);
+
+				mathPlane.material = mathPlaneMat;
+
+				BABYLON.clipPlane = new BABYLON.Plane(
+					mathPlane.a,
+					mathPlane.b,
+					mathPlane.c,
+					mathPlane.d,
+				);
+
+				initGui(mathPlane);
+
+				BABYLON.Engine.ShadersRepository = './';
+				var particle = new SimpleParticles(scene);
+
+				particle.particleTexture = new BABYLON.Texture("../../assets/images/logo.jpeg", scene);
+
+				BABYLON.Engine.ShadersRepository = '../../../source/Shaders/';
+				// var box = BABYLON.Mesh.CreateBox("Box", 5, scene);
+
+				// var material = new BABYLON.StandardMaterial("boxMat", scene);
+
+				return { scene, particle };
+			}
+
+			const { scene, particle } = CreateScene(engine);
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			engine.runRenderLoop(()=>{
+
+        // engine._gl.disable(engine._gl.CULL_FACE);
+				scene.render();
+				particle.render();
+
+				stats.update();
+			});
+
+
+			function initGui(mathPlane){
+
+        const gui = new lil.GUI();
+
+        const mathPlaneFolder = gui.addFolder('mathPlane');
+
+        mathPlaneFolder.add( mathPlane, '_isEnabled')
+
+        mathPlaneFolder.add( mathPlane, 'a', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+        	BABYLON.clipPlane.normal.x =  mathPlane.a;
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'b', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+        	BABYLON.clipPlane.normal.y =  mathPlane.b;
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'c', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+        	BABYLON.clipPlane.normal.z =  mathPlane.c;
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'd', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+        	BABYLON.clipPlane.d =  mathPlane.d;
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'ltX', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'ltY', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'rtX', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'rtY', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'lbX', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'lbY', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'rbX', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+
+        mathPlaneFolder.add( mathPlane, 'rbY', -10, 10 ).onChange((data)=>{
+        	updateMathPlane(mathPlane);
+	      });
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../icon.png">
+		<title>bloom_pass</title>
+		<link href="../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, EffectComposer, BloomPass, OutputPass } from '../../jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 100
+			);
+
+			camera.position.z = 2;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			const scene = new THREE.Scene();
+
+			const cubeMesh = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshBasicMaterial({
+					color: 0xffffff,
+					map: new THREE.TextureLoader().load('../../../assets/images/logo1.jpg'),
+				})
+			);
+
+			scene.add(cubeMesh);
+
+
+			const composer = new EffectComposer( renderer );
+
+			// RenderPass
+			composer.addPass({
+
+				isPass: true,
+				enabled: true,
+				needsSwap: true,
+				clear: true,
+				renderToScreen: false,
+
+				clearDepth: false,
+				needsSwap: false,
+
+				setSize(){  },
+
+				render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ){
+
+
+					renderer.setRenderTarget( this.renderToScreen ? null : readBuffer );
+
+					renderer.clear(true, true, true);
+					renderer.render( scene, camera );
+				}
+			});
+
+			const bloomPass = new BloomPass( 1 );
+			const outputPass = new OutputPass();
+			composer.addPass( bloomPass );
+			// BloomPass 中 将最后的 renderer.setRenderTarget( readBuffer ); 改为 renderer.setRenderTarget( null ); 就可以不使用 outputPass
+			composer.addPass( outputPass );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( bloomPass.combineUniforms.strength, 'value', 0, 2 ).name('strength');
+			}
+
+
+			loop();
+			function loop() {
+
+				composer.render();
+
+				// renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

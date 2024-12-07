@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../icon.png">
+		<title>instanced_mesh</title>
+		<link href="../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls } from '../../jsm/jsm.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const scene = new THREE.Scene();
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			// var renderer = new THREE.WebGLRenderer2(true);
+
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 1, 1000 );
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+			camera.position.z = 10;
+
+			scene.add(camera);
+
+			const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+			const material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+
+			const	mesh = new THREE.InstancedMesh( boxGeometry, material, 2 );
+
+			scene.add( mesh );
+
+
+			const matrix = new THREE.Matrix4();
+
+			const positions = [
+				{x: -4, y: 0, z: 0 },
+				{x:  0, y: 0, z: 0 },
+			];
+
+			const colors = [
+				new THREE.Color(1, 0, 0),
+				new THREE.Color(1, 1, 1)
+			]
+
+			positions.forEach(( position, i )=>{
+				const { x, y, z } = position;
+				mesh.setMatrixAt( i, matrix.setPosition(x, y, z) );
+			});
+			mesh.instanceMatrix.needsUpdate = true;
+
+			colors.forEach(( color, i )=>{
+
+				mesh.setColorAt( i, color );
+			});
+			mesh.instanceColor.needsUpdate = true;
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				initInstancedMesh(gui, mesh, 0);
+				initInstancedMesh(gui, mesh, 1);
+			}
+
+			function changePosition( i ){
+				return ()=>{
+					const { x, y, z } = positions[i];
+					mesh.setMatrixAt( i, matrix.setPosition(x, y, z) );
+					mesh.instanceMatrix.needsUpdate = true;
+				}
+			}
+
+			function changeColor( i ){
+				return ()=>{
+					mesh.setColorAt( i, colors[i] );
+					mesh.instanceColor.needsUpdate = true;
+				}
+			}
+
+			function initInstancedMesh(gui, mesh, i){
+
+				const instancedMeshFolder = gui.addFolder(`mesh ${i+1}`);
+
+				instancedMeshFolder.add(positions[i], 'x', -10, 10).name('position.x').onChange( changePosition( i ) );
+				instancedMeshFolder.add(positions[i], 'y', -10, 10).name('position.y').onChange( changePosition( i ) );
+				instancedMeshFolder.add(positions[i], 'z', -10, 10).name('position.z').onChange( changePosition( i ) );
+
+				instancedMeshFolder.addColor(colors, i).name('color').onChange( changeColor(i) );
+
+			}
+
+
+
+			loop();
+			function loop() {
+
+				// mesh.rotation.y += 0.001;
+				// mesh.updateMatrix();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>

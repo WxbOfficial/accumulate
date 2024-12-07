@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+		<link rel="icon" href="../../../../icon.png">
+		<title>mirror_camera</title>
+		<link href="../../../../../../_utils/default_css.css" rel="stylesheet" type="text/css"/>
+	</head>
+	<!--
+
+	-->
+	<body>
+		<canvas id="renderCanvas"></canvas>
+		<script type="importmap">
+			{
+				"imports": {
+						"three": "../../../../../source/src/THREE.js"
+				}
+			}
+		</script>
+		<script type="module">
+			import '../../../../module.js';
+			import * as THREE from 'three';
+			import { OrbitControls, Water } from '../../../jsm.js';
+			import { createWaterScene } from '../create_scene.water.js';
+			import { WaterTool, getDemoScene } from './water_tool.js';
+			import CameraModel from '../../../../src/cameras/camera_model.js';
+
+			const canvas = document.getElementById('renderCanvas');
+
+			const renderer = new THREE.WebGLRenderer({
+				canvas,
+				antialias: true
+			});
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const camera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 10000
+			);
+
+			camera.position.z = 6;
+
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+
+			const observeCamera = new THREE.PerspectiveCamera(
+				75, canvas.clientWidth / canvas.clientHeight,
+				1, 10000
+			);
+
+			observeCamera.position.z = 6;
+
+			const observeOrbitControls = new OrbitControls(observeCamera, renderer.domElement);
+
+
+			const scene = new THREE.Scene();
+
+			const waterScene = createWaterScene();
+
+			scene.add( waterScene );
+
+			const waterTool = new WaterTool();
+
+			const mirrorSampler = new THREE.WebGLRenderTarget(512, 512);
+
+			const water = new THREE.Mesh(
+				new THREE.PlaneGeometry( 10, 10 ),
+				new THREE.RawShaderMaterial({
+					uniforms: {
+						mirrorSampler: {
+							value: mirrorSampler.texture,
+						},
+						textureMatrix: {
+							value: waterTool.textureMatrix,
+						},
+						isMirrorCoord: {
+							value: true,
+						}
+					},
+					vertexShader: `
+						precision mediump float;
+
+						attribute vec3 position;
+						attribute vec2 uv;
+						attribute vec3 color;
+
+						uniform mat4 projectionMatrix;
+						uniform mat4 viewMatrix;
+						uniform mat4 modelMatrix;
+						uniform mat4 textureMatrix;
+
+						varying vec4 mirrorCoord;
+						varying vec2 vUv;
+
+						void main(void) {
+							vUv = uv;
+
+							mirrorCoord = modelMatrix * vec4( position, 1.0 );
+
+							mirrorCoord = textureMatrix * mirrorCoord;
+
+							gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4( position, 1.0 );
+						}
+					`,
+					fragmentShader: `
+						precision mediump float;
+
+						uniform sampler2D mirrorSampler;
+						uniform bool isMirrorCoord;
+
+						varying vec4 mirrorCoord;
+						varying vec2 vUv;
+
+						void main() {
+
+							vec3 reflectionSample = vec3( texture2D( mirrorSampler, isMirrorCoord ? ( mirrorCoord.xy / mirrorCoord.w) : vUv ) );
+
+							gl_FragColor = vec4(reflectionSample, 1.0);
+						}
+					`,
+				})
+			);
+
+			water.position.y = 1;
+			water.rotation.x = Math.PI * - 0.5;
+
+			scene.add( water );
+
+			waterTool.matrixWorld = water.matrixWorld;
+
+
+			const mirrorCameraModel = new CameraModel( waterTool.mirrorCamera );
+
+			scene.add( mirrorCameraModel );
+
+			const cameraModel = new CameraModel( camera );
+
+			scene.add( cameraModel );
+
+
+			const stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+
+			const param = {
+				isMirrorCoord: true,
+				cameraVisible: false,
+				isObserve: false,
+			}
+
+			initGui();
+			function initGui(){
+
+				const gui = new lil.GUI();
+
+				gui.add( param, 'isMirrorCoord' ).onChange(( isMirrorCoord )=>{
+					water.material.uniforms.isMirrorCoord.value = isMirrorCoord;
+				});
+
+				gui.add( param, 'cameraVisible' );
+
+				gui.add( param, 'isObserve' ).onChange(( isObserve )=>{
+
+					observeOrbitControls.enabled = isObserve;
+					orbitControls.enabled = !isObserve;
+				});
+			}
+
+			renderer.setScissorTest( true );
+
+			const widthStep = canvas.clientWidth / 2;
+			const heightStep = canvas.clientHeight / 2;
+
+			loop( 0 );
+			function loop( time ) {
+
+				orbitControls.update();
+				waterTool.update( camera );
+
+				mirrorCameraModel.update( waterTool.mirrorCamera );
+				cameraModel.update( camera );
+
+				// render
+				renderer.setScissor( 0, heightStep, widthStep, heightStep );
+				renderer.setViewport( 0, heightStep, widthStep, heightStep );
+
+				renderer.setRenderTarget( mirrorSampler );
+				renderer.render( waterScene, waterTool.mirrorCamera );
+				renderer.setRenderTarget( null);
+
+				renderer.render( scene, camera );
+
+
+				renderer.setScissor( widthStep, heightStep, widthStep, heightStep );
+				renderer.setViewport( widthStep, heightStep, widthStep, heightStep );
+
+				mirrorCameraModel.visible = true;
+				renderer.render( scene, observeCamera );
+				mirrorCameraModel.visible = false;
+
+
+				renderer.setScissor( 0, 0, widthStep, heightStep );
+				renderer.setViewport( 0, 0, widthStep, heightStep );
+
+				renderer.render( scene, waterTool.mirrorCamera )
+
+				renderer.setScissor( widthStep, 0, widthStep, heightStep );
+				renderer.setViewport( widthStep, 0, widthStep, heightStep );
+
+				cameraModel.visible = true;
+				renderer.render( scene, observeCamera );
+				cameraModel.visible = false;
+
+				stats.update();
+
+				requestAnimationFrame(loop)
+			}
+		</script>
+	</body>
+</html>
