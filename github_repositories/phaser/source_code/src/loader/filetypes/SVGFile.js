@@ -39,6 +39,7 @@ var SVGFile = new Class({
 
     function SVGFile (loader, key, url, svgConfig, xhrSettings)
     {
+        console.group('SVGFile');
         var extension = 'svg';
 
         if (IsPlainObject(key))
@@ -68,6 +69,7 @@ var SVGFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -79,6 +81,7 @@ var SVGFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('SVGFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         var text = this.xhrLoader.responseText;
@@ -139,6 +142,7 @@ var SVGFile = new Class({
         {
             this.onProcessError();
 
+            console.groupEnd();
             return;
         }
 
@@ -177,6 +181,7 @@ var SVGFile = new Class({
         };
 
         File.createObjectURL(this.data, blob, 'image/svg+xml');
+        console.groupEnd();
     },
 
     /**
@@ -187,7 +192,9 @@ var SVGFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('SVGFile addToCache');
         this.cache.addImage(this.key, this.data);
+        console.groupEnd();
     }
 
 });
@@ -309,8 +316,10 @@ var SVGFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register svg');
 FileTypesManager.register('svg', function (key, url, svgConfig, xhrSettings)
 {
+    console.group('FileTypesManager.register svg factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -324,8 +333,10 @@ FileTypesManager.register('svg', function (key, url, svgConfig, xhrSettings)
         this.addFile(new SVGFile(this, key, url, svgConfig, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = SVGFile;
 

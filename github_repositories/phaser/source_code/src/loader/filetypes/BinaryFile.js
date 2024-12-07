@@ -39,6 +39,7 @@ var BinaryFile = new Class({
 
     function BinaryFile (loader, key, url, xhrSettings, dataType)
     {
+        console.group('BinaryFile');
         var extension = 'bin';
 
         if (IsPlainObject(key))
@@ -64,6 +65,7 @@ var BinaryFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -75,6 +77,7 @@ var BinaryFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('BinaryFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         var ctor = this.config.dataType;
@@ -82,6 +85,7 @@ var BinaryFile = new Class({
         this.data = (ctor) ? new ctor(this.xhrLoader.response) : this.xhrLoader.response;
 
         this.onProcessComplete();
+        console.groupEnd();
     }
 
 });
@@ -155,8 +159,10 @@ var BinaryFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register binary');
 FileTypesManager.register('binary', function (key, url, dataType, xhrSettings)
 {
+    console.group('FileTypesManager.register binary factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -170,7 +176,9 @@ FileTypesManager.register('binary', function (key, url, dataType, xhrSettings)
         this.addFile(new BinaryFile(this, key, url, xhrSettings, dataType));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = BinaryFile;

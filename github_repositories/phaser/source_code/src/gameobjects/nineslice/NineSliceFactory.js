@@ -96,8 +96,13 @@ var GameObjectFactory = require('../GameObjectFactory');
  */
 if (typeof WEBGL_RENDERER)
 {
+    console.group('GameObjectFactory.register nineslice');
     GameObjectFactory.register('nineslice', function (x, y, texture, frame, width, height, leftWidth, rightWidth, topHeight, bottomHeight)
     {
-        return this.displayList.add(new NineSlice(this.scene, x, y, texture, frame, width, height, leftWidth, rightWidth, topHeight, bottomHeight));
+        console.group('GameObjectFactory.register nineslice factoryFunction');
+        const result = this.displayList.add(new NineSlice(this.scene, x, y, texture, frame, width, height, leftWidth, rightWidth, topHeight, bottomHeight));
+        console.groupEnd();
+        return result;
     });
+    console.groupEnd();
 }

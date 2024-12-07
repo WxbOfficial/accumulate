@@ -102,6 +102,7 @@ var Timeline = new Class({
 
     function Timeline (scene, config)
     {
+        console.group('Timeline');
         EventEmitter.call(this);
 
         /**
@@ -239,6 +240,7 @@ var Timeline = new Class({
         {
             this.add(config);
         }
+        console.groupEnd();
     },
 
     /**
@@ -252,12 +254,15 @@ var Timeline = new Class({
      */
     preUpdate: function (time, delta)
     {
+        console.group('Timeline preUpdate');
         if (this.paused)
         {
+            console.groupEnd();
             return;
         }
 
         this.elapsed += delta * this.timeScale;
+        console.groupEnd();
     },
 
     /**
@@ -286,8 +291,10 @@ var Timeline = new Class({
      */
     update: function ()
     {
+        console.group('Timeline update');
         if (this.paused || this.complete)
         {
+            console.groupEnd();
             return;
         }
 
@@ -407,6 +414,7 @@ var Timeline = new Class({
         {
             this.emit(Events.COMPLETE, this);
         }
+        console.groupEnd();
     },
 
     /**
@@ -426,6 +434,7 @@ var Timeline = new Class({
      */
     play: function (fromStart)
     {
+        console.group('Timeline play');
         if (fromStart === undefined) { fromStart = true; }
 
         this.paused = false;
@@ -437,6 +446,7 @@ var Timeline = new Class({
             this.reset();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -458,6 +468,7 @@ var Timeline = new Class({
      */
     pause: function ()
     {
+        console.group('Timeline pause');
         this.paused = true;
 
         var events = this.events;
@@ -472,6 +483,7 @@ var Timeline = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -495,11 +507,13 @@ var Timeline = new Class({
      */
     repeat: function (amount)
     {
+        console.group('Timeline repeat');
         if (amount === undefined || amount === true) { amount = -1; }
         if (amount === false) { amount = 0; }
 
         this.loop = amount;
 
+        console.groupEnd();
         return this;
     },
 
@@ -517,6 +531,7 @@ var Timeline = new Class({
      */
     resume: function ()
     {
+        console.group('Timeline resume');
         this.paused = false;
 
         var events = this.events;
@@ -531,6 +546,7 @@ var Timeline = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -548,9 +564,11 @@ var Timeline = new Class({
      */
     stop: function ()
     {
+        console.group('Timeline stop');
         this.paused = true;
         this.complete = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -576,6 +594,7 @@ var Timeline = new Class({
      */
     reset: function (loop)
     {
+        console.group('Timeline reset');
         if (loop === undefined) { loop = false; }
 
         this.elapsed = 0;
@@ -604,7 +623,9 @@ var Timeline = new Class({
             }
         }
 
-        return this.play(false);
+        const result = this.play(false);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -630,6 +651,7 @@ var Timeline = new Class({
      */
     add: function (config)
     {
+        console.group('Timeline add');
         if (!Array.isArray(config))
         {
             config = [ config ];
@@ -687,6 +709,7 @@ var Timeline = new Class({
 
         this.complete = false;
 
+        console.groupEnd();
         return this;
     },
 
@@ -703,6 +726,7 @@ var Timeline = new Class({
      */
     clear: function ()
     {
+        console.group('Timeline clear');
         var events = this.events;
 
         for (var i = 0; i < events.length; i++)
@@ -720,6 +744,7 @@ var Timeline = new Class({
         this.elapsed = 0;
         this.paused = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -735,6 +760,8 @@ var Timeline = new Class({
      */
     isPlaying: function ()
     {
+        console.group('Timeline isPlaying');
+        console.groupEnd();
         return (!this.paused && !this.complete);
     },
 
@@ -758,8 +785,10 @@ var Timeline = new Class({
      */
     getProgress: function ()
     {
+        console.group('Timeline getProgress');
         var total = Math.min(this.totalComplete, this.events.length);
 
+        console.groupEnd();
         return total / this.events.length;
     },
 
@@ -778,6 +807,7 @@ var Timeline = new Class({
      */
     destroy: function ()
     {
+        console.group('Timeline destroy');
         var eventEmitter = this.systems.events;
 
         eventEmitter.off(SceneEvents.PRE_UPDATE, this.preUpdate, this);
@@ -788,6 +818,7 @@ var Timeline = new Class({
 
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
 });
@@ -872,9 +903,14 @@ var Timeline = new Class({
  *
  * @return {Phaser.Time.Timeline} The Timeline that was created.
  */
+console.group('GameObjectFactory.register timeline');
 GameObjectFactory.register('timeline', function (config)
 {
-    return new Timeline(this.scene, config);
+    console.group('GameObjectFactory.register timeline factoryFunction');
+    const result = new Timeline(this.scene, config);
+    console.groupEnd();
+    return result;
 });
 
+console.groupEnd();
 module.exports = Timeline;

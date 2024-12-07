@@ -24,6 +24,7 @@ var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
  */
 var RectangleCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('RectangleCanvasRenderer');
     camera.addToRenderList(src);
 
     var ctx = renderer.currentContext;
@@ -64,6 +65,7 @@ var RectangleCanvasRenderer = function (renderer, src, camera, parentMatrix)
         //  Restore the context saved in SetTransform
         ctx.restore();
     }
+    console.groupEnd();
 };
 
 module.exports = RectangleCanvasRenderer;

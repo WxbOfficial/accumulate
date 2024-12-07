@@ -35,7 +35,10 @@ var RenderTexture = require('./RenderTexture');
  *
  * @return {Phaser.GameObjects.RenderTexture} The Game Object that was created.
  */
+console.group('GameObjectFactory.register renderTexture');
 GameObjectFactory.register('renderTexture', function (x, y, width, height)
 {
     return this.displayList.add(new RenderTexture(this.scene, x, y, width, height));
 });
+
+console.groupEnd();

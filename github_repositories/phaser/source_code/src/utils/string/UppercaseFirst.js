@@ -25,6 +25,8 @@
  */
 var UppercaseFirst = function (str)
 {
+    console.group('UppercaseFirst');
+    console.groupEnd();
     return str && str[0].toUpperCase() + str.slice(1);
 };
 

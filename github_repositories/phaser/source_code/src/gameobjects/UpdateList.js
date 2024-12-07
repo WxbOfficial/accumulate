@@ -33,6 +33,7 @@ var UpdateList = new Class({
 
     function UpdateList (scene)
     {
+        console.group('UpdateList');
         ProcessQueue.call(this);
 
         //  No duplicates in this list
@@ -98,6 +99,7 @@ var UpdateList = new Class({
 
         scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
         scene.sys.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -110,7 +112,9 @@ var UpdateList = new Class({
      */
     boot: function ()
     {
+        console.group('UpdateList boot');
         this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -124,11 +128,13 @@ var UpdateList = new Class({
      */
     start: function ()
     {
+        console.group('UpdateList start');
         var eventEmitter = this.systems.events;
 
         eventEmitter.on(SceneEvents.PRE_UPDATE, this.update, this);
         eventEmitter.on(SceneEvents.UPDATE, this.sceneUpdate, this);
         eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -144,6 +150,7 @@ var UpdateList = new Class({
      */
     sceneUpdate: function (time, delta)
     {
+        console.group('UpdateList sceneUpdate');
         var list = this._active;
         var length = list.length;
 
@@ -156,6 +163,7 @@ var UpdateList = new Class({
                 gameObject.preUpdate.call(gameObject, time, delta);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -168,6 +176,7 @@ var UpdateList = new Class({
      */
     shutdown: function ()
     {
+        console.group('UpdateList shutdown');
         var i = this._active.length;
 
         while (i--)
@@ -202,6 +211,7 @@ var UpdateList = new Class({
         eventEmitter.off(SceneEvents.PRE_UPDATE, this.update, this);
         eventEmitter.off(SceneEvents.UPDATE, this.sceneUpdate, this);
         eventEmitter.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -214,12 +224,14 @@ var UpdateList = new Class({
      */
     destroy: function ()
     {
+        console.group('UpdateList destroy');
         this.shutdown();
 
         this.systems.events.off(SceneEvents.START, this.start, this);
 
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
     /**
@@ -293,6 +305,8 @@ var UpdateList = new Class({
      */
 });
 
+console.group('PluginCache.register UpdateList');
 PluginCache.register('UpdateList', UpdateList, 'updateList');
 
+console.groupEnd();
 module.exports = UpdateList;

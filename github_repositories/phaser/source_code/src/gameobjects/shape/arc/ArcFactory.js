@@ -38,10 +38,12 @@ var GameObjectFactory = require('../../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Arc} The Game Object that was created.
  */
+console.group('GameObjectFactory.register arc');
 GameObjectFactory.register('arc', function (x, y, radius, startAngle, endAngle, anticlockwise, fillColor, fillAlpha)
 {
     return this.displayList.add(new Arc(this.scene, x, y, radius, startAngle, endAngle, anticlockwise, fillColor, fillAlpha));
 });
+console.groupEnd();
 
 /**
  * Creates a new Circle Shape Game Object and adds it to the Scene.
@@ -61,7 +63,9 @@ GameObjectFactory.register('arc', function (x, y, radius, startAngle, endAngle, 
  *
  * @return {Phaser.GameObjects.Arc} The Game Object that was created.
  */
+console.group('GameObjectFactory.register circle');
 GameObjectFactory.register('circle', function (x, y, radius, fillColor, fillAlpha)
 {
     return this.displayList.add(new Arc(this.scene, x, y, radius, 0, 360, false, fillColor, fillAlpha));
 });
+console.groupEnd();

@@ -24,8 +24,10 @@ var Plane = require('./Plane');
  *
  * @return {Phaser.GameObjects.Plane} The Game Object that was created.
  */
+console.group('GameObjectCreator.register plane');
 GameObjectCreator.register('plane', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register plane factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -58,5 +60,7 @@ GameObjectCreator.register('plane', function (config, addToScene)
 
     BuildGameObjectAnimation(plane, config);
 
+    console.groupEnd();
     return plane;
 });
+console.groupEnd();

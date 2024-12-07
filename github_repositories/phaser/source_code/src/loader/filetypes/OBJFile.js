@@ -42,6 +42,7 @@ var OBJFile = new Class({
 
     function OBJFile (loader, key, objURL, matURL, flipUV, xhrSettings)
     {
+        console.group('OBJFile');
         var obj;
         var mat;
 
@@ -107,6 +108,7 @@ var OBJFile = new Class({
         }
 
         MultiFile.call(this, loader, 'obj', key, [ obj, mat ]);
+        console.groupEnd();
     },
 
     /**
@@ -117,6 +119,7 @@ var OBJFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('OBJFile addToCache');
         if (this.isReadyToProcess())
         {
             var obj = this.files[0];
@@ -133,6 +136,7 @@ var OBJFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -221,8 +225,10 @@ var OBJFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register obj');
 FileTypesManager.register('obj', function (key, objURL, matURL, flipUVs, xhrSettings)
 {
+    console.group('FileTypesManager.register obj factoryFunction');
     var multifile;
 
     if (Array.isArray(key))
@@ -242,7 +248,9 @@ FileTypesManager.register('obj', function (key, objURL, matURL, flipUVs, xhrSett
         this.addFile(multifile.files);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = OBJFile;

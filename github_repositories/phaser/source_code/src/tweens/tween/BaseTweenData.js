@@ -46,6 +46,7 @@ var BaseTweenData = new Class({
 
     function BaseTweenData (tween, targetIndex, delay, duration, yoyo, hold, repeat, repeatDelay, flipX, flipY)
     {
+        console.group('BaseTweenData');
         /**
          * A reference to the Tween that this TweenData instance belongs to.
          *
@@ -214,6 +215,7 @@ var BaseTweenData = new Class({
          * @since 3.60.0
          */
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -226,7 +228,10 @@ var BaseTweenData = new Class({
      */
     getTarget: function ()
     {
-        return this.tween.targets[this.targetIndex];
+        console.group('BaseTweenData getTarget');
+        const result = this.tween.targets[this.targetIndex];
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -239,9 +244,11 @@ var BaseTweenData = new Class({
      */
     setTargetValue: function (value)
     {
+        console.group('BaseTweenData setTargetValue');
         if (value === undefined) { value = this.current; }
 
         this.tween.targets[this.targetIndex][this.key] = value;
+        console.groupEnd();
     },
 
     /**
@@ -252,8 +259,10 @@ var BaseTweenData = new Class({
      */
     setCreatedState: function ()
     {
+        console.group('BaseTweenData setCreatedState');
         this.state = TWEEN_CONST.CREATED;
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -264,8 +273,10 @@ var BaseTweenData = new Class({
      */
     setDelayState: function ()
     {
+        console.group('BaseTweenData setDelayState');
         this.state = TWEEN_CONST.DELAY;
         this.isCountdown = true;
+        console.groupEnd();
     },
 
     /**
@@ -276,8 +287,10 @@ var BaseTweenData = new Class({
      */
     setPendingRenderState: function ()
     {
+        console.group('BaseTweenData setPendingRenderState');
         this.state = TWEEN_CONST.PENDING_RENDER;
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -288,8 +301,10 @@ var BaseTweenData = new Class({
      */
     setPlayingForwardState: function ()
     {
+        console.group('BaseTweenData setPlayingForwardState');
         this.state = TWEEN_CONST.PLAYING_FORWARD;
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -300,8 +315,10 @@ var BaseTweenData = new Class({
      */
     setPlayingBackwardState: function ()
     {
+        console.group('BaseTweenData setPlayingBackwardState');
         this.state = TWEEN_CONST.PLAYING_BACKWARD;
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -312,8 +329,10 @@ var BaseTweenData = new Class({
      */
     setHoldState: function ()
     {
+        console.group('BaseTweenData setHoldState');
         this.state = TWEEN_CONST.HOLD_DELAY;
         this.isCountdown = true;
+        console.groupEnd();
     },
 
     /**
@@ -324,8 +343,10 @@ var BaseTweenData = new Class({
      */
     setRepeatState: function ()
     {
+        console.group('BaseTweenData setRepeatState');
         this.state = TWEEN_CONST.REPEAT_DELAY;
         this.isCountdown = true;
+        console.groupEnd();
     },
 
     /**
@@ -336,8 +357,10 @@ var BaseTweenData = new Class({
      */
     setCompleteState: function ()
     {
+        console.group('BaseTweenData setCompleteState');
         this.state = TWEEN_CONST.COMPLETE;
         this.isCountdown = false;
+        console.groupEnd();
     },
 
     /**
@@ -350,6 +373,8 @@ var BaseTweenData = new Class({
      */
     isCreated: function ()
     {
+        console.group('BaseTweenData isCreated');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.CREATED);
     },
 
@@ -363,6 +388,8 @@ var BaseTweenData = new Class({
      */
     isDelayed: function ()
     {
+        console.group('BaseTweenData isDelayed');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.DELAY);
     },
 
@@ -376,6 +403,8 @@ var BaseTweenData = new Class({
      */
     isPendingRender: function ()
     {
+        console.group('BaseTweenData isPendingRender');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.PENDING_RENDER);
     },
 
@@ -389,6 +418,8 @@ var BaseTweenData = new Class({
      */
     isPlayingForward: function ()
     {
+        console.group('BaseTweenData isPlayingForward');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.PLAYING_FORWARD);
     },
 
@@ -402,6 +433,8 @@ var BaseTweenData = new Class({
      */
     isPlayingBackward: function ()
     {
+        console.group('BaseTweenData isPlayingBackward');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.PLAYING_BACKWARD);
     },
 
@@ -415,6 +448,8 @@ var BaseTweenData = new Class({
      */
     isHolding: function ()
     {
+        console.group('BaseTweenData isHolding');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.HOLD_DELAY);
     },
 
@@ -428,6 +463,8 @@ var BaseTweenData = new Class({
      */
     isRepeating: function ()
     {
+        console.group('BaseTweenData isRepeating');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.REPEAT_DELAY);
     },
 
@@ -441,6 +478,8 @@ var BaseTweenData = new Class({
      */
     isComplete: function ()
     {
+        console.group('BaseTweenData isComplete');
+        console.groupEnd();
         return (this.state === TWEEN_CONST.COMPLETE);
     },
 
@@ -457,6 +496,7 @@ var BaseTweenData = new Class({
      */
     setStateFromEnd: function (diff)
     {
+        console.group('BaseTweenData setStateFromEnd');
         if (this.yoyo)
         {
             this.onRepeat(diff, true, true);
@@ -469,6 +509,7 @@ var BaseTweenData = new Class({
         {
             this.setCompleteState();
         }
+        console.groupEnd();
     },
 
     /**
@@ -483,6 +524,7 @@ var BaseTweenData = new Class({
      */
     setStateFromStart: function (diff)
     {
+        console.group('BaseTweenData setStateFromStart');
         if (this.repeatCounter > 0)
         {
             this.onRepeat(diff, false);
@@ -491,6 +533,7 @@ var BaseTweenData = new Class({
         {
             this.setCompleteState();
         }
+        console.groupEnd();
     },
 
     /**
@@ -503,6 +546,7 @@ var BaseTweenData = new Class({
      */
     reset: function ()
     {
+        console.group('BaseTweenData reset');
         var tween = this.tween;
         var totalTargets = tween.totalTargets;
 
@@ -564,6 +608,7 @@ var BaseTweenData = new Class({
 
             this.setDelayState();
         }
+        console.groupEnd();
     },
 
     /**
@@ -582,6 +627,7 @@ var BaseTweenData = new Class({
      */
     onRepeat: function (diff, setStart, isYoyo)
     {
+        console.group('BaseTweenData onRepeat');
         var tween = this.tween;
         var totalTargets = tween.totalTargets;
 
@@ -616,6 +662,7 @@ var BaseTweenData = new Class({
 
             this.dispatchEvent(Events.TWEEN_YOYO, 'onYoyo');
 
+            console.groupEnd();
             return;
         }
 
@@ -647,6 +694,7 @@ var BaseTweenData = new Class({
 
             this.dispatchEvent(Events.TWEEN_REPEAT, 'onRepeat');
         }
+        console.groupEnd();
     },
 
     /**
@@ -657,9 +705,11 @@ var BaseTweenData = new Class({
      */
     destroy: function ()
     {
+        console.group('BaseTweenData destroy');
         this.tween = null;
         this.getDelay = null;
         this.setCompleteState();
+        console.groupEnd();
     }
 
 });

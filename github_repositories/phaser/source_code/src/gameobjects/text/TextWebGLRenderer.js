@@ -22,8 +22,10 @@ var Utils = require('../../renderer/webgl/Utils');
  */
 var TextWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('TextWebGLRenderer');
     if (src.width === 0 || src.height === 0)
     {
+        console.groupEnd();
         return;
     }
 
@@ -60,6 +62,7 @@ var TextWebGLRenderer = function (renderer, src, camera, parentMatrix)
         false,
         textureUnit
     );
+    console.groupEnd();
 };
 
 module.exports = TextWebGLRenderer;

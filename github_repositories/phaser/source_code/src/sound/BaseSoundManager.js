@@ -39,6 +39,7 @@ var BaseSoundManager = new Class({
 
     function BaseSoundManager (game)
     {
+        console.group('BaseSoundManager');
         EventEmitter.call(this);
 
         /**
@@ -177,6 +178,7 @@ var BaseSoundManager = new Class({
         game.events.on(GameEvents.FOCUS, this.onGameFocus, this);
         game.events.on(GameEvents.PRE_STEP, this.update, this);
         game.events.once(GameEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**

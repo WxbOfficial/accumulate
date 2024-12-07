@@ -24,6 +24,7 @@ var StrokePathWebGL = require('../StrokePathWebGL');
  */
 var PolygonWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('PolygonWebGLRenderer');
     camera.addToRenderList(src);
 
     var pipeline = renderer.pipelines.set(src.pipeline);
@@ -50,6 +51,7 @@ var PolygonWebGLRenderer = function (renderer, src, camera, parentMatrix)
     }
 
     renderer.pipelines.postBatch(src);
+    console.groupEnd();
 };
 
 module.exports = PolygonWebGLRenderer;

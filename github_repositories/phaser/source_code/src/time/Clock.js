@@ -27,6 +27,7 @@ var Clock = new Class({
 
     function Clock (scene)
     {
+        console.group('Clock');
         /**
          * The Scene which owns this Clock.
          *
@@ -126,6 +127,7 @@ var Clock = new Class({
 
         scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
         scene.sys.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -138,10 +140,12 @@ var Clock = new Class({
      */
     boot: function ()
     {
+        console.group('Clock boot');
         //  Sync with the TimeStep
         this.now = this.systems.game.loop.time;
 
         this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -155,6 +159,7 @@ var Clock = new Class({
      */
     start: function ()
     {
+        console.group('Clock start');
         this.startTime = this.systems.game.loop.time;
 
         var eventEmitter = this.systems.events;
@@ -162,6 +167,7 @@ var Clock = new Class({
         eventEmitter.on(SceneEvents.PRE_UPDATE, this.preUpdate, this);
         eventEmitter.on(SceneEvents.UPDATE, this.update, this);
         eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -186,6 +192,7 @@ var Clock = new Class({
      */
     addEvent: function (config)
     {
+        console.group('Clock addEvent');
         var event;
 
         if (config instanceof TimerEvent)
@@ -205,6 +212,7 @@ var Clock = new Class({
 
         this._pendingInsertion.push(event);
 
+        console.groupEnd();
         return event;
     },
 
@@ -225,7 +233,10 @@ var Clock = new Class({
      */
     delayedCall: function (delay, callback, args, callbackScope)
     {
-        return this.addEvent({ delay: delay, callback: callback, args: args, callbackScope: callbackScope });
+        console.group('Clock delayedCall');
+        const result = this.addEvent({ delay: delay, callback: callback, args: args, callbackScope: callbackScope });
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -238,8 +249,10 @@ var Clock = new Class({
      */
     clearPendingEvents: function ()
     {
+        console.group('Clock clearPendingEvents');
         this._pendingInsertion = [];
 
+        console.groupEnd();
         return this;
     },
 
@@ -258,6 +271,7 @@ var Clock = new Class({
      */
     removeEvent: function (events)
     {
+        console.group('Clock removeEvent');
         if (!Array.isArray(events))
         {
             events = [ events ];
@@ -272,6 +286,7 @@ var Clock = new Class({
             Remove(this._active, event);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -285,8 +300,10 @@ var Clock = new Class({
      */
     removeAllEvents: function ()
     {
+        console.group('Clock removeAllEvents');
         this._pendingRemoval = this._pendingRemoval.concat(this._active);
 
+        console.groupEnd();
         return this;
     },
 
@@ -301,11 +318,13 @@ var Clock = new Class({
      */
     preUpdate: function ()
     {
+        console.group('Clock preUpdate');
         var toRemove = this._pendingRemoval.length;
         var toInsert = this._pendingInsertion.length;
 
         if (toRemove === 0 && toInsert === 0)
         {
+            console.groupEnd();
             //  Quick bail
             return;
         }
@@ -339,6 +358,7 @@ var Clock = new Class({
         //  Clear the lists
         this._pendingRemoval.length = 0;
         this._pendingInsertion.length = 0;
+        console.groupEnd();
     },
 
     /**
@@ -352,10 +372,12 @@ var Clock = new Class({
      */
     update: function (time, delta)
     {
+        console.group('Clock update');
         this.now = time;
 
         if (this.paused)
         {
+            console.groupEnd();
             return;
         }
 
@@ -418,6 +440,7 @@ var Clock = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -430,6 +453,7 @@ var Clock = new Class({
      */
     shutdown: function ()
     {
+        console.group('Clock shutdown');
         var i;
 
         for (i = 0; i < this._pendingInsertion.length; i++)
@@ -456,6 +480,7 @@ var Clock = new Class({
         eventEmitter.off(SceneEvents.PRE_UPDATE, this.preUpdate, this);
         eventEmitter.off(SceneEvents.UPDATE, this.update, this);
         eventEmitter.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -468,16 +493,20 @@ var Clock = new Class({
      */
     destroy: function ()
     {
+        console.group('Clock destroy');
         this.shutdown();
 
         this.scene.sys.events.off(SceneEvents.START, this.start, this);
 
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
 });
 
+console.group("PluginCache.register Clock");
 PluginCache.register('Clock', Clock, 'time');
 
+console.groupEnd();
 module.exports = Clock;

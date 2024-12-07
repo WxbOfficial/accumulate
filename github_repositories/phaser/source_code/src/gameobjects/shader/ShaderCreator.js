@@ -22,8 +22,10 @@ var Shader = require('./Shader');
  *
  * @return {Phaser.GameObjects.Shader} The Game Object that was created.
  */
+console.group('GameObjectCreator.register shader');
 GameObjectCreator.register('shader', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register shader factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -41,7 +43,9 @@ GameObjectCreator.register('shader', function (config, addToScene)
 
     BuildGameObject(this.scene, shader, config);
 
+    console.groupEnd();
     return shader;
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

@@ -22,10 +22,12 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Zone} The Game Object that was created.
  */
+console.group('GameObjectFactory.register zone');
 GameObjectFactory.register('zone', function (x, y, width, height)
 {
     return this.displayList.add(new Zone(this.scene, x, y, width, height));
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

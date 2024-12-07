@@ -36,11 +36,13 @@ var TilemapJSONFile = new Class({
 
     function TilemapJSONFile (loader, key, url, xhrSettings)
     {
+        console.group('TilemapJSONFile');
         JSONFile.call(this, loader, key, url, xhrSettings);
 
         this.type = 'tilemapJSON';
 
         this.cache = loader.cacheManager.tilemap;
+        console.groupEnd();
     },
 
     /**
@@ -51,9 +53,11 @@ var TilemapJSONFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('TilemapJSONFile addToCache');
         var tiledata = { format: TILEMAP_FORMATS.TILED_JSON, data: this.data };
 
         this.cache.add(this.key, tiledata);
+        console.groupEnd();
     }
 
 });
@@ -127,8 +131,10 @@ var TilemapJSONFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register tilemapTiledJSON');
 FileTypesManager.register('tilemapTiledJSON', function (key, url, xhrSettings)
 {
+    console.group('FileTypesManager.register tilemapTiledJSON factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -142,7 +148,9 @@ FileTypesManager.register('tilemapTiledJSON', function (key, url, xhrSettings)
         this.addFile(new TilemapJSONFile(this, key, url, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = TilemapJSONFile;

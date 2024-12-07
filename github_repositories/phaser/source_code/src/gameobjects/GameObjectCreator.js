@@ -30,6 +30,7 @@ var GameObjectCreator = new Class({
 
     function GameObjectCreator (scene)
     {
+        console.group('GameObjectCreator');
         /**
          * The Scene to which this Game Object Creator belongs.
          *
@@ -82,6 +83,7 @@ var GameObjectCreator = new Class({
 
         this.events.once(SceneEvents.BOOT, this.boot, this);
         this.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -94,10 +96,12 @@ var GameObjectCreator = new Class({
      */
     boot: function ()
     {
+        console.group('GameObjectCreator boot');
         this.displayList = this.systems.displayList;
         this.updateList = this.systems.updateList;
 
         this.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -111,7 +115,9 @@ var GameObjectCreator = new Class({
      */
     start: function ()
     {
+        console.group('GameObjectCreator start');
         this.events.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -124,7 +130,9 @@ var GameObjectCreator = new Class({
      */
     shutdown: function ()
     {
+        console.group('GameObjectCreator shutdown');
         this.events.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -137,6 +145,7 @@ var GameObjectCreator = new Class({
      */
     destroy: function ()
     {
+        console.group('GameObjectCreator shutdown');
         this.shutdown();
 
         this.events.off(SceneEvents.START, this.start, this);
@@ -147,6 +156,7 @@ var GameObjectCreator = new Class({
 
         this.displayList = null;
         this.updateList = null;
+        console.groupEnd();
     }
 
 });
@@ -166,10 +176,12 @@ var GameObjectCreator = new Class({
  */
 GameObjectCreator.register = function (factoryType, factoryFunction)
 {
+    console.group('GameObjectCreator register');
     if (!GameObjectCreator.prototype.hasOwnProperty(factoryType))
     {
         GameObjectCreator.prototype[factoryType] = factoryFunction;
     }
+    console.groupEnd();
 };
 
 /**
@@ -186,12 +198,16 @@ GameObjectCreator.register = function (factoryType, factoryFunction)
  */
 GameObjectCreator.remove = function (factoryType)
 {
+    console.group('GameObjectCreator remove');
     if (GameObjectCreator.prototype.hasOwnProperty(factoryType))
     {
         delete GameObjectCreator.prototype[factoryType];
     }
+    console.groupEnd();
 };
 
+console.group("PluginCache.register GameObjectCreator");
 PluginCache.register('GameObjectCreator', GameObjectCreator, 'make');
 
+console.groupEnd();
 module.exports = GameObjectCreator;

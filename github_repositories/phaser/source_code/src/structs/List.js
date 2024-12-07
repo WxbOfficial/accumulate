@@ -35,6 +35,7 @@ var List = new Class({
 
     function List (parent)
     {
+        console.group('List');
         /**
          * The parent of this list.
          *
@@ -94,6 +95,7 @@ var List = new Class({
          * @since 3.4.0
          */
         this._sortKey = '';
+        console.groupEnd();
     },
 
     /**
@@ -109,13 +111,18 @@ var List = new Class({
      */
     add: function (child, skipCallback)
     {
+        console.group('List add');
         if (skipCallback)
         {
-            return ArrayUtils.Add(this.list, child);
+            const result = ArrayUtils.Add(this.list, child);
+            console.groupEnd();
+            return result;
         }
         else
         {
-            return ArrayUtils.Add(this.list, child, 0, this.addCallback, this);
+            const result = ArrayUtils.Add(this.list, child, 0, this.addCallback, this);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -135,13 +142,18 @@ var List = new Class({
      */
     addAt: function (child, index, skipCallback)
     {
+        console.group('List addAt');
         if (skipCallback)
         {
-            return ArrayUtils.AddAt(this.list, child, index);
+            const result = ArrayUtils.AddAt(this.list, child, index);
+            console.groupEnd();
+            return result;
         }
         else
         {
-            return ArrayUtils.AddAt(this.list, child, index, 0, this.addCallback, this);
+            const result = ArrayUtils.AddAt(this.list, child, index, 0, this.addCallback, this);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -159,7 +171,10 @@ var List = new Class({
      */
     getAt: function (index)
     {
-        return this.list[index];
+        console.group('List getAt');
+        const result = this.list[index];
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -176,8 +191,11 @@ var List = new Class({
      */
     getIndex: function (child)
     {
+        console.group('List getIndex');
         //  Return -1 if given child isn't a child of this display list
-        return this.list.indexOf(child);
+        const result = this.list.indexOf(child);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -196,8 +214,10 @@ var List = new Class({
      */
     sort: function (property, handler)
     {
+        console.group('List sort');
         if (!property)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -205,12 +225,15 @@ var List = new Class({
         {
             handler = function (childA, childB)
             {
-                return childA[property] - childB[property];
+                const result = childA[property] - childB[property];
+                console.groupEnd();
+                return result;
             };
         }
 
         StableSort(this.list, handler);
 
+        console.groupEnd();
         return this;
     },
 
@@ -230,7 +253,10 @@ var List = new Class({
      */
     getByName: function (name)
     {
-        return ArrayUtils.GetFirst(this.list, 'name', name);
+        console.group('List getByName');
+        const result = ArrayUtils.GetFirst(this.list, 'name', name);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -248,7 +274,10 @@ var List = new Class({
      */
     getRandom: function (startIndex, length)
     {
-        return ArrayUtils.GetRandom(this.list, startIndex, length);
+        console.group('List getRandom');
+        const result = ArrayUtils.GetRandom(this.list, startIndex, length);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -268,7 +297,10 @@ var List = new Class({
      */
     getFirst: function (property, value, startIndex, endIndex)
     {
-        return ArrayUtils.GetFirst(this.list, property, value, startIndex, endIndex);
+        console.group('List getFirst');
+        const result = ArrayUtils.GetFirst(this.list, property, value, startIndex, endIndex);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -300,7 +332,10 @@ var List = new Class({
      */
     getAll: function (property, value, startIndex, endIndex)
     {
-        return ArrayUtils.GetAll(this.list, property, value, startIndex, endIndex);
+        console.group('List getAll');
+        const result = ArrayUtils.GetAll(this.list, property, value, startIndex, endIndex);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -318,7 +353,10 @@ var List = new Class({
      */
     count: function (property, value)
     {
-        return ArrayUtils.CountAllMatching(this.list, property, value);
+        console.group('List count');
+        const result = ArrayUtils.CountAllMatching(this.list, property, value);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -334,7 +372,9 @@ var List = new Class({
      */
     swap: function (child1, child2)
     {
+        console.group('List swap');
         ArrayUtils.Swap(this.list, child1, child2);
+        console.groupEnd();
     },
 
     /**
@@ -352,7 +392,10 @@ var List = new Class({
      */
     moveTo: function (child, index)
     {
-        return ArrayUtils.MoveTo(this.list, child, index);
+        console.group('List moveTo');
+        const result = ArrayUtils.MoveTo(this.list, child, index);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -370,7 +413,10 @@ var List = new Class({
      */
     moveAbove: function (child1, child2)
     {
-        return ArrayUtils.MoveAbove(this.list, child1, child2);
+        console.group('List moveAbove');
+        const result = ArrayUtils.MoveAbove(this.list, child1, child2);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -388,7 +434,10 @@ var List = new Class({
      */
     moveBelow: function (child1, child2)
     {
-        return ArrayUtils.MoveBelow(this.list, child1, child2);
+        console.group('List moveBelow');
+        const result = ArrayUtils.MoveBelow(this.list, child1, child2);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -404,13 +453,18 @@ var List = new Class({
      */
     remove: function (child, skipCallback)
     {
+        console.group('List remove');
         if (skipCallback)
         {
-            return ArrayUtils.Remove(this.list, child);
+            const result = ArrayUtils.Remove(this.list, child);
+            console.groupEnd();
+            return result;
         }
         else
         {
-            return ArrayUtils.Remove(this.list, child, this.removeCallback, this);
+            const result = ArrayUtils.Remove(this.list, child, this.removeCallback, this);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -429,13 +483,18 @@ var List = new Class({
      */
     removeAt: function (index, skipCallback)
     {
+        console.group('List removeAt');
         if (skipCallback)
         {
-            return ArrayUtils.RemoveAt(this.list, index);
+            const result = ArrayUtils.RemoveAt(this.list, index);
+            console.groupEnd();
+            return result;
         }
         else
         {
-            return ArrayUtils.RemoveAt(this.list, index, this.removeCallback, this);
+            const result = ArrayUtils.RemoveAt(this.list, index, this.removeCallback, this);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -455,13 +514,18 @@ var List = new Class({
      */
     removeBetween: function (startIndex, endIndex, skipCallback)
     {
+        console.group('List removeBetween');
         if (skipCallback)
         {
-            return ArrayUtils.RemoveBetween(this.list, startIndex, endIndex);
+            const result = ArrayUtils.RemoveBetween(this.list, startIndex, endIndex);
+            console.groupEnd();
+            return result;
         }
         else
         {
-            return ArrayUtils.RemoveBetween(this.list, startIndex, endIndex, this.removeCallback, this);
+            const result = ArrayUtils.RemoveBetween(this.list, startIndex, endIndex, this.removeCallback, this);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -477,6 +541,7 @@ var List = new Class({
      */
     removeAll: function (skipCallback)
     {
+        console.group('List removeAll');
         var i = this.list.length;
 
         while (i--)
@@ -484,6 +549,7 @@ var List = new Class({
             this.remove(this.list[i], skipCallback);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -501,7 +567,10 @@ var List = new Class({
      */
     bringToTop: function (child)
     {
-        return ArrayUtils.BringToTop(this.list, child);
+        console.group('List bringToTop');
+        const result = ArrayUtils.BringToTop(this.list, child);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -518,7 +587,10 @@ var List = new Class({
      */
     sendToBack: function (child)
     {
-        return ArrayUtils.SendToBack(this.list, child);
+        console.group('List sendToBack');
+        const result = ArrayUtils.SendToBack(this.list, child);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -535,8 +607,10 @@ var List = new Class({
      */
     moveUp: function (child)
     {
+        console.group('List moveUp');
         ArrayUtils.MoveUp(this.list, child);
 
+        console.groupEnd();
         return child;
     },
 
@@ -554,8 +628,10 @@ var List = new Class({
      */
     moveDown: function (child)
     {
+        console.group('List moveDown');
         ArrayUtils.MoveDown(this.list, child);
 
+        console.groupEnd();
         return child;
     },
 
@@ -571,8 +647,10 @@ var List = new Class({
      */
     reverse: function ()
     {
+        console.group('List reverse');
         this.list.reverse();
 
+        console.groupEnd();
         return this;
     },
 
@@ -588,8 +666,10 @@ var List = new Class({
      */
     shuffle: function ()
     {
+        console.group('List shuffle');
         ArrayUtils.Shuffle(this.list);
 
+        console.groupEnd();
         return this;
     },
 
@@ -608,7 +688,10 @@ var List = new Class({
      */
     replace: function (oldChild, newChild)
     {
-        return ArrayUtils.Replace(this.list, oldChild, newChild);
+        console.group('List replace');
+        const result = ArrayUtils.Replace(this.list, oldChild, newChild);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -625,7 +708,10 @@ var List = new Class({
      */
     exists: function (child)
     {
-        return (this.list.indexOf(child) > -1);
+        console.group('List exists');
+        const result = (this.list.indexOf(child) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -643,8 +729,10 @@ var List = new Class({
      */
     setAll: function (property, value, startIndex, endIndex)
     {
+        console.group('List setAll');
         ArrayUtils.SetAll(this.list, property, value, startIndex, endIndex);
 
+        console.groupEnd();
         return this;
     },
 
@@ -662,6 +750,7 @@ var List = new Class({
      */
     each: function (callback, context)
     {
+        console.group('List each');
         var args = [ null ];
 
         for (var i = 2; i < arguments.length; i++)
@@ -675,6 +764,7 @@ var List = new Class({
 
             callback.apply(context, args);
         }
+        console.groupEnd();
     },
 
     /**
@@ -685,9 +775,11 @@ var List = new Class({
      */
     shutdown: function ()
     {
+        console.group('List shutdown');
         this.removeAll();
 
         this.list = [];
+        console.groupEnd();
     },
 
     /**
@@ -698,11 +790,13 @@ var List = new Class({
      */
     destroy: function ()
     {
+        console.group('List destroy');
         this.removeAll();
 
         this.parent = null;
         this.addCallback = null;
         this.removeCallback = null;
+        console.groupEnd();
     },
 
     /**

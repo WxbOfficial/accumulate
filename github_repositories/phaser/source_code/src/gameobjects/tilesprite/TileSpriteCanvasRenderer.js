@@ -20,11 +20,13 @@
  */
 var TileSpriteCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('TileSpriteCanvasRenderer');
     src.updateCanvas();
 
     camera.addToRenderList(src);
 
     renderer.batchSprite(src, src.frame, camera, parentMatrix);
+    console.groupEnd();
 };
 
 module.exports = TileSpriteCanvasRenderer;

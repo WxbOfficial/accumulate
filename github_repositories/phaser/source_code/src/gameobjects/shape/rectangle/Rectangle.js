@@ -46,6 +46,7 @@ var Rectangle = new Class({
 
     function Rectangle (scene, x, y, width, height, fillColor, fillAlpha)
     {
+        console.group('Rectangle');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 128; }
@@ -63,6 +64,7 @@ var Rectangle = new Class({
 
         this.updateDisplayOrigin();
         this.updateData();
+        console.groupEnd();
     },
 
     /**
@@ -81,6 +83,7 @@ var Rectangle = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('Rectangle setSize');
         this.width = width;
         this.height = height;
 
@@ -98,6 +101,7 @@ var Rectangle = new Class({
             input.hitArea.height = height;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -112,6 +116,7 @@ var Rectangle = new Class({
      */
     updateData: function ()
     {
+        console.group('Rectangle updateData');
         var path = [];
         var rect = this.geom;
         var line = this._tempLine;
@@ -134,6 +139,7 @@ var Rectangle = new Class({
 
         this.pathData = path;
 
+        console.groupEnd();
         return this;
     }
 

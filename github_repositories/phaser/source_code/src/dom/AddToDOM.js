@@ -18,6 +18,7 @@
  */
 var AddToDOM = function (element, parent)
 {
+    console.group('AddToDOM');
     var target;
 
     if (parent)
@@ -35,6 +36,7 @@ var AddToDOM = function (element, parent)
     }
     else if (element.parentElement || parent === null)
     {
+        console.groupEnd();
         return element;
     }
 
@@ -46,6 +48,7 @@ var AddToDOM = function (element, parent)
 
     target.appendChild(element);
 
+    console.groupEnd();
     return element;
 };
 

@@ -41,6 +41,7 @@ var Pointer = new Class({
 
     function Pointer (manager, id)
     {
+        console.group('Pointer');
         /**
          * A reference to the Input Manager.
          *
@@ -491,6 +492,7 @@ var Pointer = new Class({
          * @since 3.18.0
          */
         this.deltaZ = 0;
+        console.groupEnd();
     },
 
     /**

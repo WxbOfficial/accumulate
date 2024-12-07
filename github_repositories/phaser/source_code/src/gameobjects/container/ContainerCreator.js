@@ -24,6 +24,7 @@ var GetFastValue = require('../../utils/object/GetFastValue');
  *
  * @return {Phaser.GameObjects.Container} The Game Object that was created.
  */
+console.group('GameObjectCreator.register container');
 GameObjectCreator.register('container', function (config, addToScene)
 {
     if (config === undefined) { config = {}; }
@@ -43,3 +44,5 @@ GameObjectCreator.register('container', function (config, addToScene)
 
     return container;
 });
+
+console.groupEnd();

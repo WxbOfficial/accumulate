@@ -88,7 +88,9 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Video} The Game Object that was created.
  */
+console.group('GameObjectFactory.register video');
 GameObjectFactory.register('video', function (x, y, key)
 {
     return this.displayList.add(new Video(this.scene, x, y, key));
 });
+console.groupEnd();

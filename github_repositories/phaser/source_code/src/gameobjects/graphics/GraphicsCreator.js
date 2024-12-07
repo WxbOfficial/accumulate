@@ -20,6 +20,7 @@ var Graphics = require('./Graphics');
  *
  * @return {Phaser.GameObjects.Graphics} The Game Object that was created.
  */
+console.group('GameObjectCreator.register graphics');
 GameObjectCreator.register('graphics', function (config, addToScene)
 {
     if (config === undefined) { config = {}; }
@@ -39,4 +40,5 @@ GameObjectCreator.register('graphics', function (config, addToScene)
     return graphics;
 });
 
+console.groupEnd();
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

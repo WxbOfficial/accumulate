@@ -22,8 +22,10 @@ var PointLight = require('./PointLight');
  *
  * @return {Phaser.GameObjects.PointLight} The Game Object that was created.
  */
+console.group('GameObjectCreator.register pointlight');
 GameObjectCreator.register('pointlight', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register pointlight factoryFunction');
     if (config === undefined) { config = {}; }
 
     var color = GetAdvancedValue(config, 'color', 0xffffff);
@@ -40,5 +42,7 @@ GameObjectCreator.register('pointlight', function (config, addToScene)
 
     BuildGameObject(this.scene, layer, config);
 
+    console.groupEnd();
     return layer;
 });
+console.groupEnd();

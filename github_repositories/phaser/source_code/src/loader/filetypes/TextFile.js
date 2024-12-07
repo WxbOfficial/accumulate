@@ -38,6 +38,7 @@ var TextFile = new Class({
 
     function TextFile (loader, key, url, xhrSettings)
     {
+        console.group('TextFile');
         var type = 'text';
         var extension = 'txt';
         var cache = loader.cacheManager.text;
@@ -65,6 +66,7 @@ var TextFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -76,11 +78,13 @@ var TextFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('TextFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.data = this.xhrLoader.responseText;
 
         this.onProcessComplete();
+        console.groupEnd();
     }
 
 });
@@ -152,8 +156,10 @@ var TextFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register text');
 FileTypesManager.register('text', function (key, url, xhrSettings)
 {
+    console.group('FileTypesManager.register text factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -167,7 +173,9 @@ FileTypesManager.register('text', function (key, url, xhrSettings)
         this.addFile(new TextFile(this, key, url, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = TextFile;

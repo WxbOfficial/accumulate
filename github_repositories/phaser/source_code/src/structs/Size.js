@@ -33,6 +33,7 @@ var Size = new Class({
 
     function Size (width, height, aspectMode, parent)
     {
+        console.group('Size');
         if (width === undefined) { width = 0; }
         if (height === undefined) { height = width; }
         if (aspectMode === undefined) { aspectMode = 0; }
@@ -151,6 +152,7 @@ var Size = new Class({
          * @since 3.16.0
          */
         this.snapTo = new Vector2();
+        console.groupEnd();
     },
 
     /**

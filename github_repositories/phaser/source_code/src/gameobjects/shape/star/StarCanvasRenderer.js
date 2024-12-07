@@ -24,6 +24,7 @@ var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
  */
 var StarCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('StarCanvasRenderer');
     camera.addToRenderList(src);
 
     var ctx = renderer.currentContext;
@@ -75,6 +76,7 @@ var StarCanvasRenderer = function (renderer, src, camera, parentMatrix)
         //  Restore the context saved in SetTransform
         ctx.restore();
     }
+    console.groupEnd();
 };
 
 module.exports = StarCanvasRenderer;

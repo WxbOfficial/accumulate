@@ -19,10 +19,12 @@
  */
 var Canvas = function (texture, sourceIndex)
 {
+    console.group('Parsers Canvas');
     var source = texture.source[sourceIndex];
 
     texture.add('__BASE', sourceIndex, 0, 0, source.width, source.height);
 
+    console.groupEnd();
     return texture;
 };
 

@@ -65,6 +65,7 @@ var RenderTexture = new Class({
 
     function RenderTexture (scene, x, y, width, height)
     {
+        console.group('RenderTexture');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 32; }
@@ -101,6 +102,7 @@ var RenderTexture = new Class({
          * @since 3.12.0
          */
         this._saved = false;
+        console.groupEnd();
     },
 
     /**
@@ -124,6 +126,7 @@ var RenderTexture = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('RenderTexture setSize');
         this.width = width;
         this.height = height;
 
@@ -139,6 +142,7 @@ var RenderTexture = new Class({
             input.hitArea.height = height;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -162,8 +166,10 @@ var RenderTexture = new Class({
      */
     resize: function (width, height)
     {
+        console.group('RenderTexture resize');
         this.setSize(width, height);
 
+        console.groupEnd();
         return this;
     },
 
@@ -204,6 +210,7 @@ var RenderTexture = new Class({
      */
     saveTexture: function (key)
     {
+        console.group('RenderTexture saveTexture');
         var texture = this.texture;
 
         texture.key = key;
@@ -213,6 +220,7 @@ var RenderTexture = new Class({
             this._saved = true;
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -238,8 +246,10 @@ var RenderTexture = new Class({
      */
     fill: function (rgb, alpha, x, y, width, height)
     {
+        console.group('RenderTexture fill');
         this.texture.fill(rgb, alpha, x, y, width, height);
 
+        console.groupEnd();
         return this;
     },
 
@@ -254,8 +264,10 @@ var RenderTexture = new Class({
      */
     clear: function ()
     {
+        console.group('RenderTexture clear');
         this.texture.clear();
 
+        console.groupEnd();
         return this;
     },
 
@@ -283,8 +295,10 @@ var RenderTexture = new Class({
      */
     stamp: function (key, frame, x, y, config)
     {
+        console.group('RenderTexture stamp');
         this.texture.stamp(key, frame, x, y, config);
 
+        console.groupEnd();
         return this;
     },
 
@@ -337,8 +351,10 @@ var RenderTexture = new Class({
      */
     erase: function (entries, x, y)
     {
+        console.group('RenderTexture erase');
         this.texture.erase(entries, x, y);
 
+        console.groupEnd();
         return this;
     },
 
@@ -399,8 +415,10 @@ var RenderTexture = new Class({
      */
     draw: function (entries, x, y, alpha, tint)
     {
+        console.group('RenderTexture draw');
         this.texture.draw(entries, x, y, alpha, tint);
 
+        console.groupEnd();
         return this;
     },
 
@@ -436,8 +454,10 @@ var RenderTexture = new Class({
      */
     drawFrame: function (key, frame, x, y, alpha, tint)
     {
+        console.group('RenderTexture drawFrame');
         this.texture.drawFrame(key, frame, x, y, alpha, tint);
 
+        console.groupEnd();
         return this;
     },
 
@@ -473,8 +493,10 @@ var RenderTexture = new Class({
      */
     repeat: function (key, frame, x, y, width, height, alpha, tint, skipBatch)
     {
+        console.group('RenderTexture repeat');
         this.texture.repeat(key, frame, x, y, width, height, alpha, tint, skipBatch);
 
+        console.groupEnd();
         return this;
     },
 
@@ -521,8 +543,10 @@ var RenderTexture = new Class({
      */
     beginDraw: function ()
     {
+        console.group('RenderTexture beginDraw');
         this.texture.beginDraw();
 
+        console.groupEnd();
         return this;
     },
 
@@ -604,8 +628,10 @@ var RenderTexture = new Class({
      */
     batchDraw: function (entries, x, y, alpha, tint)
     {
+        console.group('RenderTexture batchDraw');
         this.texture.batchDraw(entries, x, y, alpha, tint);
 
+        console.groupEnd();
         return this;
     },
 
@@ -661,8 +687,10 @@ var RenderTexture = new Class({
      */
     batchDrawFrame: function (key, frame, x, y, alpha, tint)
     {
+        console.group('RenderTexture batchDrawFrame');
         this.texture.batchDrawFrame(key, frame, x, y, alpha, tint);
 
+        console.groupEnd();
         return this;
     },
 
@@ -711,8 +739,10 @@ var RenderTexture = new Class({
      */
     endDraw: function (erase)
     {
+        console.group('RenderTexture endDraw');
         this.texture.endDraw(erase);
 
+        console.groupEnd();
         return this;
     },
 
@@ -746,8 +776,10 @@ var RenderTexture = new Class({
      */
     snapshotArea: function (x, y, width, height, callback, type, encoderOptions)
     {
+        console.group('RenderTexture snapshotArea');
         this.texture.snapshotArea(x, y, width, height, callback, type, encoderOptions);
 
+        console.groupEnd();
         return this;
     },
 
@@ -777,7 +809,10 @@ var RenderTexture = new Class({
      */
     snapshot: function (callback, type, encoderOptions)
     {
-        return this.snapshotArea(0, 0, this.width, this.height, callback, type, encoderOptions);
+        console.group('RenderTexture snapshot');
+        const result = this.snapshotArea(0, 0, this.width, this.height, callback, type, encoderOptions);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -803,7 +838,10 @@ var RenderTexture = new Class({
      */
     snapshotPixel: function (x, y, callback)
     {
-        return this.snapshotArea(x, y, 1, 1, callback, 'pixel');
+        console.group('RenderTexture snapshotPixel');
+        const result = this.snapshotArea(x, y, 1, 1, callback, 'pixel');
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -815,12 +853,14 @@ var RenderTexture = new Class({
      */
     preDestroy: function ()
     {
+        console.group('RenderTexture preDestroy');
         this.camera = null;
 
         if (!this._saved)
         {
             this.texture.destroy();
         }
+        console.groupEnd();
     }
 
 });

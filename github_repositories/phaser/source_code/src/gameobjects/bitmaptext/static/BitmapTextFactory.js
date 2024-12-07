@@ -44,10 +44,12 @@ var GameObjectFactory = require('../../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.BitmapText} The Game Object that was created.
  */
+console.group('GameObjectFactory.register bitmapText');
 GameObjectFactory.register('bitmapText', function (x, y, font, text, size, align)
 {
     return this.displayList.add(new BitmapText(this.scene, x, y, font, text, size, align));
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

@@ -62,6 +62,7 @@ var TweenManager = new Class({
 
     function TweenManager (scene)
     {
+        console.group('TweenManager');
         /**
          * The Scene which owns this Tween Manager.
          *
@@ -201,6 +202,7 @@ var TweenManager = new Class({
 
         this.events.once(SceneEvents.BOOT, this.boot, this);
         this.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -213,7 +215,9 @@ var TweenManager = new Class({
      */
     boot: function ()
     {
+        console.group('TweenManager boot');
         this.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -227,6 +231,7 @@ var TweenManager = new Class({
      */
     start: function ()
     {
+        console.group('TweenManager start');
         this.timeScale = 1;
         this.paused = false;
 
@@ -236,6 +241,7 @@ var TweenManager = new Class({
 
         this.events.on(SceneEvents.UPDATE, this.update, this);
         this.events.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -258,6 +264,7 @@ var TweenManager = new Class({
      */
     create: function (config)
     {
+        console.group('TweenManager create');
         if (!Array.isArray(config))
         {
             config = [ config ];
@@ -284,6 +291,7 @@ var TweenManager = new Class({
             }
         }
 
+        console.groupEnd();
         return (result.length === 1) ? result[0] : result;
     },
 
@@ -326,6 +334,7 @@ var TweenManager = new Class({
      */
     add: function (config)
     {
+        console.group('TweenManager add');
         var tween = config;
         var tweens = this.tweens;
 
@@ -347,6 +356,7 @@ var TweenManager = new Class({
             tweens.push(tween.reset());
         }
 
+        console.groupEnd();
         return tween;
     },
 
@@ -376,6 +386,7 @@ var TweenManager = new Class({
      */
     addMultiple: function (configs)
     {
+        console.group('TweenManager addMultiple');
         var tween;
         var result = [];
         var tweens = this.tweens;
@@ -405,6 +416,7 @@ var TweenManager = new Class({
             result.push(tween);
         }
 
+        console.groupEnd();
         return result;
     },
 
@@ -429,10 +441,12 @@ var TweenManager = new Class({
      */
     chain: function (config)
     {
+        console.group('TweenManager chain');
         var chain = TweenChainBuilder(this, config);
 
         this.tweens.push(chain.init());
 
+        console.groupEnd();
         return chain;
     },
 
@@ -451,7 +465,10 @@ var TweenManager = new Class({
      */
     getChainedTweens: function (tween)
     {
-        return tween.getChainedTweens();
+        console.group('TweenManager getChainedTweens');
+        const result = tween.getChainedTweens();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -470,7 +487,10 @@ var TweenManager = new Class({
      */
     has: function (tween)
     {
-        return (this.tweens.indexOf(tween) > -1);
+        console.group('TweenManager has');
+        const result = (this.tweens.indexOf(tween) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -487,11 +507,13 @@ var TweenManager = new Class({
      */
     existing: function (tween)
     {
+        console.group('TweenManager existing');
         if (!this.has(tween))
         {
             this.tweens.push(tween.reset());
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -517,10 +539,12 @@ var TweenManager = new Class({
      */
     addCounter: function (config)
     {
+        console.group('TweenManager addCounter');
         var tween = NumberTweenBuilder(this, config);
 
         this.tweens.push(tween.reset());
 
+        console.groupEnd();
         return tween;
     },
 
@@ -567,7 +591,10 @@ var TweenManager = new Class({
      */
     stagger: function (value, options)
     {
-        return StaggerBuilder(value, options);
+        console.group('TweenManager stagger');
+        const result = StaggerBuilder(value, options);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -594,12 +621,14 @@ var TweenManager = new Class({
      */
     setLagSmooth: function (limit, skip)
     {
+        console.group('TweenManager setLagSmooth');
         if (limit === undefined) { limit = 1 / 1e-8; }
         if (skip === undefined) { skip = 0; }
 
         this.maxLag = limit;
         this.lagSkip = Math.min(skip, this.maxLag);
 
+        console.groupEnd();
         return this;
     },
 
@@ -619,11 +648,13 @@ var TweenManager = new Class({
      */
     setFps: function (fps)
     {
+        console.group('TweenManager setFps');
         if (fps === undefined) { fps = 240; }
 
         this.gap = 1000 / fps;
         this.nextTime = this.time * 1000 + this.gap;
 
+        console.groupEnd();
         return this;
     },
 
@@ -642,6 +673,7 @@ var TweenManager = new Class({
      */
     getDelta: function (tick)
     {
+        console.group('TweenManager getDelta');
         var elapsed = Date.now() - this.prevTime;
 
         if (elapsed > this.maxLag)
@@ -666,6 +698,7 @@ var TweenManager = new Class({
             delta = 0;
         }
 
+        console.groupEnd();
         return delta;
     },
 
@@ -682,8 +715,10 @@ var TweenManager = new Class({
      */
     tick: function ()
     {
+        console.group('TweenManager tick');
         this.step(true);
 
+        console.groupEnd();
         return this;
     },
 
@@ -698,10 +733,12 @@ var TweenManager = new Class({
      */
     update: function ()
     {
+        console.group('TweenManager update');
         if (!this.paused)
         {
             this.step(false);
         }
+        console.groupEnd();
     },
 
     /**
@@ -716,6 +753,7 @@ var TweenManager = new Class({
      */
     step: function (tick)
     {
+        console.group('TweenManager step');
         if (tick === undefined) { tick = false; }
 
         var delta = this.getDelta(tick);
@@ -770,6 +808,7 @@ var TweenManager = new Class({
         }
 
         this.processing = false;
+        console.groupEnd();
     },
 
     /**
@@ -789,6 +828,7 @@ var TweenManager = new Class({
      */
     remove: function (tween)
     {
+        console.group('TweenManager remove');
         if (this.processing)
         {
             //  Remove it on the next frame
@@ -802,6 +842,7 @@ var TweenManager = new Class({
             tween.setRemovedState();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -821,12 +862,14 @@ var TweenManager = new Class({
      */
     reset: function (tween)
     {
+        console.group('TweenManager reset');
         this.existing(tween);
 
         tween.seek();
 
         tween.setActiveState();
 
+        console.groupEnd();
         return this;
     },
 
@@ -842,10 +885,12 @@ var TweenManager = new Class({
      */
     makeActive: function (tween)
     {
+        console.group('TweenManager makeActive');
         this.existing(tween);
 
         tween.setActiveState();
 
+        console.groupEnd();
         return this;
     },
 
@@ -863,6 +908,7 @@ var TweenManager = new Class({
      */
     each: function (callback, scope)
     {
+        console.group('TweenManager each');
         var i;
         var args = [ null ];
 
@@ -878,6 +924,7 @@ var TweenManager = new Class({
             callback.apply(scope, args);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -897,7 +944,10 @@ var TweenManager = new Class({
      */
     getTweens: function ()
     {
-        return this.tweens.slice();
+        console.group('TweenManager getTweens');
+        const result = this.tweens.slice();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -916,6 +966,7 @@ var TweenManager = new Class({
      */
     getTweensOf: function (target)
     {
+        console.group('TweenManager getTweensOf');
         var output = [];
         var list = this.tweens;
 
@@ -943,6 +994,7 @@ var TweenManager = new Class({
             }
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -956,6 +1008,8 @@ var TweenManager = new Class({
      */
     getGlobalTimeScale: function ()
     {
+        console.group('TweenManager getGlobalTimeScale');
+        console.groupEnd();
         return this.timeScale;
     },
 
@@ -973,8 +1027,10 @@ var TweenManager = new Class({
      */
     setGlobalTimeScale: function (value)
     {
+        console.group('TweenManager setGlobalTimeScale');
         this.timeScale = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -992,6 +1048,7 @@ var TweenManager = new Class({
      */
     isTweening: function (target)
     {
+        console.group('TweenManager isTweening');
         var list = this.tweens;
         var tween;
 
@@ -1001,10 +1058,12 @@ var TweenManager = new Class({
 
             if (tween.isPlaying() && tween.hasTarget(target))
             {
+                console.groupEnd();
                 return true;
             }
         }
 
+        console.groupEnd();
         return false;
     },
 
@@ -1025,6 +1084,7 @@ var TweenManager = new Class({
      */
     killAll: function ()
     {
+        console.group('TweenManager killAll');
         var tweens = (this.processing) ? this.getTweens() : this.tweens;
 
         for (var i = 0; i < tweens.length; i++)
@@ -1037,6 +1097,7 @@ var TweenManager = new Class({
             tweens.length = 0;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1061,6 +1122,7 @@ var TweenManager = new Class({
      */
     killTweensOf: function (target)
     {
+        console.group('TweenManager killTweensOf');
         var tweens = this.getTweensOf(target);
 
         for (var i = 0; i < tweens.length; i++)
@@ -1068,6 +1130,7 @@ var TweenManager = new Class({
             tweens[i].destroy();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1087,8 +1150,10 @@ var TweenManager = new Class({
      */
     pauseAll: function ()
     {
+        console.group('TweenManager pauseAll');
         this.paused = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1108,8 +1173,10 @@ var TweenManager = new Class({
      */
     resumeAll: function ()
     {
+        console.group('TweenManager resumeAll');
         this.paused = false;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1123,12 +1190,14 @@ var TweenManager = new Class({
      */
     shutdown: function ()
     {
+        console.group('TweenManager shutdown');
         this.killAll();
 
         this.tweens = [];
 
         this.events.off(SceneEvents.UPDATE, this.update, this);
         this.events.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -1140,16 +1209,20 @@ var TweenManager = new Class({
      */
     destroy: function ()
     {
+        console.group('TweenManager destroy');
         this.shutdown();
 
         this.events.off(SceneEvents.START, this.start, this);
 
         this.scene = null;
         this.events = null;
+        console.groupEnd();
     }
 
 });
 
+console.group('PluginCache.register TweenManager');
 PluginCache.register('TweenManager', TweenManager, 'tweens');
 
+console.groupEnd();
 module.exports = TweenManager;

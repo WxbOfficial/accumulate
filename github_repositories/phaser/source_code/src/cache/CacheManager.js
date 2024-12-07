@@ -29,6 +29,7 @@ var CacheManager = new Class({
 
     function CacheManager (game)
     {
+        console.group('CacheManager');
         /**
          * A reference to the Phaser.Game instance that owns this CacheManager.
          *
@@ -160,6 +161,7 @@ var CacheManager = new Class({
         this.custom = {};
 
         this.game.events.once(GameEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -176,11 +178,13 @@ var CacheManager = new Class({
      */
     addCustom: function (key)
     {
+        console.group('CacheManager addCustom');
         if (!this.custom.hasOwnProperty(key))
         {
             this.custom[key] = new BaseCache();
         }
 
+        console.groupEnd();
         return this.custom[key];
     },
 
@@ -192,6 +196,7 @@ var CacheManager = new Class({
      */
     destroy: function ()
     {
+        console.group('CacheManager destroy');
         var keys = [
             'binary',
             'bitmapFont',
@@ -221,6 +226,7 @@ var CacheManager = new Class({
         this.custom = null;
 
         this.game = null;
+        console.groupEnd();
     }
 
 });

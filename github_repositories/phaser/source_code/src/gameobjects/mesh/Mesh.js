@@ -108,6 +108,7 @@ var Mesh = new Class({
 
     function Mesh (scene, x, y, texture, frame, vertices, uvs, indicies, containsZ, normals, colors, alphas)
     {
+        console.group('Mesh');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (texture === undefined) { texture = '__WHITE'; }
@@ -382,18 +383,23 @@ var Mesh = new Class({
         {
             this.addVertices(vertices, uvs, indicies, containsZ, normals, colors, alphas);
         }
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     addedToScene: function ()
     {
+        console.group('Mesh addedToScene');
         this.scene.sys.updateList.add(this);
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     removedFromScene: function ()
     {
+        console.group('Mesh removedFromScene');
         this.scene.sys.updateList.remove(this);
+        console.groupEnd();
     },
 
     /**
@@ -406,10 +412,12 @@ var Mesh = new Class({
      */
     panX: function (v)
     {
+        console.group('Mesh panX');
         this.viewPosition.addScale(Vector3.LEFT, v);
 
         this.dirtyCache[10] = 1;
 
+        console.groupEnd();
         return this;
     },
 
@@ -423,10 +431,12 @@ var Mesh = new Class({
      */
     panY: function (v)
     {
+        console.group('Mesh panY');
         this.viewPosition.y += Vector3.DOWN.y * v;
 
         this.dirtyCache[10] = 1;
 
+        console.groupEnd();
         return this;
     },
 
@@ -446,10 +456,12 @@ var Mesh = new Class({
      */
     panZ: function (amount)
     {
+        console.group('Mesh panZ');
         this.viewPosition.z += amount;
 
         this.dirtyCache[10] = 1;
 
+        console.groupEnd();
         return this;
     },
 
@@ -471,6 +483,7 @@ var Mesh = new Class({
      */
     setPerspective: function (width, height, fov, near, far)
     {
+        console.group('Mesh setPerspective');
         if (fov === undefined) { fov = 45; }
         if (near === undefined) { near = 0.01; }
         if (far === undefined) { far = 1000; }
@@ -482,6 +495,7 @@ var Mesh = new Class({
         this.dirtyCache[10] = 1;
         this.dirtyCache[11] = 0;
 
+        console.groupEnd();
         return this;
     },
 
@@ -506,6 +520,7 @@ var Mesh = new Class({
      */
     setOrtho: function (scaleX, scaleY, near, far)
     {
+        console.group('Mesh setOrtho');
         if (scaleX === undefined) { scaleX = this.scene.sys.renderer.getAspectRatio(); }
         if (scaleY === undefined) { scaleY = 1; }
         if (near === undefined) { near = -1000; }
@@ -518,6 +533,7 @@ var Mesh = new Class({
         this.dirtyCache[10] = 1;
         this.dirtyCache[11] = 1;
 
+        console.groupEnd();
         return this;
     },
 
@@ -532,6 +548,7 @@ var Mesh = new Class({
      */
     clear: function ()
     {
+        console.group('Mesh clear');
         this.faces.forEach(function (face)
         {
             face.destroy();
@@ -540,6 +557,7 @@ var Mesh = new Class({
         this.faces = [];
         this.vertices = [];
 
+        console.groupEnd();
         return this;
     },
 
@@ -579,6 +597,7 @@ var Mesh = new Class({
      */
     addVerticesFromObj: function (key, scale, x, y, z, rotateX, rotateY, rotateZ, zIsUp)
     {
+        console.group('Mesh addVerticesFromObj');
         var data = this.scene.sys.cache.obj.get(key);
         var parsedData;
 
@@ -592,6 +611,7 @@ var Mesh = new Class({
             console.warn('Mesh.addVerticesFromObj data empty:', key);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -608,6 +628,8 @@ var Mesh = new Class({
      */
     sortByDepth: function (faceA, faceB)
     {
+        console.group('Mesh sortByDepth');
+        console.groupEnd();
         return faceA.depth - faceB.depth;
     },
 
@@ -624,8 +646,10 @@ var Mesh = new Class({
      */
     depthSort: function ()
     {
+        console.group('Mesh depthSort');
         StableSort(this.faces, this.sortByDepth);
 
+        console.groupEnd();
         return this;
     },
 
@@ -650,10 +674,12 @@ var Mesh = new Class({
      */
     addVertex: function (x, y, z, u, v, color, alpha)
     {
+        console.group('Mesh addVertex');
         var vert = new Vertex(x, y, z, u, v, color, alpha);
 
         this.vertices.push(vert);
 
+        console.groupEnd();
         return vert;
     },
 
@@ -673,12 +699,14 @@ var Mesh = new Class({
      */
     addFace: function (vertex1, vertex2, vertex3)
     {
+        console.group('Mesh addFace');
         var face = new Face(vertex1, vertex2, vertex3);
 
         this.faces.push(face);
 
         this.dirtyCache[9] = -1;
 
+        console.groupEnd();
         return face;
     },
 
@@ -746,6 +774,7 @@ var Mesh = new Class({
      */
     addVertices: function (vertices, uvs, indicies, containsZ, normals, colors, alphas)
     {
+        console.group('Mesh addVertices');
         var result = GenerateVerts(vertices, uvs, indicies, containsZ, normals, colors, alphas);
 
         if (result)
@@ -760,6 +789,7 @@ var Mesh = new Class({
 
         this.dirtyCache[9] = -1;
 
+        console.groupEnd();
         return this;
     },
 
@@ -773,6 +803,8 @@ var Mesh = new Class({
      */
     getFaceCount: function ()
     {
+        console.group('Mesh getFaceCount');
+        console.groupEnd();
         return this.faces.length;
     },
 
@@ -786,6 +818,8 @@ var Mesh = new Class({
      */
     getVertexCount: function ()
     {
+        console.group('Mesh getVertexCount');
+        console.groupEnd();
         return this.vertices.length;
     },
 
@@ -801,6 +835,8 @@ var Mesh = new Class({
      */
     getFace: function (index)
     {
+        console.group('Mesh getFace');
+        console.groupEnd();
         return this.faces[index];
     },
 
@@ -821,6 +857,7 @@ var Mesh = new Class({
      */
     hasFaceAt: function (x, y, camera)
     {
+        console.group('Mesh hasFaceAt');
         if (camera === undefined) { camera = this.scene.sys.cameras.main; }
 
         var calcMatrix = GetCalcMatrix(this, camera).calc;
@@ -833,10 +870,12 @@ var Mesh = new Class({
 
             if (face.contains(x, y, calcMatrix))
             {
+                console.groupEnd();
                 return true;
             }
         }
 
+        console.groupEnd();
         return false;
     },
 
@@ -860,6 +899,7 @@ var Mesh = new Class({
      */
     getFaceAt: function (x, y, camera)
     {
+        console.group('Mesh getFaceAt');
         if (camera === undefined) { camera = this.scene.sys.cameras.main; }
 
         var calcMatrix = GetCalcMatrix(this, camera).calc;
@@ -877,7 +917,9 @@ var Mesh = new Class({
             }
         }
 
-        return StableSort(results, this.sortByDepth);
+        const result = StableSort(results, this.sortByDepth);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -928,6 +970,7 @@ var Mesh = new Class({
      */
     setDebug: function (graphic, callback)
     {
+        console.group('Mesh setDebug');
         this.debugGraphic = graphic;
 
         if (!graphic && !callback)
@@ -943,6 +986,7 @@ var Mesh = new Class({
             this.debugCallback = callback;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -959,6 +1003,7 @@ var Mesh = new Class({
      */
     isDirty: function ()
     {
+        console.group('Mesh isDirty');
         var position = this.modelPosition;
         var rotation = this.modelRotation;
         var scale = this.modelScale;
@@ -1006,6 +1051,7 @@ var Mesh = new Class({
 
         dirtyCache[9] = faces;
 
+        console.groupEnd();
         return (
             pxCached !== px || pyCached !== py || pzCached !== pz ||
             rxCached !== rx || ryCached !== ry || rzCached !== rz ||
@@ -1040,6 +1086,7 @@ var Mesh = new Class({
      */
     preUpdate: function ()
     {
+        console.group('Mesh preUpdate');
         this.totalRendered = this.totalFrame;
         this.totalFrame = 0;
 
@@ -1047,6 +1094,7 @@ var Mesh = new Class({
 
         if (!this.ignoreDirtyCache && !dirty[10] && !this.isDirty())
         {
+            console.groupEnd();
             //  If neither the view or the mesh is dirty we can bail out and save lots of math
             return;
         }
@@ -1086,6 +1134,7 @@ var Mesh = new Class({
         }
 
         this.depthSort();
+        console.groupEnd();
     },
 
     /**
@@ -1101,6 +1150,7 @@ var Mesh = new Class({
      */
     renderDebug: function (src, faces)
     {
+        console.group('Mesh renderDebug');
         var graphic = src.debugGraphic;
 
         for (var i = 0; i < faces.length; i++)
@@ -1116,6 +1166,7 @@ var Mesh = new Class({
 
             graphic.strokeTriangle(x0, y0, x1, y1, x2, y2);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1127,10 +1178,12 @@ var Mesh = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Mesh preDestroy');
         this.clear();
 
         this.debugCallback = null;
         this.debugGraphic = null;
+        console.groupEnd();
     },
 
     /**
@@ -1147,7 +1200,10 @@ var Mesh = new Class({
      */
     clearTint: function ()
     {
-        return this.setTint();
+        console.group('Mesh clearTint');
+        const result = this.setTint();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1170,10 +1226,12 @@ var Mesh = new Class({
      */
     setInteractive: function (config)
     {
+        console.group('Mesh setInteractive');
         if (config === undefined) { config = {}; }
 
         var hitAreaCallback = function (area, x, y)
         {
+            console.group('Mesh setInteractive hitAreaCallback');
             var faces = this.faces;
 
             for (var i = 0; i < faces.length; i++)
@@ -1183,15 +1241,18 @@ var Mesh = new Class({
                 //  Don't pass a calcMatrix, as the x/y are already transformed
                 if (face.contains(x, y))
                 {
+                    console.groupEnd();
                     return true;
                 }
             }
 
+            console.groupEnd();
             return false;
         }.bind(this);
 
         this.scene.sys.input.enable(this, config, hitAreaCallback);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1216,6 +1277,7 @@ var Mesh = new Class({
      */
     setTint: function (tint)
     {
+        console.group('Mesh setTint');
         if (tint === undefined) { tint = 0xffffff; }
 
         var vertices = this.vertices;
@@ -1225,6 +1287,7 @@ var Mesh = new Class({
             vertices[i].color = tint;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1257,6 +1320,7 @@ var Mesh = new Class({
      */
     uvScroll: function (x, y)
     {
+        console.group('Mesh uvScroll');
         var faces = this.faces;
 
         for (var i = 0; i < faces.length; i++)
@@ -1264,6 +1328,7 @@ var Mesh = new Class({
             faces[i].scrollUV(x, y);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1294,6 +1359,7 @@ var Mesh = new Class({
      */
     uvScale: function (x, y)
     {
+        console.group('Mesh uvScale');
         var faces = this.faces;
 
         for (var i = 0; i < faces.length; i++)
@@ -1301,6 +1367,7 @@ var Mesh = new Class({
             faces[i].scaleUV(x, y);
         }
 
+        console.groupEnd();
         return this;
     },
 

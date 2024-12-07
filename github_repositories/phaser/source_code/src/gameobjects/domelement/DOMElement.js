@@ -119,6 +119,7 @@ var DOMElement = new Class({
 
     function DOMElement (scene, x, y, element, style, innerText)
     {
+        console.group('DOMElement');
         GameObject.call(this, scene, 'DOMElement');
 
         /**
@@ -310,6 +311,7 @@ var DOMElement = new Class({
         scene.sys.events.on(SCENE_EVENTS.SLEEP, this.handleSceneEvent, this);
         scene.sys.events.on(SCENE_EVENTS.WAKE, this.handleSceneEvent, this);
         scene.sys.events.on(SCENE_EVENTS.PRE_RENDER, this.preRender, this);
+        console.groupEnd();
     },
 
     /**
@@ -323,6 +325,7 @@ var DOMElement = new Class({
      */
     handleSceneEvent: function (sys)
     {
+        console.group('DOMElement handleSceneEvent');
         var node = this.node;
         var style = node.style;
 
@@ -330,6 +333,7 @@ var DOMElement = new Class({
         {
             style.display = (sys.settings.visible) ? 'block' : 'none';
         }
+        console.groupEnd();
     },
 
     /**
@@ -347,12 +351,14 @@ var DOMElement = new Class({
      */
     setSkew: function (x, y)
     {
+        console.group('DOMElement setSkew');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = x; }
 
         this.skewX = x;
         this.skewY = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -375,8 +381,10 @@ var DOMElement = new Class({
      */
     setPerspective: function (value)
     {
+        console.group('DOMElement setPerspective');
         this.parent.style.perspective = value + 'px';
 
+        console.groupEnd();
         return this;
     },
 
@@ -431,6 +439,7 @@ var DOMElement = new Class({
      */
     addListener: function (events)
     {
+        console.group('DOMElement addListener');
         if (this.node)
         {
             events = events.split(' ');
@@ -441,6 +450,7 @@ var DOMElement = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -456,6 +466,7 @@ var DOMElement = new Class({
      */
     removeListener: function (events)
     {
+        console.group('DOMElement removeListener');
         if (this.node)
         {
             events = events.split(' ');
@@ -466,6 +477,7 @@ var DOMElement = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -480,7 +492,9 @@ var DOMElement = new Class({
      */
     dispatchNativeEvent: function (event)
     {
+        console.group('DOMElement dispatchNativeEvent');
         this.emit(event.type, event);
+        console.groupEnd();
     },
 
     /**
@@ -527,7 +541,10 @@ var DOMElement = new Class({
      */
     createElement: function (tagName, style, innerText)
     {
-        return this.setElement(document.createElement(tagName), style, innerText);
+        console.group('DOMElement createElement');
+        const result = this.setElement(document.createElement(tagName), style, innerText);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -583,6 +600,7 @@ var DOMElement = new Class({
      */
     setElement: function (element, style, innerText)
     {
+        console.group('DOMElement setElement');
         //  Already got an element? Remove it first
         this.removeElement();
 
@@ -605,6 +623,7 @@ var DOMElement = new Class({
 
         if (!target)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -645,6 +664,7 @@ var DOMElement = new Class({
             target.innerText = innerText;
         }
 
+        console.groupEnd();
         return this.updateSize();
     },
 
@@ -688,6 +708,7 @@ var DOMElement = new Class({
      */
     createFromCache: function (key, tagName)
     {
+        console.group('DOMElement createFromCache');
         var html = this.cache.get(key);
 
         if (html)
@@ -695,6 +716,7 @@ var DOMElement = new Class({
             this.createFromHTML(html, tagName);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -731,6 +753,7 @@ var DOMElement = new Class({
      */
     createFromHTML: function (html, tagName)
     {
+        console.group('DOMElement createFromHTML');
         if (tagName === undefined) { tagName = 'div'; }
 
         //  Already got an element? Remove it first
@@ -755,7 +778,9 @@ var DOMElement = new Class({
 
         element.innerHTML = html;
 
-        return this.updateSize();
+        const result = this.updateSize();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -769,6 +794,7 @@ var DOMElement = new Class({
      */
     removeElement: function ()
     {
+        console.group('DOMElement removeElement');
         if (this.node)
         {
             RemoveFromDOM(this.node);
@@ -776,6 +802,7 @@ var DOMElement = new Class({
             this.node = null;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -793,6 +820,7 @@ var DOMElement = new Class({
      */
     updateSize: function ()
     {
+        console.group('DOMElement updateSize');
         var node = this.node;
 
         var nodeBounds = node.getBoundingClientRect();
@@ -803,6 +831,7 @@ var DOMElement = new Class({
         this.displayWidth = nodeBounds.width || 0;
         this.displayHeight = nodeBounds.height || 0;
 
+        console.groupEnd();
         return this;
     },
 
@@ -821,6 +850,7 @@ var DOMElement = new Class({
      */
     getChildByProperty: function (property, value)
     {
+        console.group('DOMElement getChildByProperty');
         if (this.node)
         {
             var children = this.node.querySelectorAll('*');
@@ -829,11 +859,13 @@ var DOMElement = new Class({
             {
                 if (children[i][property] === value)
                 {
+                    console.groupEnd();
                     return children[i];
                 }
             }
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -852,7 +884,10 @@ var DOMElement = new Class({
      */
     getChildByID: function (id)
     {
-        return this.getChildByProperty('id', id);
+        console.group('DOMElement getChildByID');
+        const result = this.getChildByProperty('id', id);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -870,7 +905,10 @@ var DOMElement = new Class({
      */
     getChildByName: function (name)
     {
-        return this.getChildByProperty('name', name);
+        console.group('DOMElement getChildByName');
+        const result = this.getChildByProperty('name', name);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -885,6 +923,7 @@ var DOMElement = new Class({
      */
     setClassName: function (className)
     {
+        console.group('DOMElement setClassName');
         if (this.node)
         {
             this.node.className = className;
@@ -892,6 +931,7 @@ var DOMElement = new Class({
             this.updateSize();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -909,6 +949,7 @@ var DOMElement = new Class({
      */
     setText: function (text)
     {
+        console.group('DOMElement setText');
         if (this.node)
         {
             this.node.innerText = text;
@@ -916,6 +957,7 @@ var DOMElement = new Class({
             this.updateSize();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -931,6 +973,7 @@ var DOMElement = new Class({
      */
     setHTML: function (html)
     {
+        console.group('DOMElement setHTML');
         if (this.node)
         {
             this.node.innerHTML = html;
@@ -938,6 +981,7 @@ var DOMElement = new Class({
             this.updateSize();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -950,6 +994,7 @@ var DOMElement = new Class({
      */
     preRender: function ()
     {
+        console.group('DOMElement preRender');
         var parent = this.parentContainer;
         var node = this.node;
 
@@ -957,6 +1002,7 @@ var DOMElement = new Class({
         {
             node.style.display = 'none';
         }
+        console.groupEnd();
     },
 
     /**
@@ -971,6 +1017,8 @@ var DOMElement = new Class({
      */
     willRender: function ()
     {
+        console.group('DOMElement willRender');
+        console.groupEnd();
         return true;
     },
 
@@ -983,11 +1031,13 @@ var DOMElement = new Class({
      */
     preDestroy: function ()
     {
+        console.group('DOMElement preDestroy');
         this.removeElement();
 
         this.scene.sys.events.off(SCENE_EVENTS.SLEEP, this.handleSceneEvent, this);
         this.scene.sys.events.off(SCENE_EVENTS.WAKE, this.handleSceneEvent, this);
         this.scene.sys.events.off(SCENE_EVENTS.PRE_RENDER, this.preRender, this);
+        console.groupEnd();
     }
 
 });

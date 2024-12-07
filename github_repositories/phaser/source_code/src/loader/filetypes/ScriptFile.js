@@ -39,6 +39,7 @@ var ScriptFile = new Class({
 
     function ScriptFile (loader, key, url, type, xhrSettings)
     {
+        console.group('ScriptFile');
         var extension = 'js';
 
         if (IsPlainObject(key))
@@ -67,6 +68,7 @@ var ScriptFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -78,6 +80,7 @@ var ScriptFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('ScriptFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.data = document.createElement('script');
@@ -89,6 +92,7 @@ var ScriptFile = new Class({
         document.head.appendChild(this.data);
 
         this.onProcessComplete();
+        console.groupEnd();
     }
 
 });
@@ -161,8 +165,10 @@ var ScriptFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register script');
 FileTypesManager.register('script', function (key, url, type, xhrSettings)
 {
+    console.group('FileTypesManager.register script factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -176,7 +182,9 @@ FileTypesManager.register('script', function (key, url, type, xhrSettings)
         this.addFile(new ScriptFile(this, key, url, type, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = ScriptFile;

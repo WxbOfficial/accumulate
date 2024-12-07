@@ -81,10 +81,9 @@
 
 		function startGame() {
 			new Phaser.Game(config);
-			document.body.removeEventListener('mousedown', startGame);
 		}
 
-		document.body.addEventListener('mousedown', startGame);
+        setTimeout(startGame, 2000);
 
 	</script>
 </body>

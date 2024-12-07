@@ -40,6 +40,7 @@ var TimeStep = new Class({
 
     function TimeStep (game, config)
     {
+        console.group('TimeStep');
         /**
          * A reference to the Phaser.Game instance.
          *
@@ -433,6 +434,7 @@ var TimeStep = new Class({
          * @since 3.22.0
          */
         this.smoothStep = GetValue(config, 'smoothStep', true);
+        console.groupEnd();
     },
 
     /**
@@ -443,7 +445,9 @@ var TimeStep = new Class({
      */
     blur: function ()
     {
+        console.group('TimeStep blur');
         this.inFocus = false;
+        console.groupEnd();
     },
 
     /**
@@ -454,9 +458,11 @@ var TimeStep = new Class({
      */
     focus: function ()
     {
+        console.group('TimeStep focus');
         this.inFocus = true;
 
         this.resetDelta();
+        console.groupEnd();
     },
 
     /**
@@ -467,7 +473,9 @@ var TimeStep = new Class({
      */
     pause: function ()
     {
+        console.group('TimeStep pause');
         this._pauseTime = window.performance.now();
+        console.groupEnd();
     },
 
     /**
@@ -478,10 +486,12 @@ var TimeStep = new Class({
      */
     resume: function ()
     {
+        console.group('TimeStep resume');
         this.resetDelta();
 
         this.pauseDuration = this.time - this._pauseTime;
         this.startTime += this.pauseDuration;
+        console.groupEnd();
     },
 
     /**
@@ -493,6 +503,7 @@ var TimeStep = new Class({
      */
     resetDelta: function ()
     {
+        console.group('TimeStep resetDelta');
         var now = window.performance.now();
 
         this.time = now;
@@ -511,6 +522,7 @@ var TimeStep = new Class({
         this.deltaIndex = 0;
 
         this._coolDown = this.panicMax;
+        console.groupEnd();
     },
 
     /**
@@ -524,8 +536,10 @@ var TimeStep = new Class({
      */
     start: function (callback)
     {
+        console.group('TimeStep start');
         if (this.started)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -546,6 +560,7 @@ var TimeStep = new Class({
         var step = (this.hasFpsLimit) ? this.stepLimitFPS.bind(this) : this.step.bind(this);
 
         this.raf.start(step, this.forceSetTimeOut, this._target);
+        console.groupEnd();
     },
 
     /**
@@ -562,6 +577,7 @@ var TimeStep = new Class({
      */
     smoothDelta: function (delta)
     {
+        console.group('TimeStep smoothDelta');
         var idx = this.deltaIndex;
         var history = this.deltaHistory;
         var max = this.deltaSmoothingMax;
@@ -609,6 +625,7 @@ var TimeStep = new Class({
         //  Then divide by the array length to get the average delta
         avg /= max;
 
+        console.groupEnd();
         return avg;
     },
 
@@ -642,9 +659,11 @@ var TimeStep = new Class({
      */
     updateFPS: function (time)
     {
+        console.group('TimeStep updateFPS');
         this.actualFps = 0.25 * this.framesThisSecond + 0.75 * this.actualFps;
         this.nextFpsUpdate = time + 1000;
         this.framesThisSecond = 0;
+        console.groupEnd();
     },
 
     /**
@@ -659,6 +678,7 @@ var TimeStep = new Class({
      */
     stepLimitFPS: function (time)
     {
+        console.group('TimeStep stepLimitFPS');
         this.now = time;
 
         //  delta time (time is in ms)
@@ -696,6 +716,7 @@ var TimeStep = new Class({
         this.lastTime = time;
 
         this.frame++;
+        console.groupEnd();
     },
 
     /**
@@ -710,6 +731,7 @@ var TimeStep = new Class({
      */
     step: function (time)
     {
+        console.group('%cTimeStep step', 'font-size: 18px; color: #ffffff; background-color: #000000;');
         this.now = time;
 
         //  delta time (time is in ms)
@@ -742,6 +764,7 @@ var TimeStep = new Class({
         this.lastTime = time;
 
         this.frame++;
+        console.groupEnd();
     },
 
     /**
@@ -752,6 +775,7 @@ var TimeStep = new Class({
      */
     tick: function ()
     {
+        console.group('TimeStep tick');
         var now = window.performance.now();
 
         if (this.hasFpsLimit)
@@ -762,6 +786,7 @@ var TimeStep = new Class({
         {
             this.step(now);
         }
+        console.groupEnd();
     },
 
     /**
@@ -772,12 +797,14 @@ var TimeStep = new Class({
      */
     sleep: function ()
     {
+        console.group('TimeStep sleep');
         if (this.running)
         {
             this.raf.stop();
 
             this.running = false;
         }
+        console.groupEnd();
     },
 
     /**
@@ -791,12 +818,14 @@ var TimeStep = new Class({
      */
     wake: function (seamless)
     {
+        console.group('TimeStep wake');
         if (seamless === undefined) { seamless = false; }
 
         var now = window.performance.now();
 
         if (this.running)
         {
+            console.groupEnd();
             return;
         }
         else if (seamless)
@@ -815,6 +844,7 @@ var TimeStep = new Class({
         this.fpsLimitTriggered = false;
 
         this.tick();
+        console.groupEnd();
     },
 
     /**
@@ -827,7 +857,10 @@ var TimeStep = new Class({
      */
     getDuration: function ()
     {
-        return Math.round(this.lastTime - this.startTime) / 1000;
+        console.group('TimeStep getDuration');
+        const result = Math.round(this.lastTime - this.startTime) / 1000;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -840,7 +873,10 @@ var TimeStep = new Class({
      */
     getDurationMS: function ()
     {
-        return Math.round(this.lastTime - this.startTime);
+        console.group('TimeStep getDurationMS');
+        const result = Math.round(this.lastTime - this.startTime);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -853,11 +889,13 @@ var TimeStep = new Class({
      */
     stop: function ()
     {
+        console.group('TimeStep stop');
         this.running = false;
         this.started = false;
 
         this.raf.stop();
 
+        console.groupEnd();
         return this;
     },
 
@@ -870,6 +908,7 @@ var TimeStep = new Class({
      */
     destroy: function ()
     {
+        console.group('TimeStep destroy');
         this.stop();
 
         this.raf.destroy();
@@ -877,6 +916,7 @@ var TimeStep = new Class({
         this.raf = null;
         this.game = null;
         this.callback = null;
+        console.groupEnd();
     }
 
 });

@@ -33,6 +33,7 @@ var MouseManager = new Class({
 
     function MouseManager (inputManager)
     {
+        console.group('MouseManager');
         /**
          * A reference to the Input Manager.
          *
@@ -227,6 +228,7 @@ var MouseManager = new Class({
         this.isTop = true;
 
         inputManager.events.once(InputEvents.MANAGER_BOOT, this.boot, this);
+        console.groupEnd();
     },
 
     /**
@@ -238,6 +240,7 @@ var MouseManager = new Class({
      */
     boot: function ()
     {
+        console.group('MouseManager boot');
         var config = this.manager.config;
 
         this.enabled = config.inputMouse;
@@ -267,6 +270,7 @@ var MouseManager = new Class({
         {
             this.startListeners();
         }
+        console.groupEnd();
     },
 
     /**
@@ -284,12 +288,15 @@ var MouseManager = new Class({
      */
     disableContextMenu: function ()
     {
+        console.group('MouseManager disableContextMenu');
         this.target.addEventListener('contextmenu', function (event)
         {
             event.preventDefault();
+            console.groupEnd();
             return false;
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -316,6 +323,7 @@ var MouseManager = new Class({
      */
     requestPointerLock: function ()
     {
+        console.group('MouseManager requestPointerLock');
         if (Features.pointerLock)
         {
             var element = this.target;
@@ -324,6 +332,7 @@ var MouseManager = new Class({
 
             element.requestPointerLock();
         }
+        console.groupEnd();
     },
 
     /**
@@ -336,11 +345,13 @@ var MouseManager = new Class({
      */
     releasePointerLock: function ()
     {
+        console.group('MouseManager releasePointerLock');
         if (Features.pointerLock)
         {
             document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
             document.exitPointerLock();
         }
+        console.groupEnd();
     },
 
     /**
@@ -352,10 +363,12 @@ var MouseManager = new Class({
      */
     startListeners: function ()
     {
+        console.group('MouseManager startListeners');
         var target = this.target;
 
         if (!target)
         {
+            console.groupEnd();
             return;
         }
 
@@ -366,6 +379,7 @@ var MouseManager = new Class({
 
         this.onMouseMove = function (event)
         {
+            console.group('MouseManager startListeners onMouseMove');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onMouseMove(event);
@@ -375,10 +389,12 @@ var MouseManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onMouseDown = function (event)
         {
+            console.group('MouseManager startListeners onMouseDown');
             if (autoFocus)
             {
                 window.focus();
@@ -393,12 +409,15 @@ var MouseManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onMouseDownWindow = function (event)
         {
+            console.group('MouseManager startListeners onMouseDownWindow');
             if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents)
             {
+                console.groupEnd();
                 return;
             }
 
@@ -407,10 +426,12 @@ var MouseManager = new Class({
                 //  Only process the event if the target isn't the canvas
                 manager.onMouseDown(event);
             }
+            console.groupEnd();
         };
 
         this.onMouseUp = function (event)
         {
+            console.group('MouseManager startListeners onMouseUp');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onMouseUp(event);
@@ -420,12 +441,15 @@ var MouseManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onMouseUpWindow = function (event)
         {
+            console.group('MouseManager startListeners onMouseUpWindow');
             if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents)
             {
+                console.groupEnd();
                 return;
             }
 
@@ -434,26 +458,32 @@ var MouseManager = new Class({
                 //  Only process the event if the target isn't the canvas
                 manager.onMouseUp(event);
             }
+            console.groupEnd();
         };
 
         this.onMouseOver = function (event)
         {
+            console.group('MouseManager startListeners onMouseOver');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.setCanvasOver(event);
             }
+            console.groupEnd();
         };
 
         this.onMouseOut = function (event)
         {
+            console.group('MouseManager startListeners onMouseOut');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.setCanvasOut(event);
             }
+            console.groupEnd();
         };
 
         this.onMouseWheel = function (event)
         {
+            console.group('MouseManager startListeners onMouseWheel');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onMouseWheel(event);
@@ -463,6 +493,7 @@ var MouseManager = new Class({
             {
                 event.preventDefault();
             }
+            console.groupEnd();
         };
 
         var passive = { passive: true };
@@ -515,6 +546,7 @@ var MouseManager = new Class({
         }
 
         this.enabled = true;
+        console.groupEnd();
     },
 
     /**
@@ -526,6 +558,7 @@ var MouseManager = new Class({
      */
     stopListeners: function ()
     {
+        console.group('MouseManager stopListeners');
         var target = this.target;
 
         target.removeEventListener('mousemove', this.onMouseMove);
@@ -548,6 +581,7 @@ var MouseManager = new Class({
             document.removeEventListener('mozpointerlockchange', this.pointerLockChange, true);
             document.removeEventListener('webkitpointerlockchange', this.pointerLockChange, true);
         }
+        console.groupEnd();
     },
 
     /**
@@ -558,11 +592,13 @@ var MouseManager = new Class({
      */
     destroy: function ()
     {
+        console.group('MouseManager destroy');
         this.stopListeners();
 
         this.target = null;
         this.enabled = false;
         this.manager = null;
+        console.groupEnd();
     }
 
 });

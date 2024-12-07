@@ -16,6 +16,7 @@
  */
 var GetTarget = function (element)
 {
+    console.group('GetTarget');
     var target;
 
     if (element !== '')
@@ -39,6 +40,7 @@ var GetTarget = function (element)
         target = document.body;
     }
 
+    console.groupEnd();
     return target;
 };
 

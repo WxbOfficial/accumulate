@@ -19,9 +19,12 @@ var IntegerToRGB = require('./IntegerToRGB');
  */
 var IntegerToColor = function (input)
 {
+    console.group('IntegerToColor');
     var rgb = IntegerToRGB(input);
 
-    return new Color(rgb.r, rgb.g, rgb.b, rgb.a);
+    const result = new Color(rgb.r, rgb.g, rgb.b, rgb.a);
+    console.groupEnd();
+    return result;
 };
 
 module.exports = IntegerToColor;

@@ -23,8 +23,10 @@ var Rope = require('./Rope');
  *
  * @return {Phaser.GameObjects.Rope} The Game Object that was created.
  */
+console.group('GameObjectCreator.register rope');
 GameObjectCreator.register('rope', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register rope factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -43,7 +45,9 @@ GameObjectCreator.register('rope', function (config, addToScene)
 
     BuildGameObject(this.scene, rope, config);
 
+    console.groupEnd();
     return rope;
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectCreator context.
