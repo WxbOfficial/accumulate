@@ -80,6 +80,7 @@ var Rope = new Class({
 
     function Rope (scene, x, y, texture, frame, points, horizontal, colors, alphas)
     {
+        console.group('Rope');
         if (texture === undefined) { texture = '__DEFAULT'; }
         if (points === undefined) { points = 2; }
         if (horizontal === undefined) { horizontal = true; }
@@ -288,18 +289,23 @@ var Rope = new Class({
         this.setPoints(points, colors, alphas);
 
         this.updateVertices();
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     addedToScene: function ()
     {
+        console.group('Rope addedToScene');
         this.scene.sys.updateList.add(this);
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     removedFromScene: function ()
     {
+        console.group('Rope removedFromScene');
         this.scene.sys.updateList.remove(this);
+        console.groupEnd();
     },
 
     /**
@@ -314,6 +320,7 @@ var Rope = new Class({
      */
     preUpdate: function (time, delta)
     {
+        console.group('Rope preUpdate');
         var prevFrame = this.anims.currentFrame;
 
         this.anims.update(time, delta);
@@ -323,6 +330,7 @@ var Rope = new Class({
             this.updateUVs();
             this.updateVertices();
         }
+        console.groupEnd();
     },
 
     /**
@@ -339,8 +347,10 @@ var Rope = new Class({
      */
     play: function (key, ignoreIfPlaying, startFrame)
     {
+        console.group('Rope play');
         this.anims.play(key, ignoreIfPlaying, startFrame);
 
+        console.groupEnd();
         return this;
     },
 
@@ -356,8 +366,10 @@ var Rope = new Class({
      */
     setDirty: function ()
     {
+        console.group('Rope setDirty');
         this.dirty = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -378,16 +390,20 @@ var Rope = new Class({
      */
     setHorizontal: function (points, colors, alphas)
     {
+        console.group('Rope setHorizontal');
         if (points === undefined) { points = this.points.length; }
 
         if (this.horizontal)
         {
+            console.groupEnd();
             return this;
         }
 
         this.horizontal = true;
 
-        return this.setPoints(points, colors, alphas);
+        const result = this.setPoints(points, colors, alphas);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -407,16 +423,20 @@ var Rope = new Class({
      */
     setVertical: function (points, colors, alphas)
     {
+        console.group('Rope setVertical');
         if (points === undefined) { points = this.points.length; }
 
         if (!this.horizontal)
         {
+            console.groupEnd();
             return this;
         }
 
         this.horizontal = false;
 
-        return this.setPoints(points, colors, alphas);
+        const result = this.setPoints(points, colors, alphas);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -441,10 +461,12 @@ var Rope = new Class({
      */
     setTintFill: function (value)
     {
+        console.group('Rope setTintFill');
         if (value === undefined) { value = false; }
 
         this.tintFill = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -476,10 +498,12 @@ var Rope = new Class({
      */
     setAlphas: function (alphas, bottomAlpha)
     {
+        console.group('Rope setAlphas');
         var total = this.points.length;
 
         if (total < 1)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -543,6 +567,7 @@ var Rope = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
 
     },
@@ -573,10 +598,12 @@ var Rope = new Class({
      */
     setColors: function (colors)
     {
+        console.group('Rope setColors');
         var total = this.points.length;
 
         if (total < 1)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -629,6 +656,7 @@ var Rope = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -675,6 +703,7 @@ var Rope = new Class({
      */
     setPoints: function (points, colors, alphas)
     {
+        console.group('Rope setPoints');
         if (points === undefined) { points = 2; }
 
         if (typeof points === 'number')
@@ -722,6 +751,7 @@ var Rope = new Class({
         {
             console.warn('Rope: Not enough points given');
 
+            console.groupEnd();
             return this;
         }
         else if (total === 1)
@@ -751,6 +781,7 @@ var Rope = new Class({
             this.setAlphas(alphas);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -764,6 +795,7 @@ var Rope = new Class({
      */
     updateUVs: function ()
     {
+        console.group('Rope updateUVs');
         var currentUVs = this.uv;
         var total = this.points.length;
 
@@ -839,6 +871,7 @@ var Rope = new Class({
             currentUVs[index + 3] = uv3;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -855,6 +888,7 @@ var Rope = new Class({
      */
     resizeArrays: function (newSize)
     {
+        console.group('Rope resizeArrays');
         var colors = this.colors;
         var alphas = this.alphas;
 
@@ -876,6 +910,7 @@ var Rope = new Class({
         //  updateVertices during next render
         this.dirty = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -893,6 +928,7 @@ var Rope = new Class({
      */
     updateVertices: function ()
     {
+        console.group('Rope updateVertices');
         var perp = this._perp;
         var points = this.points;
         var vertices = this.vertices;
@@ -903,6 +939,7 @@ var Rope = new Class({
 
         if (total < 1)
         {
+            console.groupEnd();
             return;
         }
 
@@ -944,6 +981,7 @@ var Rope = new Class({
             lastPoint = point;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -981,6 +1019,7 @@ var Rope = new Class({
      */
     setDebug: function (graphic, callback)
     {
+        console.group('Rope setDebug');
         this.debugGraphic = graphic;
 
         if (!graphic && !callback)
@@ -996,6 +1035,7 @@ var Rope = new Class({
             this.debugCallback = callback;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1013,6 +1053,7 @@ var Rope = new Class({
      */
     renderDebugVerts: function (src, meshLength, verts)
     {
+        console.group('Rope renderDebugVerts');
         var graphic = src.debugGraphic;
 
         var px0 = verts[0];
@@ -1039,6 +1080,7 @@ var Rope = new Class({
             px1 = x1;
             py1 = y1;
         }
+        console.groupEnd();
     },
 
     /**
@@ -1050,6 +1092,7 @@ var Rope = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Rope preDestroy');
         this.anims.destroy();
 
         this.anims = undefined;
@@ -1062,6 +1105,7 @@ var Rope = new Class({
 
         this.debugCallback = null;
         this.debugGraphic = null;
+        console.groupEnd();
     },
 
     /**

@@ -38,6 +38,7 @@ var TransformMatrix = new Class({
 
     function TransformMatrix (a, b, c, d, tx, ty)
     {
+        console.group('TransformMatrix');
         if (a === undefined) { a = 1; }
         if (b === undefined) { b = 0; }
         if (c === undefined) { c = 0; }
@@ -77,6 +78,7 @@ var TransformMatrix = new Class({
          * @since 3.60.0
          */
         this.quad = new Float32Array(8);
+        console.groupEnd();
     },
 
     /**

@@ -56,6 +56,7 @@ var CameraManager = new Class({
 
     function CameraManager (scene)
     {
+        console.group('CameraManager');
         /**
          * The Scene that owns the Camera Manager plugin.
          *
@@ -129,6 +130,7 @@ var CameraManager = new Class({
 
         scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
         scene.sys.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -142,6 +144,7 @@ var CameraManager = new Class({
      */
     boot: function ()
     {
+        console.group('CameraManager boot');
         var sys = this.systems;
 
         if (sys.settings.cameras)
@@ -163,6 +166,7 @@ var CameraManager = new Class({
         sys.game.scale.on(ScaleEvents.RESIZE, this.onResize, this);
 
         this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -178,6 +182,7 @@ var CameraManager = new Class({
      */
     start: function ()
     {
+        console.group('CameraManager start');
         if (!this.main)
         {
             var sys = this.systems;
@@ -200,6 +205,7 @@ var CameraManager = new Class({
 
         eventEmitter.on(SceneEvents.UPDATE, this.update, this);
         eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -233,6 +239,7 @@ var CameraManager = new Class({
      */
     add: function (x, y, width, height, makeMain, name)
     {
+        console.group('CameraManager add');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = this.scene.sys.scale.width; }
@@ -255,6 +262,7 @@ var CameraManager = new Class({
             this.main = camera;
         }
 
+        console.groupEnd();
         return camera;
     },
 
@@ -281,6 +289,7 @@ var CameraManager = new Class({
      */
     addExisting: function (camera, makeMain)
     {
+        console.group('CameraManager addExisting');
         if (makeMain === undefined) { makeMain = false; }
 
         var index = this.cameras.indexOf(camera);
@@ -298,9 +307,11 @@ var CameraManager = new Class({
                 this.main = camera;
             }
 
+            console.groupEnd();
             return camera;
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -318,6 +329,7 @@ var CameraManager = new Class({
      */
     getNextID: function ()
     {
+        console.group('CameraManager getNextID');
         var cameras = this.cameras;
 
         var testID = 1;
@@ -345,10 +357,12 @@ var CameraManager = new Class({
             }
             else
             {
+                console.groupEnd();
                 return testID;
             }
         }
 
+        console.groupEnd();
         return 0;
     },
 
@@ -366,6 +380,7 @@ var CameraManager = new Class({
      */
     getTotal: function (isVisible)
     {
+        console.group('CameraManager getTotal');
         if (isVisible === undefined) { isVisible = false; }
 
         var total = 0;
@@ -382,6 +397,7 @@ var CameraManager = new Class({
             }
         }
 
+        console.groupEnd();
         return total;
     },
 
@@ -399,6 +415,7 @@ var CameraManager = new Class({
      */
     fromJSON: function (config)
     {
+        console.group('CameraManager fromJSON');
         if (!Array.isArray(config))
         {
             config = [ config ];
@@ -451,6 +468,7 @@ var CameraManager = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -469,16 +487,19 @@ var CameraManager = new Class({
      */
     getCamera: function (name)
     {
+        console.group('CameraManager getCamera');
         var cameras = this.cameras;
 
         for (var i = 0; i < cameras.length; i++)
         {
             if (cameras[i].name === name)
             {
+                console.groupEnd();
                 return cameras[i];
             }
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -496,6 +517,7 @@ var CameraManager = new Class({
      */
     getCamerasBelowPointer: function (pointer)
     {
+        console.group('CameraManager getCamerasBelowPointer');
         var cameras = this.cameras;
 
         var x = pointer.x;
@@ -514,6 +536,7 @@ var CameraManager = new Class({
             }
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -537,6 +560,7 @@ var CameraManager = new Class({
      */
     remove: function (camera, runDestroy)
     {
+        console.group('CameraManager remove');
         if (runDestroy === undefined) { runDestroy = true; }
 
         if (!Array.isArray(camera))
@@ -573,6 +597,7 @@ var CameraManager = new Class({
             this.main = cameras[0];
         }
 
+        console.groupEnd();
         return total;
     },
 
@@ -591,6 +616,7 @@ var CameraManager = new Class({
      */
     render: function (renderer, displayList)
     {
+        console.group('CameraManager render');
         var scene = this.scene;
         var cameras = this.cameras;
 
@@ -607,6 +633,7 @@ var CameraManager = new Class({
                 renderer.render(scene, visibleChildren, camera);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -624,10 +651,13 @@ var CameraManager = new Class({
      */
     getVisibleChildren: function (children, camera)
     {
-        return children.filter(function (child)
+        console.group('CameraManager getVisibleChildren');
+        const result = children.filter(function (child)
         {
             return child.willRender(camera);
         });
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -643,6 +673,7 @@ var CameraManager = new Class({
      */
     resetAll: function ()
     {
+        console.group('CameraManager resetAll');
         for (var i = 0; i < this.cameras.length; i++)
         {
             this.cameras[i].destroy();
@@ -652,6 +683,7 @@ var CameraManager = new Class({
 
         this.main = this.add();
 
+        console.groupEnd();
         return this.main;
     },
 
@@ -667,10 +699,12 @@ var CameraManager = new Class({
      */
     update: function (time, delta)
     {
+        console.group('CameraManager update');
         for (var i = 0; i < this.cameras.length; i++)
         {
             this.cameras[i].update(time, delta);
         }
+        console.groupEnd();
     },
 
     /**
@@ -684,6 +718,7 @@ var CameraManager = new Class({
      */
     onResize: function (gameSize, baseSize, displaySize, previousWidth, previousHeight)
     {
+        console.group('CameraManager onResize');
         for (var i = 0; i < this.cameras.length; i++)
         {
             var cam = this.cameras[i];
@@ -696,6 +731,7 @@ var CameraManager = new Class({
                 cam.setSize(baseSize.width, baseSize.height);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -709,10 +745,12 @@ var CameraManager = new Class({
      */
     resize: function (width, height)
     {
+        console.group('CameraManager resize');
         for (var i = 0; i < this.cameras.length; i++)
         {
             this.cameras[i].setSize(width, height);
         }
+        console.groupEnd();
     },
 
     /**
@@ -725,6 +763,7 @@ var CameraManager = new Class({
      */
     shutdown: function ()
     {
+        console.group('CameraManager shutdown');
         this.main = undefined;
 
         for (var i = 0; i < this.cameras.length; i++)
@@ -738,6 +777,7 @@ var CameraManager = new Class({
 
         eventEmitter.off(SceneEvents.UPDATE, this.update, this);
         eventEmitter.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -750,6 +790,7 @@ var CameraManager = new Class({
      */
     destroy: function ()
     {
+        console.group('CameraManager destroy');
         this.shutdown();
 
         this.default.destroy();
@@ -760,10 +801,13 @@ var CameraManager = new Class({
 
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
 });
 
+console.group("PluginCache.register CameraManager");
 PluginCache.register('CameraManager', CameraManager, 'cameras');
 
+console.groupEnd();
 module.exports = CameraManager;

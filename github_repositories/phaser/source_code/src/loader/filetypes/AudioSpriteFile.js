@@ -42,6 +42,7 @@ var AudioSpriteFile = new Class({
 
     function AudioSpriteFile (loader, key, jsonURL, audioURL, audioConfig, audioXhrSettings, jsonXhrSettings)
     {
+        console.group('AudioSpriteFile');
         if (IsPlainObject(key))
         {
             var config = key;
@@ -80,6 +81,7 @@ var AudioSpriteFile = new Class({
                 this.config.resourceLoad = false;
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -92,6 +94,7 @@ var AudioSpriteFile = new Class({
      */
     onFileComplete: function (file)
     {
+        console.group('AudioSpriteFile onFileComplete');
         var index = this.files.indexOf(file);
 
         if (index !== -1)
@@ -116,6 +119,7 @@ var AudioSpriteFile = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -126,6 +130,7 @@ var AudioSpriteFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('AudioSpriteFile addToCache');
         if (this.isReadyToProcess())
         {
             var fileA = this.files[0];
@@ -136,6 +141,7 @@ var AudioSpriteFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -240,14 +246,17 @@ var AudioSpriteFile = new Class({
  *
  * @return {this} The Loader.
  */
+console.group('FileTypesManager.register audioSprite');
 FileTypesManager.register('audioSprite', function (key, jsonURL, audioURL, audioConfig, audioXhrSettings, jsonXhrSettings)
 {
+    console.group('FileTypesManager.register audioSprite factoryFunction');
     var game = this.systems.game;
     var gameAudioConfig = game.config.audio;
     var deviceAudio = game.device.audio;
 
     if ((gameAudioConfig && gameAudioConfig.noAudio) || (!deviceAudio.webAudio && !deviceAudio.audioData))
     {
+        console.groupEnd();
         //  Sounds are disabled, so skip loading audio
         return this;
     }
@@ -280,5 +289,7 @@ FileTypesManager.register('audioSprite', function (key, jsonURL, audioURL, audio
         }
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();

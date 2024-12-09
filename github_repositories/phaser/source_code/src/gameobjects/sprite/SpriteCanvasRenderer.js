@@ -20,9 +20,11 @@
  */
 var SpriteCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('SpriteCanvasRenderer');
     camera.addToRenderList(src);
 
     renderer.batchSprite(src, src.frame, camera, parentMatrix);
+    console.groupEnd();
 };
 
 module.exports = SpriteCanvasRenderer;

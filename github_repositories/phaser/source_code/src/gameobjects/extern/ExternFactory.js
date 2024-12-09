@@ -17,6 +17,7 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Extern} The Game Object that was created.
  */
+console.group('GameObjectFactory.register extern');
 GameObjectFactory.register('extern', function ()
 {
     var extern = new Extern(this.scene);
@@ -25,6 +26,7 @@ GameObjectFactory.register('extern', function ()
 
     return extern;
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

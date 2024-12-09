@@ -32,6 +32,7 @@
  */
 var NumberArray = function (start, end, prefix, suffix)
 {
+    console.group('NumberArray');
     var result = [];
 
     var i;
@@ -81,6 +82,7 @@ var NumberArray = function (start, end, prefix, suffix)
         }
     }
 
+    console.groupEnd();
     return result;
 };
 

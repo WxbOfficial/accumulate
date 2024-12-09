@@ -98,6 +98,7 @@ var MatterPhysics = new Class({
 
     function MatterPhysics (scene)
     {
+        console.group('MatterPhysics');
         /**
          * The Phaser Scene that owns this Matter Physics instance
          *
@@ -393,6 +394,7 @@ var MatterPhysics = new Class({
 
         scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
         scene.sys.events.on(SceneEvents.START, this.start, this);
+        console.groupEnd();
     },
 
     /**
@@ -405,11 +407,13 @@ var MatterPhysics = new Class({
      */
     boot: function ()
     {
+        console.group('MatterPhysics boot');
         this.world = new World(this.scene, this.config);
         this.add = new Factory(this.world);
         this.bodyBounds = new BodyBounds();
 
         this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -423,6 +427,7 @@ var MatterPhysics = new Class({
      */
     start: function ()
     {
+        console.group('MatterPhysics start');
         if (!this.world)
         {
             this.world = new World(this.scene, this.config);
@@ -434,6 +439,7 @@ var MatterPhysics = new Class({
         eventEmitter.on(SceneEvents.UPDATE, this.world.update, this.world);
         eventEmitter.on(SceneEvents.POST_UPDATE, this.world.postUpdate, this.world);
         eventEmitter.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -446,6 +452,7 @@ var MatterPhysics = new Class({
      */
     getConfig: function ()
     {
+        console.group('MatterPhysics getConfig');
         var gameConfig = this.systems.game.config.physics;
         var sceneConfig = this.systems.settings.physics;
 
@@ -454,6 +461,7 @@ var MatterPhysics = new Class({
             GetFastValue(gameConfig, 'matter', {})
         );
 
+        console.groupEnd();
         return config;
     },
 
@@ -470,7 +478,10 @@ var MatterPhysics = new Class({
      */
     pause: function ()
     {
-        return this.world.pause();
+        console.group('MatterPhysics pause');
+        const result = this.world.pause();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -483,7 +494,10 @@ var MatterPhysics = new Class({
      */
     resume: function ()
     {
-        return this.world.resume();
+        console.group('MatterPhysics resume');
+        const result = this.world.resume();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -497,9 +511,11 @@ var MatterPhysics = new Class({
      */
     set60Hz: function ()
     {
+        console.group('MatterPhysics set60Hz');
         this.world.getDelta = this.world.update60Hz;
         this.world.autoUpdate = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -514,9 +530,11 @@ var MatterPhysics = new Class({
      */
     set30Hz: function ()
     {
+        console.group('MatterPhysics set30Hz');
         this.world.getDelta = this.world.update30Hz;
         this.world.autoUpdate = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -549,7 +567,9 @@ var MatterPhysics = new Class({
      */
     step: function (delta, correction)
     {
+        console.group('MatterPhysics step');
         this.world.step(delta, correction);
+        console.groupEnd();
     },
 
     /**
@@ -574,12 +594,14 @@ var MatterPhysics = new Class({
      */
     containsPoint: function (body, x, y)
     {
+        console.group('MatterPhysics containsPoint');
         body = this.getMatterBodies(body);
 
         var position = Vector.create(x, y);
 
         var result = Query.point(body, position);
 
+        console.groupEnd();
         return (result.length > 0) ? true : false;
     },
 
@@ -603,6 +625,7 @@ var MatterPhysics = new Class({
      */
     intersectPoint: function (x, y, bodies)
     {
+        console.group('MatterPhysics intersectPoint');
         bodies = this.getMatterBodies(bodies);
 
         var position = Vector.create(x, y);
@@ -619,6 +642,7 @@ var MatterPhysics = new Class({
             }
         });
 
+        console.groupEnd();
         return output;
     },
 
@@ -643,6 +667,7 @@ var MatterPhysics = new Class({
      */
     intersectRect: function (x, y, width, height, outside, bodies)
     {
+        console.group('MatterPhysics intersectRect');
         if (outside === undefined) { outside = false; }
 
         bodies = this.getMatterBodies(bodies);
@@ -664,6 +689,7 @@ var MatterPhysics = new Class({
             }
         });
 
+        console.groupEnd();
         return output;
     },
 
@@ -688,6 +714,7 @@ var MatterPhysics = new Class({
      */
     intersectRay: function (x1, y1, x2, y2, rayWidth, bodies)
     {
+        console.group('MatterPhysics intersectRay');
         if (rayWidth === undefined) { rayWidth = 1; }
 
         bodies = this.getMatterBodies(bodies);
@@ -700,6 +727,7 @@ var MatterPhysics = new Class({
             result.push(collisions[i].body);
         }
 
+        console.groupEnd();
         return result;
     },
 
@@ -718,6 +746,7 @@ var MatterPhysics = new Class({
      */
     intersectBody: function (body, bodies)
     {
+        console.group('MatterPhysics intersectBody');
         bodies = this.getMatterBodies(bodies);
 
         var result = [];
@@ -737,6 +766,7 @@ var MatterPhysics = new Class({
             }
         }
 
+        console.groupEnd();
         return result;
     },
 
@@ -771,6 +801,7 @@ var MatterPhysics = new Class({
      */
     overlap: function (target, bodies, overlapCallback, processCallback, callbackContext)
     {
+        console.group('MatterPhysics overlap');
         if (overlapCallback === undefined) { overlapCallback = null; }
         if (processCallback === undefined) { processCallback = null; }
         if (callbackContext === undefined) { callbackContext = overlapCallback; }
@@ -806,6 +837,7 @@ var MatterPhysics = new Class({
                     }
                     else if (!processCallback)
                     {
+                        console.groupEnd();
                         //  If there are no callbacks we don't need to test every body, just exit when the first is found
                         return true;
                     }
@@ -813,6 +845,7 @@ var MatterPhysics = new Class({
             }
         }
 
+        console.groupEnd();
         return match;
     },
 
@@ -834,6 +867,7 @@ var MatterPhysics = new Class({
      */
     setCollisionCategory: function (bodies, value)
     {
+        console.group('MatterPhysics setCollisionCategory');
         bodies = this.getMatterBodies(bodies);
 
         bodies.forEach(function (body)
@@ -841,6 +875,7 @@ var MatterPhysics = new Class({
             body.collisionFilter.category = value;
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -863,6 +898,7 @@ var MatterPhysics = new Class({
      */
     setCollisionGroup: function (bodies, value)
     {
+        console.group('MatterPhysics setCollisionGroup');
         bodies = this.getMatterBodies(bodies);
 
         bodies.forEach(function (body)
@@ -870,6 +906,7 @@ var MatterPhysics = new Class({
             body.collisionFilter.group = value;
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -890,6 +927,7 @@ var MatterPhysics = new Class({
      */
     setCollidesWith: function (bodies, categories)
     {
+        console.group('MatterPhysics setCollidesWith');
         bodies = this.getMatterBodies(bodies);
 
         var flags = 0;
@@ -911,6 +949,7 @@ var MatterPhysics = new Class({
             body.collisionFilter.mask = flags;
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -931,9 +970,12 @@ var MatterPhysics = new Class({
      */
     getMatterBodies: function (bodies)
     {
+        console.group('MatterPhysics getMatterBodies');
         if (!bodies)
         {
-            return this.world.getAllBodies();
+            const result = this.world.getAllBodies();
+            console.groupEnd();
+            return result;
         }
 
         if (!Array.isArray(bodies))
@@ -950,6 +992,7 @@ var MatterPhysics = new Class({
             output.push(body);
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -967,6 +1010,7 @@ var MatterPhysics = new Class({
      */
     setVelocity: function (bodies, x, y)
     {
+        console.group('MatterPhysics setVelocity');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -979,6 +1023,7 @@ var MatterPhysics = new Class({
             Body.setVelocity(body, vec2);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -996,6 +1041,7 @@ var MatterPhysics = new Class({
      */
     setVelocityX: function (bodies, x)
     {
+        console.group('MatterPhysics setVelocityX');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -1008,6 +1054,7 @@ var MatterPhysics = new Class({
             Body.setVelocity(body, vec2);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1025,6 +1072,7 @@ var MatterPhysics = new Class({
      */
     setVelocityY: function (bodies, y)
     {
+        console.group('MatterPhysics setVelocityY');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -1037,6 +1085,7 @@ var MatterPhysics = new Class({
             Body.setVelocity(body, vec2);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1054,6 +1103,7 @@ var MatterPhysics = new Class({
      */
     setAngularVelocity: function (bodies, value)
     {
+        console.group('MatterPhysics setAngularVelocity');
         bodies = this.getMatterBodies(bodies);
 
         bodies.forEach(function (body)
@@ -1061,6 +1111,7 @@ var MatterPhysics = new Class({
             Body.setAngularVelocity(body, value);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1077,6 +1128,7 @@ var MatterPhysics = new Class({
      */
     applyForce: function (bodies, force)
     {
+        console.group('MatterPhysics applyForce');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -1089,6 +1141,7 @@ var MatterPhysics = new Class({
             Body.applyForce(body, vec2, force);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1110,6 +1163,7 @@ var MatterPhysics = new Class({
      */
     applyForceFromPosition: function (bodies, position, speed, angle)
     {
+        console.group('MatterPhysics applyForceFromPosition');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -1127,6 +1181,7 @@ var MatterPhysics = new Class({
             Body.applyForce(body, position, vec2);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1147,6 +1202,7 @@ var MatterPhysics = new Class({
      */
     applyForceFromAngle: function (bodies, speed, angle)
     {
+        console.group('MatterPhysics applyForceFromAngle');
         bodies = this.getMatterBodies(bodies);
 
         var vec2 = this._tempVec2;
@@ -1164,6 +1220,7 @@ var MatterPhysics = new Class({
             Body.applyForce(body, { x: body.position.x, y: body.position.y }, vec2);
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -1179,6 +1236,7 @@ var MatterPhysics = new Class({
      */
     getConstraintLength: function (constraint)
     {
+        console.group('MatterPhysics getConstraintLength');
         var aX = constraint.pointA.x;
         var aY = constraint.pointA.y;
         var bX = constraint.pointB.x;
@@ -1196,7 +1254,9 @@ var MatterPhysics = new Class({
             bY += constraint.bodyB.position.y;
         }
 
-        return DistanceBetween(aX, aY, bX, bY);
+        const result = DistanceBetween(aX, aY, bX, bY);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1232,6 +1292,7 @@ var MatterPhysics = new Class({
      */
     alignBody: function (body, x, y, align)
     {
+        console.group('MatterPhysics alignBody');
         body = (body.hasOwnProperty('body')) ? body.body : body;
 
         var pos;
@@ -1284,6 +1345,7 @@ var MatterPhysics = new Class({
             Body.setPosition(body, pos);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1297,6 +1359,7 @@ var MatterPhysics = new Class({
      */
     shutdown: function ()
     {
+        console.group('MatterPhysics shutdown');
         var eventEmitter = this.systems.events;
 
         if (this.world)
@@ -1319,6 +1382,7 @@ var MatterPhysics = new Class({
 
         this.add = null;
         this.world = null;
+        console.groupEnd();
     },
 
     /**
@@ -1331,16 +1395,20 @@ var MatterPhysics = new Class({
      */
     destroy: function ()
     {
+        console.group('MatterPhysics destroy');
         this.shutdown();
 
         this.scene.sys.events.off(SceneEvents.START, this.start, this);
 
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
 });
 
+console.group('PluginCache.register MatterPhysics');
 PluginCache.register('MatterPhysics', MatterPhysics, 'matterPhysics');
 
+console.groupEnd();
 module.exports = MatterPhysics;

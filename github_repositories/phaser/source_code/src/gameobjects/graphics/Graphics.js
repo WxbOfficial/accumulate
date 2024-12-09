@@ -96,6 +96,7 @@ var Graphics = new Class({
 
     function Graphics (scene, options)
     {
+        console.group('Graphics');
         var x = GetValue(options, 'x', 0);
         var y = GetValue(options, 'y', 0);
 
@@ -209,6 +210,7 @@ var Graphics = new Class({
         this.fillStyle(0, 0);
 
         this.setDefaultStyles(options);
+        console.groupEnd();
     },
 
     /**
@@ -223,6 +225,7 @@ var Graphics = new Class({
      */
     setDefaultStyles: function (options)
     {
+        console.group('Graphics setDefaultStyles');
         if (GetValue(options, 'lineStyle', null))
         {
             this.defaultStrokeWidth = GetValue(options, 'lineStyle.width', 1);
@@ -240,6 +243,7 @@ var Graphics = new Class({
             this.fillStyle(this.defaultFillColor, this.defaultFillAlpha);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -257,6 +261,7 @@ var Graphics = new Class({
      */
     lineStyle: function (lineWidth, color, alpha)
     {
+        console.group('Graphics lineStyle');
         if (alpha === undefined) { alpha = 1; }
 
         this.commandBuffer.push(
@@ -266,6 +271,7 @@ var Graphics = new Class({
 
         this._lineWidth = lineWidth;
 
+        console.groupEnd();
         return this;
     },
 
@@ -282,6 +288,7 @@ var Graphics = new Class({
      */
     fillStyle: function (color, alpha)
     {
+        console.group('Graphics fillStyle');
         if (alpha === undefined) { alpha = 1; }
 
         this.commandBuffer.push(
@@ -289,6 +296,7 @@ var Graphics = new Class({
             color, alpha
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -324,6 +332,7 @@ var Graphics = new Class({
      */
     fillGradientStyle: function (topLeft, topRight, bottomLeft, bottomRight, alphaTopLeft, alphaTopRight, alphaBottomLeft, alphaBottomRight)
     {
+        console.group('Graphics fillGradientStyle');
         if (alphaTopLeft === undefined) { alphaTopLeft = 1; }
         if (alphaTopRight === undefined) { alphaTopRight = alphaTopLeft; }
         if (alphaBottomLeft === undefined) { alphaBottomLeft = alphaTopLeft; }
@@ -335,6 +344,7 @@ var Graphics = new Class({
             topLeft, topRight, bottomLeft, bottomRight
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -366,6 +376,7 @@ var Graphics = new Class({
      */
     lineGradientStyle: function (lineWidth, topLeft, topRight, bottomLeft, bottomRight, alpha)
     {
+        console.group('Graphics lineGradientStyle');
         if (alpha === undefined) { alpha = 1; }
 
         this.commandBuffer.push(
@@ -373,6 +384,7 @@ var Graphics = new Class({
             lineWidth, alpha, topLeft, topRight, bottomLeft, bottomRight
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -386,10 +398,12 @@ var Graphics = new Class({
      */
     beginPath: function ()
     {
+        console.group('Graphics beginPath');
         this.commandBuffer.push(
             Commands.BEGIN_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -403,10 +417,12 @@ var Graphics = new Class({
      */
     closePath: function ()
     {
+        console.group('Graphics closePath');
         this.commandBuffer.push(
             Commands.CLOSE_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -420,10 +436,12 @@ var Graphics = new Class({
      */
     fillPath: function ()
     {
+        console.group('Graphics fillPath');
         this.commandBuffer.push(
             Commands.FILL_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -440,10 +458,12 @@ var Graphics = new Class({
      */
     fill: function ()
     {
+        console.group('Graphics fill');
         this.commandBuffer.push(
             Commands.FILL_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -457,10 +477,12 @@ var Graphics = new Class({
      */
     strokePath: function ()
     {
+        console.group('Graphics strokePath');
         this.commandBuffer.push(
             Commands.STROKE_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -477,10 +499,12 @@ var Graphics = new Class({
      */
     stroke: function ()
     {
+        console.group('Graphics stroke');
         this.commandBuffer.push(
             Commands.STROKE_PATH
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -496,7 +520,10 @@ var Graphics = new Class({
      */
     fillCircleShape: function (circle)
     {
-        return this.fillCircle(circle.x, circle.y, circle.radius);
+        console.group('Graphics fillCircleShape');
+        const result = this.fillCircle(circle.x, circle.y, circle.radius);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -511,7 +538,10 @@ var Graphics = new Class({
      */
     strokeCircleShape: function (circle)
     {
-        return this.strokeCircle(circle.x, circle.y, circle.radius);
+        console.group('Graphics strokeCircleShape');
+        const result = this.strokeCircle(circle.x, circle.y, circle.radius);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -528,10 +558,12 @@ var Graphics = new Class({
      */
     fillCircle: function (x, y, radius)
     {
+        console.group('Graphics fillCircle');
         this.beginPath();
         this.arc(x, y, radius, 0, MATH_CONST.PI2);
         this.fillPath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -549,10 +581,12 @@ var Graphics = new Class({
      */
     strokeCircle: function (x, y, radius)
     {
+        console.group('Graphics strokeCircle');
         this.beginPath();
         this.arc(x, y, radius, 0, MATH_CONST.PI2);
         this.strokePath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -568,7 +602,10 @@ var Graphics = new Class({
      */
     fillRectShape: function (rect)
     {
-        return this.fillRect(rect.x, rect.y, rect.width, rect.height);
+        console.group('Graphics fillRectShape');
+        const result = this.fillRect(rect.x, rect.y, rect.width, rect.height);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -583,7 +620,10 @@ var Graphics = new Class({
      */
     strokeRectShape: function (rect)
     {
-        return this.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        console.group('Graphics strokeRectShape');
+        const result =  this.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -601,11 +641,13 @@ var Graphics = new Class({
      */
     fillRect: function (x, y, width, height)
     {
+        console.group('Graphics fillRect');
         this.commandBuffer.push(
             Commands.FILL_RECT,
             x, y, width, height
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -624,6 +666,7 @@ var Graphics = new Class({
      */
     strokeRect: function (x, y, width, height)
     {
+        console.group('Graphics strokeRect');
         var lineWidthHalf = this._lineWidth / 2;
         var minx = x - lineWidthHalf;
         var maxx = x + lineWidthHalf;
@@ -648,6 +691,7 @@ var Graphics = new Class({
         this.lineTo(maxx + width, y + height);
         this.strokePath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -667,6 +711,7 @@ var Graphics = new Class({
      */
     fillRoundedRect: function (x, y, width, height, radius)
     {
+        console.group('Graphics fillRoundedRect');
         if (radius === undefined) { radius = 20; }
 
         var tl = radius;
@@ -740,6 +785,7 @@ var Graphics = new Class({
 
         this.fillPath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -759,6 +805,7 @@ var Graphics = new Class({
      */
     strokeRoundedRect: function (x, y, width, height, radius)
     {
+        console.group('Graphics strokeRoundedRect');
         if (radius === undefined) { radius = 20; }
 
         var tl = radius;
@@ -838,6 +885,7 @@ var Graphics = new Class({
 
         this.strokePath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -856,7 +904,10 @@ var Graphics = new Class({
      */
     fillPointShape: function (point, size)
     {
-        return this.fillPoint(point.x, point.y, size);
+        console.group('Graphics fillPointShape');
+        const result = this.fillPoint(point.x, point.y, size);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -875,6 +926,7 @@ var Graphics = new Class({
      */
     fillPoint: function (x, y, size)
     {
+        console.group('Graphics fillPoint');
         if (!size || size < 1)
         {
             size = 1;
@@ -890,6 +942,7 @@ var Graphics = new Class({
             x, y, size, size
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -905,7 +958,10 @@ var Graphics = new Class({
      */
     fillTriangleShape: function (triangle)
     {
-        return this.fillTriangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
+        console.group('Graphics fillTriangleShape');
+        const result = this.fillTriangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -920,7 +976,10 @@ var Graphics = new Class({
      */
     strokeTriangleShape: function (triangle)
     {
-        return this.strokeTriangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
+        console.group('Graphics strokeTriangleShape');
+        const result = this.strokeTriangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -940,11 +999,13 @@ var Graphics = new Class({
      */
     fillTriangle: function (x0, y0, x1, y1, x2, y2)
     {
+        console.group('Graphics fillTriangle');
         this.commandBuffer.push(
             Commands.FILL_TRIANGLE,
             x0, y0, x1, y1, x2, y2
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -965,11 +1026,13 @@ var Graphics = new Class({
      */
     strokeTriangle: function (x0, y0, x1, y1, x2, y2)
     {
+        console.group('Graphics strokeTriangle');
         this.commandBuffer.push(
             Commands.STROKE_TRIANGLE,
             x0, y0, x1, y1, x2, y2
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -985,7 +1048,10 @@ var Graphics = new Class({
      */
     strokeLineShape: function (line)
     {
-        return this.lineBetween(line.x1, line.y1, line.x2, line.y2);
+        console.group('Graphics strokeLineShape');
+        const result = this.lineBetween(line.x1, line.y1, line.x2, line.y2);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1003,11 +1069,13 @@ var Graphics = new Class({
      */
     lineBetween: function (x1, y1, x2, y2)
     {
+        console.group('Graphics lineBetween');
         this.beginPath();
         this.moveTo(x1, y1);
         this.lineTo(x2, y2);
         this.strokePath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1026,11 +1094,13 @@ var Graphics = new Class({
      */
     lineTo: function (x, y)
     {
+        console.group('Graphics lineTo');
         this.commandBuffer.push(
             Commands.LINE_TO,
             x, y
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1047,11 +1117,13 @@ var Graphics = new Class({
      */
     moveTo: function (x, y)
     {
+        console.group('Graphics moveTo');
         this.commandBuffer.push(
             Commands.MOVE_TO,
             x, y
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1074,6 +1146,7 @@ var Graphics = new Class({
      */
     strokePoints: function (points, closeShape, closePath, endIndex)
     {
+        console.group('Graphics strokePoints');
         if (closeShape === undefined) { closeShape = false; }
         if (closePath === undefined) { closePath = false; }
         if (endIndex === undefined) { endIndex = points.length; }
@@ -1099,6 +1172,7 @@ var Graphics = new Class({
 
         this.strokePath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1121,6 +1195,7 @@ var Graphics = new Class({
      */
     fillPoints: function (points, closeShape, closePath, endIndex)
     {
+        console.group('Graphics fillPoints');
         if (closeShape === undefined) { closeShape = false; }
         if (closePath === undefined) { closePath = false; }
         if (endIndex === undefined) { endIndex = points.length; }
@@ -1146,6 +1221,7 @@ var Graphics = new Class({
 
         this.fillPath();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1162,11 +1238,14 @@ var Graphics = new Class({
      */
     strokeEllipseShape: function (ellipse, smoothness)
     {
+        console.group('Graphics strokeEllipseShape');
         if (smoothness === undefined) { smoothness = 32; }
 
         var points = ellipse.getPoints(smoothness);
 
-        return this.strokePoints(points, true);
+        const result = this.strokePoints(points, true);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1185,13 +1264,16 @@ var Graphics = new Class({
      */
     strokeEllipse: function (x, y, width, height, smoothness)
     {
+        console.group('Graphics strokeEllipse');
         if (smoothness === undefined) { smoothness = 32; }
 
         var ellipse = new Ellipse(x, y, width, height);
 
         var points = ellipse.getPoints(smoothness);
 
-        return this.strokePoints(points, true);
+        const result = this.strokePoints(points, true);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1207,11 +1289,14 @@ var Graphics = new Class({
      */
     fillEllipseShape: function (ellipse, smoothness)
     {
+        console.group('Graphics fillEllipseShape');
         if (smoothness === undefined) { smoothness = 32; }
 
         var points = ellipse.getPoints(smoothness);
 
-        return this.fillPoints(points, true);
+        const result = this.fillPoints(points, true);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1230,13 +1315,16 @@ var Graphics = new Class({
      */
     fillEllipse: function (x, y, width, height, smoothness)
     {
+        console.group('Graphics fillEllipse');
         if (smoothness === undefined) { smoothness = 32; }
 
         var ellipse = new Ellipse(x, y, width, height);
 
         var points = ellipse.getPoints(smoothness);
 
-        return this.fillPoints(points, true);
+        const result = this.fillPoints(points, true);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1269,6 +1357,7 @@ var Graphics = new Class({
      */
     arc: function (x, y, radius, startAngle, endAngle, anticlockwise, overshoot)
     {
+        console.group('Graphics arc');
         if (anticlockwise === undefined) { anticlockwise = false; }
         if (overshoot === undefined) { overshoot = 0; }
 
@@ -1277,6 +1366,7 @@ var Graphics = new Class({
             x, y, radius, startAngle, endAngle, anticlockwise, overshoot
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1305,6 +1395,7 @@ var Graphics = new Class({
      */
     slice: function (x, y, radius, startAngle, endAngle, anticlockwise, overshoot)
     {
+        console.group('Graphics slice');
         if (anticlockwise === undefined) { anticlockwise = false; }
         if (overshoot === undefined) { overshoot = 0; }
 
@@ -1316,6 +1407,7 @@ var Graphics = new Class({
 
         this.commandBuffer.push(Commands.CLOSE_PATH);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1331,10 +1423,12 @@ var Graphics = new Class({
      */
     save: function ()
     {
+        console.group('Graphics save');
         this.commandBuffer.push(
             Commands.SAVE
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1352,10 +1446,12 @@ var Graphics = new Class({
      */
     restore: function ()
     {
+        console.group('Graphics restore');
         this.commandBuffer.push(
             Commands.RESTORE
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1378,11 +1474,13 @@ var Graphics = new Class({
      */
     translateCanvas: function (x, y)
     {
+        console.group('Graphics translateCanvas');
         this.commandBuffer.push(
             Commands.TRANSLATE,
             x, y
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1405,11 +1503,13 @@ var Graphics = new Class({
      */
     scaleCanvas: function (x, y)
     {
+        console.group('Graphics scaleCanvas');
         this.commandBuffer.push(
             Commands.SCALE,
             x, y
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1431,11 +1531,13 @@ var Graphics = new Class({
      */
     rotateCanvas: function (radians)
     {
+        console.group('Graphics rotateCanvas');
         this.commandBuffer.push(
             Commands.ROTATE,
             radians
         );
 
+        console.groupEnd();
         return this;
     },
 
@@ -1449,6 +1551,7 @@ var Graphics = new Class({
      */
     clear: function ()
     {
+        console.group('Graphics clear');
         this.commandBuffer.length = 0;
 
         if (this.defaultFillColor > -1)
@@ -1461,6 +1564,7 @@ var Graphics = new Class({
             this.lineStyle(this.defaultStrokeWidth, this.defaultStrokeColor, this.defaultStrokeAlpha);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1488,6 +1592,7 @@ var Graphics = new Class({
      */
     generateTexture: function (key, width, height)
     {
+        console.group('Graphics generateTexture');
         var sys = this.scene.sys;
         var renderer = sys.game.renderer;
 
@@ -1545,6 +1650,7 @@ var Graphics = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1557,7 +1663,9 @@ var Graphics = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Graphics preDestroy');
         this.commandBuffer = [];
+        console.groupEnd();
     }
 
 });
@@ -1569,6 +1677,8 @@ var Graphics = new Class({
  * @type {Phaser.Cameras.Scene2D.Camera}
  * @since 3.1.0
  */
+console.group('Graphics.TargetCamera = new BaseCamera');
 Graphics.TargetCamera = new BaseCamera();
 
+console.groupEnd();
 module.exports = Graphics;

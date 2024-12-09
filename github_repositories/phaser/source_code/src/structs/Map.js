@@ -44,6 +44,7 @@ var Map = new Class({
 
     function Map (elements)
     {
+        console.group('Map');
         /**
          * The entries in this Map.
          *
@@ -67,6 +68,7 @@ var Map = new Class({
         this.size = 0;
 
         this.setAll(elements);
+        console.groupEnd();
     },
 
     /**
@@ -87,6 +89,7 @@ var Map = new Class({
      */
     setAll: function (elements)
     {
+        console.group('Map setAll');
         if (Array.isArray(elements))
         {
             for (var i = 0; i < elements.length; i++)
@@ -95,6 +98,7 @@ var Map = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -119,6 +123,7 @@ var Map = new Class({
      */
     set: function (key, value)
     {
+        console.group('Map set');
         if (!this.has(key))
         {
             this.size++;
@@ -126,6 +131,7 @@ var Map = new Class({
 
         this.entries[key] = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -144,10 +150,13 @@ var Map = new Class({
      */
     get: function (key)
     {
+        console.group('Map get');
         if (this.has(key))
         {
+            console.groupEnd();
             return this.entries[key];
         }
+        console.groupEnd();
     },
 
     /**
@@ -162,6 +171,7 @@ var Map = new Class({
      */
     getArray: function ()
     {
+        console.group('Map getArray');
         var output = [];
         var entries = this.entries;
 
@@ -170,6 +180,7 @@ var Map = new Class({
             output.push(entries[key]);
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -187,7 +198,10 @@ var Map = new Class({
      */
     has: function (key)
     {
-        return (this.entries.hasOwnProperty(key));
+        console.group('Map has');
+        const result = (this.entries.hasOwnProperty(key));
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -205,12 +219,14 @@ var Map = new Class({
      */
     delete: function (key)
     {
+        console.group('Map delete');
         if (this.has(key))
         {
             delete this.entries[key];
             this.size--;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -226,6 +242,7 @@ var Map = new Class({
      */
     clear: function ()
     {
+        console.group('Map clear');
         Object.keys(this.entries).forEach(function (prop)
         {
             delete this.entries[prop];
@@ -234,6 +251,7 @@ var Map = new Class({
 
         this.size = 0;
 
+        console.groupEnd();
         return this;
     },
 
@@ -249,7 +267,10 @@ var Map = new Class({
      */
     keys: function ()
     {
-        return Object.keys(this.entries);
+        console.group('Map keys');
+        const result = Object.keys(this.entries);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -264,6 +285,7 @@ var Map = new Class({
      */
     values: function ()
     {
+        console.group('Map values');
         var output = [];
         var entries = this.entries;
 
@@ -272,6 +294,7 @@ var Map = new Class({
             output.push(entries[key]);
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -314,6 +337,7 @@ var Map = new Class({
      */
     each: function (callback)
     {
+        console.group('Map each');
         var entries = this.entries;
 
         for (var key in entries)
@@ -324,6 +348,7 @@ var Map = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -341,16 +366,19 @@ var Map = new Class({
      */
     contains: function (value)
     {
+        console.group('Map contains');
         var entries = this.entries;
 
         for (var key in entries)
         {
             if (entries[key] === value)
             {
+                console.groupEnd();
                 return true;
             }
         }
 
+        console.groupEnd();
         return false;
     },
 
@@ -370,6 +398,7 @@ var Map = new Class({
      */
     merge: function (map, override)
     {
+        console.group('Map merge');
         if (override === undefined) { override = false; }
 
         var local = this.entries;
@@ -387,6 +416,7 @@ var Map = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     }
 

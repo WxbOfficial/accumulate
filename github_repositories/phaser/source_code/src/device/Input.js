@@ -31,8 +31,10 @@ var Input = {
 
 function init ()
 {
+    console.group('Device Input init');
     if (typeof importScripts === 'function')
     {
+        console.groupEnd();
         return Input;
     }
 
@@ -68,6 +70,7 @@ function init ()
         Input.wheelEvent = 'DOMMouseScroll';
     }
 
+    console.groupEnd();
     return Input;
 }
 

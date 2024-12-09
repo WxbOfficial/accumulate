@@ -13,6 +13,7 @@ var imageHeight = 0;
  */
 var addFrame = function (texture, sourceIndex, name, frame)
 {
+    console.group('Parsers UnityYAML addFrame');
     //  The frame values are the exact coordinates to cut the frame out of the atlas from
 
     var y = imageHeight - frame.y - frame.height;
@@ -33,6 +34,7 @@ var addFrame = function (texture, sourceIndex, name, frame)
         );
     }
     */
+    console.groupEnd();
 };
 
 /**
@@ -52,6 +54,7 @@ var addFrame = function (texture, sourceIndex, name, frame)
  */
 var UnityYAML = function (texture, sourceIndex, yaml)
 {
+    console.group('Parsers UnityYAML');
     //  Add in a __BASE entry (for the entire atlas)
     var source = texture.source[sourceIndex];
 
@@ -126,6 +129,7 @@ var UnityYAML = function (texture, sourceIndex, yaml)
         addFrame(texture, sourceIndex, currentSprite, rect);
     }
 
+    console.groupEnd();
     return texture;
 };
 

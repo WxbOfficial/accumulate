@@ -69,6 +69,7 @@ var BaseCamera = new Class({
 
     function BaseCamera (x, y, width, height)
     {
+        console.group('BaseCamera');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 0; }
@@ -533,6 +534,7 @@ var BaseCamera = new Class({
          * @since 3.86.0
          */
         this.renderRoundPixels = true;
+        console.groupEnd();
     },
 
     /**
@@ -548,7 +550,9 @@ var BaseCamera = new Class({
      */
     addToRenderList: function (child)
     {
+        console.group('BaseCamera addToRenderList');
         this.renderList.push(child);
+        console.groupEnd();
     },
 
     /**
@@ -583,12 +587,14 @@ var BaseCamera = new Class({
      */
     setOrigin: function (x, y)
     {
+        console.group('BaseCamera setOrigin');
         if (x === undefined) { x = 0.5; }
         if (y === undefined) { y = x; }
 
         this.originX = x;
         this.originY = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -608,6 +614,7 @@ var BaseCamera = new Class({
      */
     getScroll: function (x, y, out)
     {
+        console.group('BaseCamera getScroll');
         if (out === undefined) { out = new Vector2(); }
 
         var originX = this.width * 0.5;
@@ -622,6 +629,7 @@ var BaseCamera = new Class({
             out.y = this.clampY(out.y);
         }
 
+        console.groupEnd();
         return out;
     },
 
@@ -638,6 +646,7 @@ var BaseCamera = new Class({
      */
     centerOnX: function (x)
     {
+        console.group('BaseCamera centerOnX');
         var originX = this.width * 0.5;
 
         this.midPoint.x = x;
@@ -649,6 +658,7 @@ var BaseCamera = new Class({
             this.scrollX = this.clampX(this.scrollX);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -665,6 +675,7 @@ var BaseCamera = new Class({
      */
     centerOnY: function (y)
     {
+        console.group('BaseCamera centerOnY');
         var originY = this.height * 0.5;
 
         this.midPoint.y = y;
@@ -676,6 +687,7 @@ var BaseCamera = new Class({
             this.scrollY = this.clampY(this.scrollY);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -692,9 +704,11 @@ var BaseCamera = new Class({
      */
     centerOn: function (x, y)
     {
+        console.group('BaseCamera centerOn');
         this.centerOnX(x);
         this.centerOnY(y);
 
+        console.groupEnd();
         return this;
     },
 
@@ -708,6 +722,7 @@ var BaseCamera = new Class({
      */
     centerToBounds: function ()
     {
+        console.group('BaseCamera centerToBounds');
         if (this.useBounds)
         {
             var bounds = this._bounds;
@@ -720,6 +735,7 @@ var BaseCamera = new Class({
             this.scrollY = bounds.centerY - originY;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -733,9 +749,11 @@ var BaseCamera = new Class({
      */
     centerToSize: function ()
     {
+        console.group('BaseCamera centerToSize');
         this.scrollX = this.width * 0.5;
         this.scrollY = this.height * 0.5;
 
+        console.groupEnd();
         return this;
     },
 
@@ -754,8 +772,10 @@ var BaseCamera = new Class({
      */
     cull: function (renderableObjects)
     {
+        console.group('BaseCamera cull');
         if (this.disableCull)
         {
+            console.groupEnd();
             return renderableObjects;
         }
 
@@ -771,6 +791,7 @@ var BaseCamera = new Class({
 
         if (!determinant)
         {
+            console.groupEnd();
             return renderableObjects;
         }
 
@@ -817,6 +838,7 @@ var BaseCamera = new Class({
             }
         }
 
+        console.groupEnd();
         return culledObjects;
     },
 
@@ -837,6 +859,7 @@ var BaseCamera = new Class({
      */
     getWorldPoint: function (x, y, output)
     {
+        console.group('BaseCamera getWorldPoint');
         if (output === undefined) { output = new Vector2(); }
 
         var cameraMatrix = this.matrix.matrix;
@@ -856,6 +879,7 @@ var BaseCamera = new Class({
             output.x = x;
             output.y = y;
 
+            console.groupEnd();
             return output;
         }
 
@@ -884,6 +908,7 @@ var BaseCamera = new Class({
         output.x = (sx * ima + sy * imc) + ime;
         output.y = (sx * imb + sy * imd) + imf;
 
+        console.groupEnd();
         return output;
     },
 
@@ -900,6 +925,7 @@ var BaseCamera = new Class({
      */
     ignore: function (entries)
     {
+        console.group('BaseCamera ignore');
         var id = this.id;
 
         if (!Array.isArray(entries))
@@ -925,6 +951,7 @@ var BaseCamera = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -941,6 +968,7 @@ var BaseCamera = new Class({
      */
     clampX: function (x)
     {
+        console.group('BaseCamera clampX');
         var bounds = this._bounds;
 
         var dw = this.displayWidth;
@@ -957,6 +985,7 @@ var BaseCamera = new Class({
             x = bw;
         }
 
+        console.groupEnd();
         return x;
     },
 
@@ -973,6 +1002,7 @@ var BaseCamera = new Class({
      */
     clampY: function (y)
     {
+        console.group('BaseCamera clampY');
         var bounds = this._bounds;
 
         var dh = this.displayHeight;
@@ -989,6 +1019,7 @@ var BaseCamera = new Class({
             y = bh;
         }
 
+        console.groupEnd();
         return y;
     },
 
@@ -1007,12 +1038,14 @@ var BaseCamera = new Class({
      */
     removeBounds: function ()
     {
+        console.group('BaseCamera removeBounds');
         this.useBounds = false;
 
         this.dirty = true;
 
         this._bounds.setEmpty();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1030,10 +1063,12 @@ var BaseCamera = new Class({
      */
     setAngle: function (value)
     {
+        console.group('BaseCamera setAngle');
         if (value === undefined) { value = 0; }
 
         this.rotation = DegToRad(value);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1054,12 +1089,14 @@ var BaseCamera = new Class({
      */
     setBackgroundColor: function (color)
     {
+        console.group('BaseCamera setBackgroundColor');
         if (color === undefined) { color = 'rgba(0,0,0,0)'; }
 
         this.backgroundColor = ValueToColor(color);
 
         this.transparent = (this.backgroundColor.alpha === 0);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1095,6 +1132,7 @@ var BaseCamera = new Class({
      */
     setBounds: function (x, y, width, height, centerOn)
     {
+        console.group('BaseCamera setBounds');
         if (centerOn === undefined) { centerOn = false; }
 
         this._bounds.setTo(x, y, width, height);
@@ -1112,6 +1150,7 @@ var BaseCamera = new Class({
             this.scrollY = this.clampY(this.scrollY);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1131,12 +1170,14 @@ var BaseCamera = new Class({
      */
     getBounds: function (out)
     {
+        console.group('BaseCamera getBounds');
         if (out === undefined) { out = new Rectangle(); }
 
         var source = this._bounds;
 
         out.setTo(source.x, source.y, source.width, source.height);
 
+        console.groupEnd();
         return out;
     },
 
@@ -1153,10 +1194,12 @@ var BaseCamera = new Class({
      */
     setName: function (value)
     {
+        console.group('BaseCamera setName');
         if (value === undefined) { value = ''; }
 
         this.name = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1175,11 +1218,13 @@ var BaseCamera = new Class({
      */
     setPosition: function (x, y)
     {
+        console.group('BaseCamera setPosition');
         if (y === undefined) { y = x; }
 
         this.x = x;
         this.y = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1197,10 +1242,12 @@ var BaseCamera = new Class({
      */
     setRotation: function (value)
     {
+        console.group('BaseCamera setRotation');
         if (value === undefined) { value = 0; }
 
         this.rotation = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1218,8 +1265,10 @@ var BaseCamera = new Class({
      */
     setRoundPixels: function (value)
     {
+        console.group('BaseCamera setRoundPixels');
         this.roundPixels = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1236,6 +1285,7 @@ var BaseCamera = new Class({
      */
     setScene: function (scene, isSceneCamera)
     {
+        console.group('BaseCamera setScene');
         if (isSceneCamera === undefined) { isSceneCamera = true; }
 
         if (this.scene && this._customViewport)
@@ -1254,6 +1304,7 @@ var BaseCamera = new Class({
 
         this.updateSystem();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1274,11 +1325,13 @@ var BaseCamera = new Class({
      */
     setScroll: function (x, y)
     {
+        console.group('BaseCamera setScroll');
         if (y === undefined) { y = x; }
 
         this.scrollX = x;
         this.scrollY = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1299,11 +1352,13 @@ var BaseCamera = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('BaseCamera setSize');
         if (height === undefined) { height = width; }
 
         this.width = width;
         this.height = height;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1330,11 +1385,13 @@ var BaseCamera = new Class({
      */
     setViewport: function (x, y, width, height)
     {
+        console.group('BaseCamera setViewport');
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1360,6 +1417,7 @@ var BaseCamera = new Class({
      */
     setZoom: function (x, y)
     {
+        console.group('BaseCamera setZoom');
         if (x === undefined) { x = 1; }
         if (y === undefined) { y = x; }
 
@@ -1376,6 +1434,7 @@ var BaseCamera = new Class({
         this.zoomX = x;
         this.zoomY = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1401,12 +1460,14 @@ var BaseCamera = new Class({
      */
     setMask: function (mask, fixedPosition)
     {
+        console.group('BaseCamera setMask');
         if (fixedPosition === undefined) { fixedPosition = true; }
 
         this.mask = mask;
 
         this._maskCamera = (fixedPosition) ? this.cameraManager.default : this;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1422,6 +1483,7 @@ var BaseCamera = new Class({
      */
     clearMask: function (destroyMask)
     {
+        console.group('BaseCamera clearMask');
         if (destroyMask === undefined) { destroyMask = false; }
 
         if (destroyMask && this.mask)
@@ -1431,6 +1493,7 @@ var BaseCamera = new Class({
 
         this.mask = null;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1457,6 +1520,7 @@ var BaseCamera = new Class({
      */
     toJSON: function ()
     {
+        console.group('BaseCamera toJSON');
         var output = {
             name: this.name,
             x: this.x,
@@ -1481,6 +1545,7 @@ var BaseCamera = new Class({
             };
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -1496,7 +1561,9 @@ var BaseCamera = new Class({
      */
     update: function ()
     {
+        console.group('BaseCamera update');
         //  NOOP
+        console.groupEnd();
     },
 
     /**
@@ -1510,8 +1577,10 @@ var BaseCamera = new Class({
      */
     setIsSceneCamera: function (value)
     {
+        console.group('BaseCamera setIsSceneCamera');
         this.isSceneCamera = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -1524,8 +1593,10 @@ var BaseCamera = new Class({
      */
     updateSystem: function ()
     {
+        console.group('BaseCamera updateSystem');
         if (!this.scaleManager || !this.isSceneCamera)
         {
+            console.groupEnd();
             return;
         }
 
@@ -1546,6 +1617,7 @@ var BaseCamera = new Class({
 
         this.dirty = true;
         this._customViewport = custom;
+        console.groupEnd();
     },
 
     /**
@@ -1563,6 +1635,7 @@ var BaseCamera = new Class({
      */
     destroy: function ()
     {
+        console.group('BaseCamera destroy');
         this.emit(Events.DESTROY, this);
 
         this.removeAllListeners();
@@ -1585,6 +1658,7 @@ var BaseCamera = new Class({
         this.scaleManager = null;
         this.sceneManager = null;
         this.cameraManager = null;
+        console.groupEnd();
     },
 
     /**

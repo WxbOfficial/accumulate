@@ -52,6 +52,7 @@ var Curve = new Class({
 
     function Curve (scene, x, y, curve, fillColor, fillAlpha)
     {
+        console.group('Curve');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
 
@@ -89,6 +90,7 @@ var Curve = new Class({
         }
 
         this.updateData();
+        console.groupEnd();
     },
 
     /**
@@ -130,9 +132,12 @@ var Curve = new Class({
      */
     setSmoothness: function (value)
     {
+        console.group('Curve setSmoothness');
         this._smoothness = value;
 
-        return this.updateData();
+        const result = this.updateData();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -146,6 +151,7 @@ var Curve = new Class({
      */
     updateData: function ()
     {
+        console.group('Curve updateData');
         var bounds = this._curveBounds;
         var smoothness = this._smoothness;
 
@@ -168,6 +174,7 @@ var Curve = new Class({
         this.pathIndexes = Earcut(path);
         this.pathData = path;
 
+        console.groupEnd();
         return this;
     }
 

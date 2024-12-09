@@ -49,10 +49,12 @@ var GameObjectFactory = require('../../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.DynamicBitmapText} The Game Object that was created.
  */
+console.group('GameObjectFactory.register dynamicBitmapText');
 GameObjectFactory.register('dynamicBitmapText', function (x, y, font, text, size)
 {
     return this.displayList.add(new DynamicBitmapText(this.scene, x, y, font, text, size));
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

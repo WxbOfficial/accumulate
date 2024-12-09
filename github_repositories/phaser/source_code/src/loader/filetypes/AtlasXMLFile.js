@@ -41,6 +41,7 @@ var AtlasXMLFile = new Class({
 
     function AtlasXMLFile (loader, key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
     {
+        console.group('AtlasXMLFile');
         var image;
         var data;
 
@@ -80,6 +81,7 @@ var AtlasXMLFile = new Class({
         {
             MultiFile.call(this, loader, 'atlasxml', key, [ image, data ]);
         }
+        console.groupEnd();
     },
 
     /**
@@ -90,6 +92,7 @@ var AtlasXMLFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('AtlasXMLFile addToCache');
         if (this.isReadyToProcess())
         {
             var image = this.files[0];
@@ -100,6 +103,7 @@ var AtlasXMLFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -205,8 +209,10 @@ var AtlasXMLFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register atlasXML');
 FileTypesManager.register('atlasXML', function (key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
 {
+    console.group('FileTypesManager.register atlasXML factoryFunction');
     var multifile;
 
     //  Supports an Object file definition in the key argument
@@ -229,7 +235,9 @@ FileTypesManager.register('atlasXML', function (key, textureURL, atlasURL, textu
         this.addFile(multifile.files);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = AtlasXMLFile;

@@ -45,10 +45,12 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Text} The Game Object that was created.
  */
+console.group('GameObjectFactory.register text');
 GameObjectFactory.register('text', function (x, y, text, style)
 {
     return this.displayList.add(new Text(this.scene, x, y, text, style));
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

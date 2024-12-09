@@ -20,12 +20,14 @@
  */
 var VideoWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('VideoWebGLRenderer');
     if (src.videoTexture)
     {
         camera.addToRenderList(src);
 
         src.pipeline.batchSprite(src, camera, parentMatrix);
     }
+    console.groupEnd();
 };
 
 module.exports = VideoWebGLRenderer;

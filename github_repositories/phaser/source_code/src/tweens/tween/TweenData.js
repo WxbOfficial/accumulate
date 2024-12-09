@@ -55,6 +55,7 @@ var TweenData = new Class({
 
     function TweenData (tween, targetIndex, key, getEnd, getStart, getActive, ease, delay, duration, yoyo, hold, repeat, repeatDelay, flipX, flipY, interpolation, interpolationData)
     {
+        console.group('TweenData');
         BaseTweenData.call(this, tween, targetIndex, delay, duration, yoyo, hold, repeat, repeatDelay, flipX, flipY);
 
         /**
@@ -168,6 +169,7 @@ var TweenData = new Class({
          * @since 3.60.0
          */
         this.interpolationData = interpolationData;
+        console.groupEnd();
     },
 
     /**
@@ -182,6 +184,7 @@ var TweenData = new Class({
      */
     reset: function (isSeeking)
     {
+        console.group('TweenData reset');
         BaseTweenData.prototype.reset.call(this);
 
         var target = this.tween.targets[this.targetIndex];
@@ -201,6 +204,7 @@ var TweenData = new Class({
         {
             target[key] = this.getActiveValue(target, key, 0);
         }
+        console.groupEnd();
     },
 
     /**
@@ -217,6 +221,7 @@ var TweenData = new Class({
      */
     update: function (delta)
     {
+        console.group('TweenData update');
         var tween = this.tween;
         var totalTargets = tween.totalTargets;
 
@@ -229,6 +234,7 @@ var TweenData = new Class({
         {
             this.setCompleteState();
 
+            console.groupEnd();
             return false;
         }
 
@@ -273,6 +279,7 @@ var TweenData = new Class({
 
             this.setPlayingForwardState();
 
+            console.groupEnd();
             return true;
         }
 
@@ -348,7 +355,9 @@ var TweenData = new Class({
         }
 
         //  Return TRUE if this TweenData still playing, otherwise FALSE
-        return !this.isComplete();
+        const result = !this.isComplete();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -363,6 +372,7 @@ var TweenData = new Class({
      */
     dispatchEvent: function (event, callback)
     {
+        console.group('TweenData dispatchEvent');
         var tween = this.tween;
 
         if (!tween.isSeeking)
@@ -382,6 +392,7 @@ var TweenData = new Class({
                 handler.func.apply(tween.callbackScope, [ tween, target, key, current, previous ].concat(handler.params));
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -392,12 +403,14 @@ var TweenData = new Class({
      */
     destroy: function ()
     {
+        console.group('TweenData destroy');
         BaseTweenData.prototype.destroy.call(this);
 
         this.getActiveValue = null;
         this.getEndValue = null;
         this.getStartValue = null;
         this.ease = null;
+        console.groupEnd();
     }
 
 });

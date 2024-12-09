@@ -24,6 +24,7 @@ var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
  */
 var GridCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('GridCanvasRenderer');
     camera.addToRenderList(src);
 
     var ctx = renderer.currentContext;
@@ -179,6 +180,7 @@ var GridCanvasRenderer = function (renderer, src, camera, parentMatrix)
         //  Restore the context saved in SetTransform
         ctx.restore();
     }
+    console.groupEnd();
 };
 
 module.exports = GridCanvasRenderer;

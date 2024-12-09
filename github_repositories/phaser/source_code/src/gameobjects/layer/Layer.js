@@ -95,6 +95,7 @@ var Layer = new Class({
 
     function Layer (scene, children)
     {
+        console.group('Layer');
         List.call(this, scene);
         EventEmitter.call(this);
 
@@ -317,6 +318,7 @@ var Layer = new Class({
 
         //  Tell the Scene to re-sort the children
         scene.sys.queueDepthSort();
+        console.groupEnd();
     },
 
     /**
@@ -332,8 +334,10 @@ var Layer = new Class({
      */
     setActive: function (value)
     {
+        console.group('Layer setActive');
         this.active = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -350,8 +354,10 @@ var Layer = new Class({
      */
     setName: function (value)
     {
+        console.group('Layer setName');
         this.name = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -374,8 +380,10 @@ var Layer = new Class({
      */
     setState: function (value)
     {
+        console.group('Layer setState');
         this.state = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -390,11 +398,13 @@ var Layer = new Class({
      */
     setDataEnabled: function ()
     {
+        console.group('Layer setDataEnabled');
         if (!this.data)
         {
             this.data = new DataManager(this);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -447,6 +457,7 @@ var Layer = new Class({
      */
     setData: function (key, value)
     {
+        console.group('Layer setData');
         if (!this.data)
         {
             this.data = new DataManager(this);
@@ -454,6 +465,7 @@ var Layer = new Class({
 
         this.data.set(key, value);
 
+        console.groupEnd();
         return this;
     },
 
@@ -477,6 +489,7 @@ var Layer = new Class({
      */
     incData: function (key, value)
     {
+        console.group('Layer incData');
         if (!this.data)
         {
             this.data = new DataManager(this);
@@ -484,6 +497,7 @@ var Layer = new Class({
 
         this.data.inc(key, value);
 
+        console.groupEnd();
         return this;
     },
 
@@ -506,6 +520,7 @@ var Layer = new Class({
      */
     toggleData: function (key)
     {
+        console.group('Layer toggleData');
         if (!this.data)
         {
             this.data = new DataManager(this);
@@ -513,6 +528,7 @@ var Layer = new Class({
 
         this.data.toggle(key);
 
+        console.groupEnd();
         return this;
     },
 
@@ -548,12 +564,15 @@ var Layer = new Class({
      */
     getData: function (key)
     {
+        console.group('Layer getData');
         if (!this.data)
         {
             this.data = new DataManager(this);
         }
 
-        return this.data.get(key);
+        const result = this.data.get(key);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -569,6 +588,8 @@ var Layer = new Class({
      */
     setInteractive: function ()
     {
+        console.group('Layer setInteractive');
+        console.groupEnd();
         return this;
     },
 
@@ -585,6 +606,8 @@ var Layer = new Class({
      */
     disableInteractive: function ()
     {
+        console.group('Layer disableInteractive');
+        console.groupEnd();
         return this;
     },
 
@@ -601,6 +624,8 @@ var Layer = new Class({
      */
     removeInteractive: function ()
     {
+        console.group('Layer removeInteractive');
+        console.groupEnd();
         return this;
     },
 
@@ -617,6 +642,8 @@ var Layer = new Class({
      */
     addedToScene: function ()
     {
+        console.group('Layer addedToScene');
+        console.groupEnd();
     },
 
     /**
@@ -632,6 +659,8 @@ var Layer = new Class({
      */
     removedFromScene: function ()
     {
+        console.group('Layer removedFromScene');
+        console.groupEnd();
     },
 
     /**
@@ -644,6 +673,8 @@ var Layer = new Class({
      */
     update: function ()
     {
+        console.group('Layer update');
+        console.groupEnd();
     },
 
     /**
@@ -656,7 +687,10 @@ var Layer = new Class({
      */
     toJSON: function ()
     {
-        return ComponentsToJSON(this);
+        console.group('Layer toJSON');
+        const result = ComponentsToJSON(this);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -672,7 +706,10 @@ var Layer = new Class({
      */
     willRender: function (camera)
     {
-        return !(this.renderFlags !== 15 || this.list.length === 0 || (this.cameraFilter !== 0 && (this.cameraFilter & camera.id)));
+        console.group('Layer willRender');
+        const result = !(this.renderFlags !== 15 || this.list.length === 0 || (this.cameraFilter !== 0 && (this.cameraFilter & camera.id)));
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -690,6 +727,7 @@ var Layer = new Class({
      */
     getIndexList: function ()
     {
+        console.group('Layer getIndexList');
         // eslint-disable-next-line consistent-this
         var child = this;
         var parent = this.parentContainer;
@@ -714,6 +752,7 @@ var Layer = new Class({
 
         indexes.unshift(this.displayList.getIndex(child));
 
+        console.groupEnd();
         return indexes;
     },
 
@@ -730,6 +769,7 @@ var Layer = new Class({
      */
     addChildCallback: function (gameObject)
     {
+        console.group('Layer addChildCallback');
         var displayList = gameObject.displayList;
 
         if (displayList && displayList !== this)
@@ -747,6 +787,7 @@ var Layer = new Class({
 
             this.events.emit(SceneEvents.ADDED_TO_SCENE, gameObject, this.scene);
         }
+        console.groupEnd();
     },
 
     /**
@@ -762,6 +803,7 @@ var Layer = new Class({
      */
     removeChildCallback: function (gameObject)
     {
+        console.group('Layer removeChildCallback');
         this.queueDepthSort();
 
         gameObject.displayList = null;
@@ -769,6 +811,7 @@ var Layer = new Class({
         gameObject.emit(GameObjectEvents.REMOVED_FROM_SCENE, gameObject, this.scene);
 
         this.events.emit(SceneEvents.REMOVED_FROM_SCENE, gameObject, this.scene);
+        console.groupEnd();
     },
 
     /**
@@ -779,7 +822,9 @@ var Layer = new Class({
      */
     queueDepthSort: function ()
     {
+        console.group('Layer queueDepthSort');
         this.sortChildrenFlag = true;
+        console.groupEnd();
     },
 
     /**
@@ -790,12 +835,14 @@ var Layer = new Class({
      */
     depthSort: function ()
     {
+        console.group('Layer depthSort');
         if (this.sortChildrenFlag)
         {
             StableSort(this.list, this.sortByDepth);
 
             this.sortChildrenFlag = false;
         }
+        console.groupEnd();
     },
 
     /**
@@ -811,6 +858,8 @@ var Layer = new Class({
      */
     sortByDepth: function (childA, childB)
     {
+        console.group('Layer sortByDepth');
+        console.groupEnd();
         return childA._depth - childB._depth;
     },
 
@@ -826,6 +875,8 @@ var Layer = new Class({
      */
     getChildren: function ()
     {
+        console.group('Layer getChildren');
+        console.groupEnd();
         return this.list;
     },
 
@@ -856,6 +907,7 @@ var Layer = new Class({
      */
     addToDisplayList: function (displayList)
     {
+        console.group('Layer addToDisplayList');
         if (displayList === undefined) { displayList = this.scene.sys.displayList; }
 
         if (this.displayList && this.displayList !== displayList)
@@ -877,6 +929,7 @@ var Layer = new Class({
             displayList.events.emit(SceneEvents.ADDED_TO_SCENE, this, this.scene);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -900,6 +953,7 @@ var Layer = new Class({
      */
     removeFromDisplayList: function ()
     {
+        console.group('Layer removeFromDisplayList');
         var displayList = this.displayList || this.scene.sys.displayList;
 
         if (displayList.exists(this))
@@ -915,6 +969,7 @@ var Layer = new Class({
             displayList.events.emit(SceneEvents.REMOVED_FROM_SCENE, this, this.scene);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -940,9 +995,11 @@ var Layer = new Class({
      */
     destroy: function (fromScene)
     {
+        console.group('Layer destroy');
         //  This Game Object has already been destroyed
         if (!this.scene || this.ignoreDestroy)
         {
+            console.groupEnd();
             return;
         }
 
@@ -981,6 +1038,7 @@ var Layer = new Class({
         this.displayList = undefined;
         this.systems = undefined;
         this.events = undefined;
+        console.groupEnd();
     }
 
     /**

@@ -22,8 +22,10 @@ var Video = require('./Video');
  *
  * @return {Phaser.GameObjects.Video} The Game Object that was created.
  */
+console.group('GameObjectCreator.register video');
 GameObjectCreator.register('video', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register video factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -37,7 +39,9 @@ GameObjectCreator.register('video', function (config, addToScene)
 
     BuildGameObject(this.scene, video, config);
 
+    console.groupEnd();
     return video;
 });
 
+console.groupEnd();
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

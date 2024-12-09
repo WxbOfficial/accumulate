@@ -46,6 +46,7 @@ var CompressedTextureFile = new Class({
 
     function CompressedTextureFile (loader, key, entry, xhrSettings)
     {
+        console.group('CompressedTextureFile');
         if (entry.multiAtlasURL)
         {
             var multi = new JSONFile(loader, {
@@ -92,6 +93,7 @@ var CompressedTextureFile = new Class({
         }
 
         this.config = entry;
+        console.groupEnd();
     },
 
     /**
@@ -104,6 +106,7 @@ var CompressedTextureFile = new Class({
      */
     onFileComplete: function (file)
     {
+        console.group('CompressedTextureFile onFileComplete');
         var index = this.files.indexOf(file);
 
         if (index !== -1)
@@ -112,6 +115,7 @@ var CompressedTextureFile = new Class({
 
             if (!this.config.multiAtlasURL)
             {
+                console.groupEnd();
                 return;
             }
 
@@ -181,6 +185,7 @@ var CompressedTextureFile = new Class({
                 loader.setPrefix(currentPrefix);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -191,6 +196,7 @@ var CompressedTextureFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('CompressedTextureFile addToCache');
         function compressionWarning (message)
         {
             console.warn('Compressed Texture Invalid: "' + image.key + '". ' + message);
@@ -252,6 +258,7 @@ var CompressedTextureFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     },
 
     /**
@@ -262,6 +269,7 @@ var CompressedTextureFile = new Class({
      */
     addMultiToCache: function ()
     {
+        console.group('CompressedTextureFile addMultiToCache');
         var entry = this.config;
         var json = this.files[0];
 
@@ -330,6 +338,7 @@ var CompressedTextureFile = new Class({
         textureManager.addAtlasJSONArray(this.key, images, data, normalMaps);
 
         this.complete = true;
+        console.groupEnd();
     }
 
 });
@@ -473,8 +482,10 @@ var CompressedTextureFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register texture');
 FileTypesManager.register('texture', function (key, url, xhrSettings)
 {
+    console.group('FileTypesManager.register texture factoryFunction');
     var renderer = this.systems.renderer;
 
     var AddEntry = function (loader, key, urls, xhrSettings)
@@ -571,7 +582,9 @@ FileTypesManager.register('texture', function (key, url, xhrSettings)
         AddEntry(this, key, url, xhrSettings);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = CompressedTextureFile;

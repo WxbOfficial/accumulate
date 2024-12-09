@@ -26,11 +26,13 @@ var tempMatrix = new TransformMatrix();
  */
 var DynamicBitmapTextWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('DynamicBitmapTextWebGLRenderer')
     var text = src.text;
     var textLength = text.length;
 
     if (textLength === 0)
     {
+        console.groupEnd();
         return;
     }
 
@@ -285,6 +287,7 @@ var DynamicBitmapTextWebGLRenderer = function (renderer, src, camera, parentMatr
     }
 
     renderer.pipelines.postBatch(src);
+    console.groupEnd();
 };
 
 module.exports = DynamicBitmapTextWebGLRenderer;

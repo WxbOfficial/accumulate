@@ -37,6 +37,7 @@ var ProcessQueue = new Class({
 
     function ProcessQueue ()
     {
+        console.group('ProcessQueue');
         EventEmitter.call(this);
 
         /**
@@ -97,6 +98,7 @@ var ProcessQueue = new Class({
          * @since 3.50.0
          */
         this.checkQueue = false;
+        console.groupEnd();
     },
 
     /**
@@ -114,7 +116,10 @@ var ProcessQueue = new Class({
      */
     isActive: function (item)
     {
-        return (this._active.indexOf(item) > -1);
+        console.group('ProcessQueue isActive');
+        const result = (this._active.indexOf(item) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -132,7 +137,10 @@ var ProcessQueue = new Class({
      */
     isPending: function (item)
     {
-        return (this._toProcess > 0 && this._pending.indexOf(item) > -1);
+        console.group('ProcessQueue isPending');
+        const result = (this._toProcess > 0 && this._pending.indexOf(item) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -150,7 +158,10 @@ var ProcessQueue = new Class({
      */
     isDestroying: function (item)
     {
-        return (this._destroy.indexOf(item) > -1);
+        console.group('ProcessQueue isDestroying');
+        const result = (this._destroy.indexOf(item) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -170,9 +181,11 @@ var ProcessQueue = new Class({
      */
     add: function (item)
     {
+        console.group('ProcessQueue add');
         //  Don't add if already active or pending, but DO add if active AND in the destroy list
         if (this.checkQueue && (this.isActive(item) && !this.isDestroying(item)) || this.isPending(item))
         {
+            console.groupEnd();
             return item;
         }
 
@@ -180,6 +193,7 @@ var ProcessQueue = new Class({
 
         this._toProcess++;
 
+        console.groupEnd();
         return item;
     },
 
@@ -200,6 +214,7 @@ var ProcessQueue = new Class({
      */
     remove: function (item)
     {
+        console.group('ProcessQueue remove');
         //  Check if it's in the _pending list
         if (this.isPending(item))
         {
@@ -224,6 +239,7 @@ var ProcessQueue = new Class({
         //  If neither of the above conditions pass, then the item is either already in the destroy list,
         //  or isn't pending or active, so cannot be removed anyway
 
+        console.groupEnd();
         return item;
     },
 
@@ -239,6 +255,7 @@ var ProcessQueue = new Class({
      */
     removeAll: function ()
     {
+        console.group('ProcessQueue removeAll');
         var list = this._active;
         var destroy = this._destroy;
         var i = list.length;
@@ -250,6 +267,7 @@ var ProcessQueue = new Class({
             this._toProcess++;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -268,9 +286,11 @@ var ProcessQueue = new Class({
      */
     update: function ()
     {
+        console.group('ProcessQueue update');
         if (this._toProcess === 0)
         {
             //  Quick bail
+            console.groupEnd();
             return this._active;
         }
 
@@ -318,6 +338,7 @@ var ProcessQueue = new Class({
 
         this._toProcess = 0;
 
+        console.groupEnd();
         //  The owner of this queue can now safely do whatever it needs to with the active list
         return active;
     },
@@ -337,6 +358,8 @@ var ProcessQueue = new Class({
      */
     getActive: function ()
     {
+        console.group('ProcessQueue getActive');
+        console.groupEnd();
         return this._active;
     },
 
@@ -365,11 +388,13 @@ var ProcessQueue = new Class({
      */
     destroy: function ()
     {
+        console.group('ProcessQueue destroy');
         this._toProcess = 0;
 
         this._pending = [];
         this._active = [];
         this._destroy = [];
+        console.groupEnd();
     }
 
 });

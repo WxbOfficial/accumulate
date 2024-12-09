@@ -63,6 +63,7 @@ var DynamicBitmapText = new Class({
 
     function DynamicBitmapText (scene, x, y, font, text, size, align)
     {
+        console.group('DynamicBitmapText');
         BitmapText.call(this, scene, x, y, font, text, size, align);
 
         this.type = 'DynamicBitmapText';
@@ -145,6 +146,7 @@ var DynamicBitmapText = new Class({
             rotation: 0,
             data: 0
         };
+        console.groupEnd();
     },
 
     /**
@@ -160,9 +162,11 @@ var DynamicBitmapText = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('DynamicBitmapText setSize');
         this.cropWidth = width;
         this.cropHeight = height;
 
+        console.groupEnd();
         return this;
     },
 
@@ -184,8 +188,10 @@ var DynamicBitmapText = new Class({
      */
     setDisplayCallback: function (callback)
     {
+        console.group('DynamicBitmapText setDisplayCallback');
         this.displayCallback = callback;
 
+        console.groupEnd();
         return this;
     },
 
@@ -201,8 +207,10 @@ var DynamicBitmapText = new Class({
      */
     setScrollX: function (value)
     {
+        console.group('DynamicBitmapText setScrollX');
         this.scrollX = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -218,8 +226,10 @@ var DynamicBitmapText = new Class({
      */
     setScrollY: function (value)
     {
+        console.group('DynamicBitmapText setScrollY');
         this.scrollY = value;
 
+        console.groupEnd();
         return this;
     }
 

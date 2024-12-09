@@ -27,6 +27,7 @@ var CanvasFeatures = {
 
 function checkBlendMode ()
 {
+    console.group('Device CanvasFeatures init checkBlendMode');
     var pngHead = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAABAQMAAADD8p2OAAAAA1BMVEX/';
     var pngEnd = 'AAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==';
 
@@ -34,10 +35,12 @@ function checkBlendMode ()
 
     magenta.onload = function ()
     {
+        console.group('Device CanvasFeatures init checkBlendMode magenta.onload');
         var yellow = new Image();
 
         yellow.onload = function ()
         {
+            console.group('Device CanvasFeatures init checkBlendMode magenta.onload yellow.onload');
             var canvas = CanvasPool.create2D(yellow, 6);
             var context = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -48,6 +51,7 @@ function checkBlendMode ()
 
             if (!context.getImageData(2, 0, 1, 1))
             {
+                console.groupEnd();
                 return false;
             }
 
@@ -56,18 +60,22 @@ function checkBlendMode ()
             CanvasPool.remove(yellow);
 
             CanvasFeatures.supportNewBlendModes = (data[0] === 255 && data[1] === 0 && data[2] === 0);
+            console.groupEnd();
         };
 
         yellow.src = pngHead + '/wCKxvRF' + pngEnd;
+        console.groupEnd();
     };
 
     magenta.src = pngHead + 'AP804Oa6' + pngEnd;
 
+    console.groupEnd();
     return false;
 }
 
 function checkInverseAlpha ()
 {
+    console.group('Device CanvasFeatures init checkInverseAlpha');
     var canvas = CanvasPool.create2D(this, 2);
     var context = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -81,6 +89,7 @@ function checkInverseAlpha ()
 
     if (s1 === null)
     {
+        console.groupEnd();
         return false;
     }
 
@@ -94,18 +103,21 @@ function checkInverseAlpha ()
 
     CanvasPool.remove(this);
 
+    console.groupEnd();
     //  Compare and return
     return result;
 }
 
 function init ()
 {
+    console.group('Device CanvasFeatures init');
     if (typeof importScripts !== 'function' && document !== undefined)
     {
         CanvasFeatures.supportNewBlendModes = checkBlendMode();
         CanvasFeatures.supportInverseAlpha = checkInverseAlpha();
     }
 
+    console.groupEnd();
     return CanvasFeatures;
 }
 

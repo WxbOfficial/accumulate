@@ -41,6 +41,7 @@ var FontFile = new Class({
 
     function FontFile (loader, key, url, format, descriptors, xhrSettings)
     {
+        console.group('FontFile');
         var extension = 'ttf';
 
         if (IsPlainObject(key))
@@ -77,6 +78,7 @@ var FontFile = new Class({
         };
 
         this.state = CONST.FILE_POPULATED;
+        console.groupEnd();
     },
 
     /**
@@ -88,6 +90,7 @@ var FontFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('FontFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.src = GetURL(this, this.loader.baseURL);
@@ -120,6 +123,7 @@ var FontFile = new Class({
 
             _this.onProcessComplete();
         });
+        console.groupEnd();
     }
 
 });
@@ -201,8 +205,10 @@ var FontFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register font');
 FileTypesManager.register('font', function (key, url, format, descriptors, xhrSettings)
 {
+    console.group('FileTypesManager.register font factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -216,7 +222,9 @@ FileTypesManager.register('font', function (key, url, format, descriptors, xhrSe
         this.addFile(new FontFile(this, key, url, format, descriptors, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = FontFile;

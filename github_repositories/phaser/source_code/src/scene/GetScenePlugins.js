@@ -18,6 +18,7 @@ var GetFastValue = require('../utils/object/GetFastValue');
  */
 var GetScenePlugins = function (sys)
 {
+    console.group('GetScenePlugins');
     var defaultPlugins = sys.plugins.getDefaultScenePlugins();
 
     var scenePlugins = GetFastValue(sys.settings, 'plugins', false);
@@ -25,14 +26,17 @@ var GetScenePlugins = function (sys)
     //  Scene Plugins always override Default Plugins
     if (Array.isArray(scenePlugins))
     {
+        console.groupEnd();
         return scenePlugins;
     }
     else if (defaultPlugins)
     {
+        console.groupEnd();
         return defaultPlugins;
     }
     else
     {
+        console.groupEnd();
         //  No default plugins or plugins in this scene
         return [];
     }

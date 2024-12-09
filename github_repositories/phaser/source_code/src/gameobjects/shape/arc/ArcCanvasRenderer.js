@@ -25,6 +25,7 @@ var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
  */
 var ArcCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('ArcCanvasRenderer');
     camera.addToRenderList(src);
 
     var ctx = renderer.currentContext;
@@ -66,6 +67,7 @@ var ArcCanvasRenderer = function (renderer, src, camera, parentMatrix)
         //  Restore the context saved in SetTransform
         ctx.restore();
     }
+    console.groupEnd();
 };
 
 module.exports = ArcCanvasRenderer;

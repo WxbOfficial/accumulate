@@ -20,7 +20,9 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Group} The Game Object that was created.
  */
+console.group('GameObjectFactory.register group');
 GameObjectFactory.register('group', function (children, config)
 {
     return this.updateList.add(new Group(this.scene, children, config));
 });
+console.groupEnd();

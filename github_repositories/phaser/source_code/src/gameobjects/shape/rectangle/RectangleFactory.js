@@ -33,7 +33,10 @@ var Rectangle = require('./Rectangle');
  *
  * @return {Phaser.GameObjects.Rectangle} The Game Object that was created.
  */
+console.group('GameObjectFactory.register rectangle');
 GameObjectFactory.register('rectangle', function (x, y, width, height, fillColor, fillAlpha)
 {
     return this.displayList.add(new Rectangle(this.scene, x, y, width, height, fillColor, fillAlpha));
 });
+
+console.groupEnd();

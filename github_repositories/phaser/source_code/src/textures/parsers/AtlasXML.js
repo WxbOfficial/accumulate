@@ -20,10 +20,12 @@
  */
 var AtlasXML = function (texture, sourceIndex, xml)
 {
+    console.group('Parsers AtlasXML');
     //  Malformed?
     if (!xml.getElementsByTagName('TextureAtlas'))
     {
         console.warn('Invalid Texture Atlas XML given');
+        console.groupEnd();
         return;
     }
 
@@ -69,6 +71,7 @@ var AtlasXML = function (texture, sourceIndex, xml)
         }
     }
 
+    console.groupEnd();
     return texture;
 };
 

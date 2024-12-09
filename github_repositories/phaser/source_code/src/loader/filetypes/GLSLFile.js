@@ -40,6 +40,7 @@ var GLSLFile = new Class({
 
     function GLSLFile (loader, key, url, shaderType, xhrSettings)
     {
+        console.group('GLSLFile');
         var extension = 'glsl';
 
         if (IsPlainObject(key))
@@ -71,6 +72,7 @@ var GLSLFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -82,11 +84,13 @@ var GLSLFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('GLSLFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.data = this.xhrLoader.responseText;
 
         this.onProcessComplete();
+        console.groupEnd();
     },
 
     /**
@@ -97,6 +101,7 @@ var GLSLFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('GLSLFile addToCache');
         var data = this.data.split('\n');
 
         //  Check to see if this is a shader bundle, or raw glsl file.
@@ -150,6 +155,7 @@ var GLSLFile = new Class({
         {
             this.cache.add(this.key, new Shader(this.key, '', this.data));
         }
+        console.groupEnd();
     },
 
     /**
@@ -164,16 +170,20 @@ var GLSLFile = new Class({
      */
     getShaderName: function (headerSource)
     {
+        console.group('GLSLFile getShaderName');
         for (var i = 0; i < headerSource.length; i++)
         {
             var line = headerSource[i].trim();
 
             if (line.substring(0, 5) === 'name:')
             {
-                return line.substring(5).trim();
+                const result = line.substring(5).trim();
+                console.groupEnd();
+                return result;
             }
         }
 
+        console.groupEnd();
         return this.key;
     },
 
@@ -189,16 +199,20 @@ var GLSLFile = new Class({
      */
     getShaderType: function (headerSource)
     {
+        console.group('GLSLFile getShaderType');
         for (var i = 0; i < headerSource.length; i++)
         {
             var line = headerSource[i].trim();
 
             if (line.substring(0, 5) === 'type:')
             {
-                return line.substring(5).trim();
+                const result = line.substring(5).trim();
+                console.groupEnd();
+                return result;
             }
         }
 
+        console.groupEnd();
         return this.config.shaderType;
     },
 
@@ -214,6 +228,7 @@ var GLSLFile = new Class({
      */
     getShaderUniforms: function (headerSource)
     {
+        console.group('GLSLFile getShaderUniforms');
         var uniforms = {};
 
         for (var i = 0; i < headerSource.length; i++)
@@ -240,6 +255,7 @@ var GLSLFile = new Class({
             }
         }
 
+        console.groupEnd();
         return uniforms;
     },
 
@@ -257,6 +273,7 @@ var GLSLFile = new Class({
      */
     extractBlock: function (data, offset)
     {
+        console.group('GLSLFile extractBlock');
         var headerStart = -1;
         var headerEnd = -1;
         var blockEnd = -1;
@@ -302,10 +319,13 @@ var GLSLFile = new Class({
 
         if (!headerOpen && headerEnd !== -1)
         {
-            return { header: headerSource, shader: shaderSource.join('\n'), offset: blockEnd };
+            const result = { header: headerSource, shader: shaderSource.join('\n'), offset: blockEnd };
+            console.groupEnd();
+            return result;
         }
         else
         {
+            console.groupEnd();
             return null;
         }
     }
@@ -382,8 +402,10 @@ var GLSLFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register glsl');
 FileTypesManager.register('glsl', function (key, url, shaderType, xhrSettings)
 {
+    console.group('FileTypesManager.register glsl factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -397,7 +419,9 @@ FileTypesManager.register('glsl', function (key, url, shaderType, xhrSettings)
         this.addFile(new GLSLFile(this, key, url, shaderType, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = GLSLFile;

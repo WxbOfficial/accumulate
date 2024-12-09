@@ -23,8 +23,10 @@ var Sprite = require('./Sprite');
  *
  * @return {Phaser.GameObjects.Sprite} The Game Object that was created.
  */
+console.group('GameObjectCreator.register sprite');
 GameObjectCreator.register('sprite', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register sprite factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -43,5 +45,8 @@ GameObjectCreator.register('sprite', function (config, addToScene)
 
     BuildGameObjectAnimation(sprite, config);
 
+    console.groupEnd();
     return sprite;
 });
+
+console.groupEnd();

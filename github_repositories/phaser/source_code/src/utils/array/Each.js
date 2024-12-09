@@ -19,6 +19,7 @@
  */
 var Each = function (array, callback, context)
 {
+    console.group('Each');
     var i;
     var args = [ null ];
 
@@ -34,6 +35,7 @@ var Each = function (array, callback, context)
         callback.apply(context, args);
     }
 
+    console.groupEnd();
     return array;
 };
 
