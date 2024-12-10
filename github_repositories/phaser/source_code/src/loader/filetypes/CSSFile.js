@@ -38,6 +38,7 @@ var CSSFile = new Class({
 
     function CSSFile (loader, key, url, xhrSettings)
     {
+        console.group('CSSFile');
         var extension = 'css';
 
         if (IsPlainObject(key))
@@ -61,6 +62,7 @@ var CSSFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -72,6 +74,7 @@ var CSSFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('CSSFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.data = document.createElement('style');
@@ -81,6 +84,7 @@ var CSSFile = new Class({
         document.head.appendChild(this.data);
 
         this.onProcessComplete();
+        console.groupEnd();
     }
 
 });
@@ -141,8 +145,10 @@ var CSSFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register css');
 FileTypesManager.register('css', function (key, url, xhrSettings)
 {
+    console.group('FileTypesManager.register css factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -156,7 +162,9 @@ FileTypesManager.register('css', function (key, url, xhrSettings)
         this.addFile(new CSSFile(this, key, url, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = CSSFile;

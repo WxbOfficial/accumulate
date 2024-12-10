@@ -44,6 +44,7 @@ var AnimationState = new Class({
 
     function AnimationState (parent)
     {
+        console.group('AnimationState');
         /**
          * The Game Object to which this animation component belongs.
          *
@@ -479,6 +480,7 @@ var AnimationState = new Class({
          * @since 3.4.0
          */
         this._pendingStopValue;
+        console.groupEnd();
     },
 
     /**
@@ -504,6 +506,7 @@ var AnimationState = new Class({
      */
     chain: function (key)
     {
+        console.group('AnimationState chain');
         var parent = this.parent;
 
         if (key === undefined)
@@ -511,6 +514,7 @@ var AnimationState = new Class({
             this.nextAnimsQueue.length = 0;
             this.nextAnim = null;
 
+            console.groupEnd();
             return parent;
         }
 
@@ -533,6 +537,7 @@ var AnimationState = new Class({
             }
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -548,7 +553,10 @@ var AnimationState = new Class({
      */
     getName: function ()
     {
-        return (this.currentAnim) ? this.currentAnim.key : '';
+        console.group('AnimationState getName');
+        const result = (this.currentAnim) ? this.currentAnim.key : '';
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -561,7 +569,10 @@ var AnimationState = new Class({
      */
     getFrameName: function ()
     {
-        return (this.currentFrame) ? this.currentFrame.textureFrame : '';
+        console.group('AnimationState getFrameName');
+        const result = (this.currentFrame) ? this.currentFrame.textureFrame : '';
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -577,6 +588,7 @@ var AnimationState = new Class({
      */
     load: function (key)
     {
+        console.group('AnimationState load');
         if (this.isPlaying)
         {
             this.stop();
@@ -638,6 +650,7 @@ var AnimationState = new Class({
             this.currentFrame = frame;
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -654,6 +667,7 @@ var AnimationState = new Class({
      */
     pause: function (atFrame)
     {
+        console.group('AnimationState pause');
         if (!this._paused)
         {
             this._paused = true;
@@ -666,6 +680,7 @@ var AnimationState = new Class({
             this.setCurrentFrame(atFrame);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -682,6 +697,7 @@ var AnimationState = new Class({
      */
     resume: function (fromFrame)
     {
+        console.group('AnimationState resume');
         if (this._paused)
         {
             this._paused = false;
@@ -693,6 +709,7 @@ var AnimationState = new Class({
             this.setCurrentFrame(fromFrame);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -719,6 +736,7 @@ var AnimationState = new Class({
      */
     playAfterDelay: function (key, delay)
     {
+        console.group('AnimationState playAfterDelay');
         if (!this.isPlaying)
         {
             this.delayCounter = delay;
@@ -742,6 +760,7 @@ var AnimationState = new Class({
             this._pendingStopValue = delay;
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -765,6 +784,7 @@ var AnimationState = new Class({
      */
     playAfterRepeat: function (key, repeatCount)
     {
+        console.group('AnimationState playAfterRepeat');
         if (repeatCount === undefined) { repeatCount = 1; }
 
         if (!this.isPlaying)
@@ -793,6 +813,7 @@ var AnimationState = new Class({
             this._pendingStopValue = repeatCount;
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -858,6 +879,7 @@ var AnimationState = new Class({
      */
     play: function (key, ignoreIfPlaying)
     {
+        console.group('AnimationState play');
         if (ignoreIfPlaying === undefined) { ignoreIfPlaying = false; }
 
         var currentAnim = this.currentAnim;
@@ -868,6 +890,7 @@ var AnimationState = new Class({
 
         if (ignoreIfPlaying && this.isPlaying && currentAnim.key === animKey)
         {
+            console.groupEnd();
             return parent;
         }
 
@@ -878,7 +901,9 @@ var AnimationState = new Class({
 
             if (mix > 0)
             {
-                return this.playAfterDelay(key, mix);
+                const result = this.playAfterDelay(key, mix);
+                console.groupEnd();
+                return result;
             }
         }
 
@@ -888,7 +913,9 @@ var AnimationState = new Class({
         this._paused = false;
         this._wasPlaying = true;
 
-        return this.startAnimation(key);
+        const result = this.startAnimation(key);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -953,6 +980,7 @@ var AnimationState = new Class({
      */
     playReverse: function (key, ignoreIfPlaying)
     {
+        console.group('AnimationState playReverse');
         if (ignoreIfPlaying === undefined) { ignoreIfPlaying = false; }
 
         //  Must be either an Animation instance, or a PlayAnimationConfig object
@@ -960,6 +988,7 @@ var AnimationState = new Class({
 
         if (ignoreIfPlaying && this.isPlaying && this.currentAnim.key === animKey)
         {
+            console.groupEnd();
             return this.parent;
         }
 
@@ -969,7 +998,9 @@ var AnimationState = new Class({
         this._paused = false;
         this._wasPlaying = true;
 
-        return this.startAnimation(key);
+        const result = this.startAnimation(key);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -986,6 +1017,7 @@ var AnimationState = new Class({
      */
     startAnimation: function (key)
     {
+        console.group('AnimationState startAnimation');
         this.load(key);
 
         var anim = this.currentAnim;
@@ -993,6 +1025,7 @@ var AnimationState = new Class({
 
         if (!anim)
         {
+            console.groupEnd();
             return gameObject;
         }
 
@@ -1022,6 +1055,7 @@ var AnimationState = new Class({
             this.setCurrentFrame(this.currentFrame);
         }
 
+        console.groupEnd();
         return gameObject;
     },
 
@@ -1034,6 +1068,7 @@ var AnimationState = new Class({
      */
     handleStart: function ()
     {
+        console.group('AnimationState handleStart');
         if (this.showOnStart)
         {
             this.parent.setVisible(true);
@@ -1044,6 +1079,7 @@ var AnimationState = new Class({
         this.hasStarted = true;
 
         this.emitEvents(Events.ANIMATION_START);
+        console.groupEnd();
     },
 
     /**
@@ -1055,9 +1091,11 @@ var AnimationState = new Class({
      */
     handleRepeat: function ()
     {
+        console.group('AnimationState handleRepeat');
         this.pendingRepeat = false;
 
         this.emitEvents(Events.ANIMATION_REPEAT);
+        console.groupEnd();
     },
 
     /**
@@ -1069,11 +1107,13 @@ var AnimationState = new Class({
      */
     handleStop: function ()
     {
+        console.group('AnimationState handleStop');
         this._pendingStop = 0;
 
         this.isPlaying = false;
 
         this.emitEvents(Events.ANIMATION_STOP);
+        console.groupEnd();
     },
 
     /**
@@ -1085,6 +1125,7 @@ var AnimationState = new Class({
      */
     handleComplete: function ()
     {
+        console.group('AnimationState handleComplete');
         this._pendingStop = 0;
 
         this.isPlaying = false;
@@ -1095,6 +1136,7 @@ var AnimationState = new Class({
         }
 
         this.emitEvents(Events.ANIMATION_COMPLETE, Events.ANIMATION_COMPLETE_KEY);
+        console.groupEnd();
     },
 
     /**
@@ -1108,6 +1150,7 @@ var AnimationState = new Class({
      */
     emitEvents: function (event, keyEvent)
     {
+        console.group('AnimationState emitEvents');
         var anim = this.currentAnim;
 
         if (anim)
@@ -1125,6 +1168,7 @@ var AnimationState = new Class({
                 gameObject.emit(keyEvent + anim.key, anim, frame, gameObject, frameKey);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1137,6 +1181,7 @@ var AnimationState = new Class({
      */
     reverse: function ()
     {
+        console.group('AnimationState reverse');
         if (this.isPlaying)
         {
             this.inReverse = !this.inReverse;
@@ -1144,6 +1189,7 @@ var AnimationState = new Class({
             this.forward = !this.forward;
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1160,10 +1206,12 @@ var AnimationState = new Class({
      */
     getProgress: function ()
     {
+        console.group('AnimationState getProgress');
         var frame = this.currentFrame;
 
         if (!frame)
         {
+            console.groupEnd();
             return 0;
         }
 
@@ -1174,6 +1222,7 @@ var AnimationState = new Class({
             p *= -1;
         }
 
+        console.groupEnd();
         return p;
     },
 
@@ -1194,6 +1243,7 @@ var AnimationState = new Class({
      */
     setProgress: function (value)
     {
+        console.group('AnimationState setProgress');
         if (!this.forward)
         {
             value = 1 - value;
@@ -1201,6 +1251,7 @@ var AnimationState = new Class({
 
         this.setCurrentFrame(this.currentAnim.getFrameByProgress(value));
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1224,8 +1275,10 @@ var AnimationState = new Class({
      */
     setRepeat: function (value)
     {
+        console.group('AnimationState setRepeat');
         this.repeatCounter = (value === -1) ? Number.MAX_VALUE : value;
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1240,6 +1293,7 @@ var AnimationState = new Class({
      */
     globalRemove: function (key, animation)
     {
+        console.group('AnimationState globalRemove');
         if (animation === undefined) { animation = this.currentAnim; }
 
         if (this.isPlaying && animation.key === this.currentAnim.key)
@@ -1248,6 +1302,7 @@ var AnimationState = new Class({
 
             this.setCurrentFrame(this.currentAnim.frames[0]);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1271,6 +1326,7 @@ var AnimationState = new Class({
      */
     restart: function (includeDelay, resetRepeats)
     {
+        console.group('AnimationState restart');
         if (includeDelay === undefined) { includeDelay = false; }
         if (resetRepeats === undefined) { resetRepeats = false; }
 
@@ -1279,6 +1335,7 @@ var AnimationState = new Class({
 
         if (!anim)
         {
+            console.groupEnd();
             return gameObject;
         }
 
@@ -1303,6 +1360,7 @@ var AnimationState = new Class({
 
         this.setCurrentFrame(anim.frames[0]);
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1323,6 +1381,7 @@ var AnimationState = new Class({
      */
     complete: function ()
     {
+        console.group('AnimationState complete');
         this._pendingStop = 0;
 
         this.isPlaying = false;
@@ -1341,6 +1400,7 @@ var AnimationState = new Class({
             this.play(key);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1359,6 +1419,7 @@ var AnimationState = new Class({
      */
     stop: function ()
     {
+        console.group('AnimationState stop');
         this._pendingStop = 0;
 
         this.isPlaying = false;
@@ -1379,6 +1440,7 @@ var AnimationState = new Class({
             this.play(key);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1402,9 +1464,11 @@ var AnimationState = new Class({
      */
     stopAfterDelay: function (delay)
     {
+        console.group('AnimationState stopAfterDelay');
         this._pendingStop = 1;
         this._pendingStopValue = delay;
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1430,6 +1494,7 @@ var AnimationState = new Class({
      */
     stopAfterRepeat: function (repeatCount)
     {
+        console.group('AnimationState stopAfterRepeat');
         if (repeatCount === undefined) { repeatCount = 1; }
 
         if (this.repeatCounter !== -1 && repeatCount > this.repeatCounter)
@@ -1440,6 +1505,7 @@ var AnimationState = new Class({
         this._pendingStop = 2;
         this._pendingStopValue = repeatCount;
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1464,9 +1530,11 @@ var AnimationState = new Class({
      */
     stopOnFrame: function (frame)
     {
+        console.group('AnimationState stopOnFrame');
         this._pendingStop = 3;
         this._pendingStopValue = frame;
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1481,7 +1549,10 @@ var AnimationState = new Class({
      */
     getTotalFrames: function ()
     {
-        return (this.currentAnim) ? this.currentAnim.getTotalFrames() : 0;
+        console.group('AnimationState getTotalFrames');
+        const result = (this.currentAnim) ? this.currentAnim.getTotalFrames() : 0;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1497,10 +1568,12 @@ var AnimationState = new Class({
      */
     update: function (time, delta)
     {
+        console.group('AnimationState update');
         var anim = this.currentAnim;
 
         if (!this.isPlaying || !anim || anim.paused)
         {
+            console.groupEnd();
             return;
         }
 
@@ -1512,7 +1585,9 @@ var AnimationState = new Class({
 
             if (this._pendingStopValue <= 0)
             {
-                return this.stop();
+                const result = this.stop();
+                console.groupEnd();
+                return result;
             }
         }
 
@@ -1559,6 +1634,7 @@ var AnimationState = new Class({
                 } while (this.isPlaying && this.accumulator > this.nextTick && safetyNet < 60);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1576,6 +1652,7 @@ var AnimationState = new Class({
      */
     setCurrentFrame: function (animationFrame)
     {
+        console.group('AnimationState setCurrentFrame');
         var gameObject = this.parent;
 
         this.currentFrame = animationFrame;
@@ -1617,6 +1694,7 @@ var AnimationState = new Class({
             }
         }
 
+        console.groupEnd();
         return gameObject;
     },
 
@@ -1634,11 +1712,13 @@ var AnimationState = new Class({
      */
     nextFrame: function ()
     {
+        console.group('AnimationState nextFrame');
         if (this.currentAnim)
         {
             this.currentAnim.nextFrame(this);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1656,11 +1736,13 @@ var AnimationState = new Class({
      */
     previousFrame: function ()
     {
+        console.group('AnimationState previousFrame');
         if (this.currentAnim)
         {
             this.currentAnim.previousFrame(this);
         }
 
+        console.groupEnd();
         return this.parent;
     },
 
@@ -1678,7 +1760,10 @@ var AnimationState = new Class({
      */
     get: function (key)
     {
-        return (this.anims) ? this.anims.get(key) : null;
+        console.group('AnimationState get');
+        const result = (this.anims) ? this.anims.get(key) : null;
+        console.groupEnd();
+        return result
     },
 
     /**
@@ -1693,7 +1778,10 @@ var AnimationState = new Class({
      */
     exists: function (key)
     {
-        return (this.anims) ? this.anims.has(key) : false;
+        console.group('AnimationState exists');
+        const result = (this.anims) ? this.anims.has(key) : false;
+        console.groupEnd();
+        return result
     },
 
     /**
@@ -1722,6 +1810,7 @@ var AnimationState = new Class({
      */
     create: function (config)
     {
+        console.group('AnimationState create');
         var key = config.key;
 
         var anim = false;
@@ -1747,6 +1836,7 @@ var AnimationState = new Class({
             }
         }
 
+        console.groupEnd();
         return anim;
     },
 
@@ -1834,7 +1924,10 @@ var AnimationState = new Class({
      */
     createFromAseprite: function (key, tags)
     {
-        return this.animationManager.createFromAseprite(key, tags, this.parent);
+        console.group('AnimationState createFromAseprite');
+        const result = this.animationManager.createFromAseprite(key, tags, this.parent);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1877,7 +1970,10 @@ var AnimationState = new Class({
      */
     generateFrameNames: function (key, config)
     {
-        return this.animationManager.generateFrameNames(key, config);
+        console.group('AnimationState generateFrameNames');
+        const result = this.animationManager.generateFrameNames(key, config);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1927,7 +2023,10 @@ var AnimationState = new Class({
      */
     generateFrameNumbers: function (key, config)
     {
-        return this.animationManager.generateFrameNumbers(key, config);
+        console.group('AnimationState generateFrameNumbers');
+        const result = this.animationManager.generateFrameNumbers(key, config);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1944,6 +2043,7 @@ var AnimationState = new Class({
      */
     remove: function (key)
     {
+        console.group('AnimationState remove');
         var anim = this.get(key);
 
         if (anim)
@@ -1956,6 +2056,7 @@ var AnimationState = new Class({
             this.anims.delete(key);
         }
 
+        console.groupEnd();
         return anim;
     },
 
@@ -1969,6 +2070,7 @@ var AnimationState = new Class({
      */
     destroy: function ()
     {
+        console.group('AnimationState destroy');
         this.animationManager.off(Events.REMOVE_ANIMATION, this.globalRemove, this);
 
         if (this.anims)
@@ -1983,6 +2085,7 @@ var AnimationState = new Class({
 
         this.currentAnim = null;
         this.currentFrame = null;
+        console.groupEnd();
     },
 
     /**

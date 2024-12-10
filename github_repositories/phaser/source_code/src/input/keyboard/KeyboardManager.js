@@ -33,6 +33,7 @@ var KeyboardManager = new Class({
 
     function KeyboardManager (inputManager)
     {
+        console.group('KeyboardManager');
         /**
          * A reference to the Input Manager.
          *
@@ -141,6 +142,7 @@ var KeyboardManager = new Class({
         this.onKeyUp = NOOP;
 
         inputManager.events.once(InputEvents.MANAGER_BOOT, this.boot, this);
+        console.groupEnd();
     },
 
     /**
@@ -152,6 +154,7 @@ var KeyboardManager = new Class({
      */
     boot: function ()
     {
+        console.group('KeyboardManager boot');
         var config = this.manager.config;
 
         this.enabled = config.inputKeyboard;
@@ -170,6 +173,7 @@ var KeyboardManager = new Class({
         }
 
         this.manager.game.events.on(GameEvents.POST_STEP, this.postUpdate, this);
+        console.groupEnd();
     },
 
     /**
@@ -181,13 +185,16 @@ var KeyboardManager = new Class({
      */
     startListeners: function ()
     {
+        console.group('KeyboardManager startListeners');
         var _this = this;
 
         this.onKeyDown = function (event)
         {
+            console.group('KeyboardManager startListeners onKeyDown');
             if (event.defaultPrevented || !_this.enabled || !_this.manager)
             {
                 // Do nothing if event already handled
+                console.groupEnd();
                 return;
             }
 
@@ -201,13 +208,16 @@ var KeyboardManager = new Class({
             {
                 event.preventDefault();
             }
+            console.groupEnd();
         };
 
         this.onKeyUp = function (event)
         {
+            console.group('KeyboardManager startListeners onKeyUp');
             if (event.defaultPrevented || !_this.enabled || !_this.manager)
             {
                 // Do nothing if event already handled
+                console.groupEnd();
                 return;
             }
 
@@ -221,6 +231,7 @@ var KeyboardManager = new Class({
             {
                 event.preventDefault();
             }
+            console.groupEnd();
         };
 
         var target = this.target;
@@ -232,6 +243,7 @@ var KeyboardManager = new Class({
 
             this.enabled = true;
         }
+        console.groupEnd();
     },
 
     /**
@@ -243,11 +255,13 @@ var KeyboardManager = new Class({
      */
     stopListeners: function ()
     {
+        console.group('KeyboardManager stopListeners');
         var target = this.target;
 
         target.removeEventListener('keydown', this.onKeyDown, false);
         target.removeEventListener('keyup', this.onKeyUp, false);
 
+        console.groupEnd();
         this.enabled = false;
     },
 
@@ -261,7 +275,9 @@ var KeyboardManager = new Class({
      */
     postUpdate: function ()
     {
+        console.group('KeyboardManager postUpdate');
         this.queue = [];
+        console.groupEnd();
     },
 
     /**
@@ -305,6 +321,7 @@ var KeyboardManager = new Class({
      */
     addCapture: function (keycode)
     {
+        console.group('KeyboardManager addCapture');
         if (typeof keycode === 'string')
         {
             keycode = keycode.split(',');
@@ -333,6 +350,7 @@ var KeyboardManager = new Class({
         }
 
         this.preventDefault = captures.length > 0;
+        console.groupEnd();
     },
 
     /**
@@ -372,6 +390,7 @@ var KeyboardManager = new Class({
      */
     removeCapture: function (keycode)
     {
+        console.group('KeyboardManager removeCapture');
         if (typeof keycode === 'string')
         {
             keycode = keycode.split(',');
@@ -397,6 +416,7 @@ var KeyboardManager = new Class({
         }
 
         this.preventDefault = captures.length > 0;
+        console.groupEnd();
     },
 
     /**
@@ -407,9 +427,11 @@ var KeyboardManager = new Class({
      */
     clearCaptures: function ()
     {
+        console.group('KeyboardManager clearCaptures');
         this.captures = [];
 
         this.preventDefault = false;
+        console.groupEnd();
     },
 
     /**
@@ -420,6 +442,7 @@ var KeyboardManager = new Class({
      */
     destroy: function ()
     {
+        console.group('KeyboardManager destroy');
         this.stopListeners();
 
         this.clearCaptures();
@@ -431,6 +454,7 @@ var KeyboardManager = new Class({
         this.target = null;
         this.enabled = false;
         this.manager = null;
+        console.groupEnd();
     }
 
 });

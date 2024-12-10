@@ -74,31 +74,41 @@ var Extern = new Class({
 
     function Extern (scene)
     {
+        console.group('Extern');
         GameObject.call(this, scene, 'Extern');
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     addedToScene: function ()
     {
+        console.group('Extern addedToScene');
         this.scene.sys.updateList.add(this);
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     removedFromScene: function ()
     {
+        console.group('Extern removedFromScene');
         this.scene.sys.updateList.remove(this);
+        console.groupEnd();
     },
 
     preUpdate: function ()
     {
+        console.group('Extern preUpdate');
         //  override this!
         //  Arguments: time, delta
+        console.groupEnd();
     },
 
     render: function ()
     {
+        console.group('Extern render');
         //  override this!
         //  Arguments: renderer, camera, calcMatrix
+        console.groupEnd();
     }
 
 });

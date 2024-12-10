@@ -27,6 +27,8 @@
 			graphics;
 
 			create() {
+				console.group('Example create');
+				console.log('Example create this.add:', this.add);
 				this.graphics = this.add.graphics({ lineStyle: { width: 2, color: 0x2266aa } });
 
 				this.point = new Phaser.Math.Vector2(250, 0);
@@ -40,9 +42,11 @@
 					this.point2.x -= 400;
 					this.point2.y -= 300;
 				});
+				console.groupEnd();
 			}
 
 			update() {
+				console.group('Example update');
 				this.graphics.clear();
 
 				this.angle += 0.005;
@@ -68,6 +72,7 @@
 					`Sinus of the angle between vectors: ${Phaser.Math.RadToDeg(angleBetween)}`,
 					`Green vector is on the ${cross > 0 ? 'right' : 'left'}`
 				].join('\n'));
+				console.groupEnd();
 			}
 		}
 
@@ -81,10 +86,9 @@
 
 		function startGame() {
 			new Phaser.Game(config);
-			document.body.removeEventListener('mousedown', startGame);
 		}
 
-		document.body.addEventListener('mousedown', startGame);
+        setTimeout(startGame, 2000);
 
 	</script>
 </body>

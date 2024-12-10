@@ -24,6 +24,7 @@ var StrokePathWebGL = require('../StrokePathWebGL');
  */
 var StarWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('StarWebGLRenderer');
     camera.addToRenderList(src);
 
     var pipeline = renderer.pipelines.set(src.pipeline);
@@ -50,6 +51,7 @@ var StarWebGLRenderer = function (renderer, src, camera, parentMatrix)
     }
 
     renderer.pipelines.postBatch(src);
+    console.groupEnd();
 };
 
 module.exports = StarWebGLRenderer;

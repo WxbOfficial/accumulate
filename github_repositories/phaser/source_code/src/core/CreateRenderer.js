@@ -21,6 +21,7 @@ var Features = require('../device/Features');
  */
 var CreateRenderer = function (game)
 {
+    console.group('CreateRenderer');
     var config = game.config;
 
     if ((config.customEnvironment || config.canvas) && config.renderType === CONST.AUTO)
@@ -133,6 +134,7 @@ var CreateRenderer = function (game)
 
         game.context = game.renderer.gameContext;
     }
+    console.groupEnd();
 };
 
 module.exports = CreateRenderer;

@@ -54,6 +54,7 @@ var Ellipse = new Class({
 
     function Ellipse (scene, x, y, width, height, fillColor, fillAlpha)
     {
+        console.group('Ellipse');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 128; }
@@ -84,6 +85,7 @@ var Ellipse = new Class({
 
         this.updateDisplayOrigin();
         this.updateData();
+        console.groupEnd();
     },
 
     /**
@@ -125,6 +127,7 @@ var Ellipse = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('Ellipse setSize');
         this.width = width;
         this.height = height;
         this.geom.setPosition(width / 2, height / 2);
@@ -132,7 +135,9 @@ var Ellipse = new Class({
 
         this.updateDisplayOrigin();
 
-        return this.updateData();
+        const result = this.updateData();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -149,9 +154,12 @@ var Ellipse = new Class({
      */
     setSmoothness: function (value)
     {
+        console.group('Ellipse setSmoothness');
         this._smoothness = value;
 
-        return this.updateData();
+        const result = this.updateData();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -165,6 +173,7 @@ var Ellipse = new Class({
      */
     updateData: function ()
     {
+        console.group('Ellipse updateData');
         var path = [];
         var points = this.geom.getPoints(this._smoothness);
 
@@ -178,6 +187,7 @@ var Ellipse = new Class({
         this.pathIndexes = Earcut(path);
         this.pathData = path;
 
+        console.groupEnd();
         return this;
     }
 

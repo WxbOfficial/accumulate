@@ -27,6 +27,7 @@ var ParticleEmitter = require('./ParticleEmitter');
  *
  * @return {Phaser.GameObjects.Particles.ParticleEmitter} The Game Object that was created.
  */
+console.group('GameObjectCreator.register particles');
 GameObjectCreator.register('particles', function (config, addToScene)
 {
     if (config === undefined) { config = {}; }
@@ -50,3 +51,5 @@ GameObjectCreator.register('particles', function (config, addToScene)
 
     return emitter;
 });
+
+console.groupEnd();

@@ -32,8 +32,12 @@ var GameObjectFactory = require('../GameObjectFactory');
  */
 if (typeof WEBGL_RENDERER)
 {
+    console.group('GameObjectFactory.register mesh');
     GameObjectFactory.register('mesh', function (x, y, texture, frame, vertices, uvs, indicies, containsZ, normals, colors, alphas)
     {
-        return this.displayList.add(new Mesh(this.scene, x, y, texture, frame, vertices, uvs, indicies, containsZ, normals, colors, alphas));
+        console.group('GameObjectCreator.register mesh factoryFunction');
+        const result = this.displayList.add(new Mesh(this.scene, x, y, texture, frame, vertices, uvs, indicies, containsZ, normals, colors, alphas));
+        console.groupEnd();
     });
+    console.groupEnd();
 }

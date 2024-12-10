@@ -32,6 +32,7 @@ var AnimationFrame = new Class({
 
     function AnimationFrame (textureKey, textureFrame, index, frame, isKeyFrame)
     {
+        console.group('AnimationFrame');
         if (isKeyFrame === undefined) { isKeyFrame = false; }
 
         /**
@@ -144,6 +145,7 @@ var AnimationFrame = new Class({
          * @since 3.50.0
          */
         this.isKeyFrame = isKeyFrame;
+        console.groupEnd();
     },
 
     /**
@@ -156,6 +158,8 @@ var AnimationFrame = new Class({
      */
     toJSON: function ()
     {
+        console.group('AnimationFrame toJSON');
+        console.groupEnd();
         return {
             key: this.textureKey,
             frame: this.textureFrame,
@@ -172,7 +176,9 @@ var AnimationFrame = new Class({
      */
     destroy: function ()
     {
+        console.group('AnimationFrame destroy');
         this.frame = undefined;
+        console.groupEnd();
     }
 
 });

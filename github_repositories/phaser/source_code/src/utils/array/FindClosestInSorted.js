@@ -21,12 +21,15 @@
  */
 var FindClosestInSorted = function (value, array, key)
 {
+    console.group('FindClosestInSorted');
     if (!array.length)
     {
+        console.groupEnd();
         return NaN;
     }
     else if (array.length === 1)
     {
+        console.groupEnd();
         return array[0];
     }
 
@@ -38,6 +41,7 @@ var FindClosestInSorted = function (value, array, key)
     {
         if (value < array[0][key])
         {
+            console.groupEnd();
             return array[0];
         }
 
@@ -64,6 +68,7 @@ var FindClosestInSorted = function (value, array, key)
         low = array[i - 1][key];
         high = array[i][key];
 
+        console.groupEnd();
         return ((high - value) <= (value - low)) ? array[i] : array[i - 1];
     }
     else
@@ -71,6 +76,7 @@ var FindClosestInSorted = function (value, array, key)
         low = array[i - 1];
         high = array[i];
 
+        console.groupEnd();
         return ((high - value) <= (value - low)) ? high : low;
     }
 };

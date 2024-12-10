@@ -19,10 +19,12 @@
  */
 var Image = function (texture, sourceIndex)
 {
+    console.group('Parsers Image');
     var source = texture.source[sourceIndex];
 
     texture.add('__BASE', sourceIndex, 0, 0, source.width, source.height);
 
+    console.groupEnd();
     return texture;
 };
 

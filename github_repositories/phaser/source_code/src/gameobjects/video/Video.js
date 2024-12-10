@@ -143,6 +143,7 @@ var Video = new Class({
 
     function Video (scene, x, y, key)
     {
+        console.group('Video');
         GameObject.call(this, scene, 'Video');
 
         /**
@@ -544,18 +545,23 @@ var Video = new Class({
         {
             this.load(key);
         }
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     addedToScene: function ()
     {
+        console.group('Video addedToScene');
         this.scene.sys.updateList.add(this);
+        console.groupEnd();
     },
 
     //  Overrides Game Object method
     removedFromScene: function ()
     {
+        console.group('Video removedFromScene');
         this.scene.sys.updateList.remove(this);
+        console.groupEnd();
     },
 
     /**
@@ -577,6 +583,7 @@ var Video = new Class({
      */
     load: function (key)
     {
+        console.group('Video load');
         var video = this.scene.sys.cache.video.get(key);
 
         if (video)
@@ -590,6 +597,7 @@ var Video = new Class({
             console.warn('No video in cache for key: ' + key);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -615,6 +623,7 @@ var Video = new Class({
      */
     changeSource: function (key, autoplay, loop, markerIn, markerOut)
     {
+        console.group('Video changeSource');
         if (autoplay === undefined) { autoplay = true; }
         if (loop === undefined) { loop = false; }
 
@@ -627,6 +636,7 @@ var Video = new Class({
                 this.play(loop, markerIn, markerOut);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -641,7 +651,10 @@ var Video = new Class({
      */
     getVideoKey: function ()
     {
-        return this.cacheKey;
+        console.group('Video getVideoKey');
+        const result = this.cacheKey;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -665,6 +678,7 @@ var Video = new Class({
      */
     loadURL: function (urls, noAudio, crossOrigin)
     {
+        console.group('Video loadURL');
         if (noAudio === undefined) { noAudio = false; }
 
         var urlConfig = this._device.getVideoURL(urls);
@@ -680,6 +694,7 @@ var Video = new Class({
             this.loadHandler(urlConfig.url, noAudio, crossOrigin);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -697,7 +712,10 @@ var Video = new Class({
      */
     loadMediaStream: function (stream, noAudio, crossOrigin)
     {
-        return this.loadHandler(null, noAudio, crossOrigin, stream);
+        console.group('Video loadMediaStream');
+        const result = this.loadHandler(null, noAudio, crossOrigin, stream);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -722,6 +740,7 @@ var Video = new Class({
      */
     loadHandler: function (url, noAudio, crossOrigin, stream)
     {
+        console.group('Video loadHandler');
         if (!noAudio) { noAudio = false; }
 
         var video = this.video;
@@ -810,6 +829,7 @@ var Video = new Class({
 
         this.setTexture(texture);
 
+        console.groupEnd();
         return this;
     },
 
@@ -837,10 +857,12 @@ var Video = new Class({
      */
     requestVideoFrame: function (now, metadata)
     {
+        console.group('Video requestVideoFrame');
         var video = this.video;
 
         if (!video)
         {
+            console.groupEnd();
             return;
         }
 
@@ -948,6 +970,7 @@ var Video = new Class({
         {
             this._rfvCallbackId = this.video.requestVideoFrameCallback(this.requestVideoFrame.bind(this));
         }
+        console.groupEnd();
     },
 
     /**
@@ -986,6 +1009,7 @@ var Video = new Class({
      */
     play: function (loop, markerIn, markerOut)
     {
+        console.group('Video play');
         if (markerIn === undefined) { markerIn = -1; }
         if (markerOut === undefined) { markerOut = MATH_CONST.MAX_SAFE_INTEGER; }
 
@@ -998,6 +1022,7 @@ var Video = new Class({
                 console.warn('Video not loaded');
             }
 
+            console.groupEnd();
             return this;
         }
 
@@ -1024,6 +1049,7 @@ var Video = new Class({
             this.createPlayPromise();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1041,6 +1067,7 @@ var Video = new Class({
      */
     getFirstFrame: function ()
     {
+        console.group('Video getFirstFrame');
         var video = this.video;
 
         if (!video || this.isPlaying())
@@ -1050,6 +1077,7 @@ var Video = new Class({
                 console.warn('Video not loaded');
             }
 
+            console.groupEnd();
             return this;
         }
 
@@ -1062,6 +1090,7 @@ var Video = new Class({
             this.createPlayPromise();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1073,6 +1102,7 @@ var Video = new Class({
      */
     addLoadEventHandlers: function ()
     {
+        console.group('Video addLoadEventHandlers');
         var video = this.video;
 
         if (video)
@@ -1081,6 +1111,7 @@ var Video = new Class({
             video.addEventListener('abort', this._loadCallbackHandler);
             video.addEventListener('loadedmetadata', this._metadataCallbackHandler);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1091,6 +1122,7 @@ var Video = new Class({
      */
     removeLoadEventHandlers: function ()
     {
+        console.group('Video removeLoadEventHandlers');
         var video = this.video;
 
         if (video)
@@ -1098,6 +1130,7 @@ var Video = new Class({
             video.removeEventListener('error', this._loadCallbackHandler);
             video.removeEventListener('abort', this._loadCallbackHandler);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1108,6 +1141,7 @@ var Video = new Class({
      */
     addEventHandlers: function ()
     {
+        console.group('Video addEventHandlers');
         var video = this.video;
 
         //  Set these _after_ calling `video.play` or they don't fire
@@ -1122,6 +1156,7 @@ var Video = new Class({
                 video.addEventListener(callback, callbacks[callback]);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1132,6 +1167,7 @@ var Video = new Class({
      */
     removeEventHandlers: function ()
     {
+        console.group('Video removeEventHandlers');
         var video = this.video;
 
         if (video)
@@ -1143,6 +1179,7 @@ var Video = new Class({
                 video.removeEventListener(callback, callbacks[callback]);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1160,6 +1197,7 @@ var Video = new Class({
      */
     createPlayPromise: function (catchError)
     {
+        console.group('Video createPlayPromise');
         if (catchError === undefined) { catchError = true; }
 
         var video = this.video;
@@ -1193,6 +1231,7 @@ var Video = new Class({
                 this.failedPlayAttempts++;
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1218,11 +1257,13 @@ var Video = new Class({
      */
     addMarker: function (key, markerIn, markerOut)
     {
+        console.group('Video addMarker');
         if (!isNaN(markerIn) && markerIn >= 0 && !isNaN(markerOut) && markerOut > markerIn)
         {
             this.markers[key] = [ markerIn, markerOut ];
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1247,6 +1288,7 @@ var Video = new Class({
      */
     playMarker: function (key, loop)
     {
+        console.group('Video playMarker');
         var marker = this.markers[key];
 
         if (marker)
@@ -1254,6 +1296,7 @@ var Video = new Class({
             this.play(loop, marker[0], marker[1]);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1271,8 +1314,10 @@ var Video = new Class({
      */
     removeMarker: function (key)
     {
+        console.group('Video removeMarker');
         delete this.markers[key];
 
+        console.groupEnd();
         return this;
     },
 
@@ -1293,10 +1338,13 @@ var Video = new Class({
      */
     snapshot: function (width, height)
     {
+        console.group('Video snapshot');
         if (width === undefined) { width = this.width; }
         if (height === undefined) { height = this.height; }
 
-        return this.snapshotArea(0, 0, this.width, this.height, width, height);
+        const result = this.snapshotArea(0, 0, this.width, this.height, width, height);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1320,6 +1368,7 @@ var Video = new Class({
      */
     snapshotArea: function (x, y, srcWidth, srcHeight, destWidth, destHeight)
     {
+        console.group('Video snapshotArea');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (srcWidth === undefined) { srcWidth = this.width; }
@@ -1351,7 +1400,9 @@ var Video = new Class({
             }
         }
 
-        return snap.update();
+        const result = snap.update();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1390,6 +1441,7 @@ var Video = new Class({
      */
     saveSnapshotTexture: function (key)
     {
+        console.group('Video saveSnapshotTexture');
         if (this.snapshotTexture)
         {
             this.scene.sys.textures.renameTexture(this.snapshotTexture.key, key);
@@ -1399,6 +1451,7 @@ var Video = new Class({
             this.snapshotTexture = this.scene.sys.textures.createCanvas(key, this.width, this.height);
         }
 
+        console.groupEnd();
         return this.snapshotTexture;
     },
 
@@ -1411,10 +1464,12 @@ var Video = new Class({
      */
     playSuccess: function ()
     {
+        console.group('Video playSuccess');
         if (!this._playCalled)
         {
             //  The stop method has been called but the Promise has resolved
             //  after this, so we need to just abort.
+            console.groupEnd();
             return;
         }
 
@@ -1441,6 +1496,7 @@ var Video = new Class({
         {
             this.video.currentTime = this._markerIn;
         }
+        console.groupEnd();
     },
 
     /**
@@ -1456,6 +1512,7 @@ var Video = new Class({
      */
     playError: function (error)
     {
+        console.group('Video playError');
         var name = error.name;
 
         if (name === 'NotAllowedError')
@@ -1478,6 +1535,7 @@ var Video = new Class({
 
             this.emit(Events.VIDEO_ERROR, this, error);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1490,6 +1548,7 @@ var Video = new Class({
      */
     legacyPlayHandler: function ()
     {
+        console.group('Video legacyPlayHandler');
         var video = this.video;
 
         if (video)
@@ -1498,6 +1557,7 @@ var Video = new Class({
 
             video.removeEventListener('playing', this._callbacks.legacy);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1509,9 +1569,11 @@ var Video = new Class({
      */
     playingHandler: function ()
     {
+        console.group('Video playingHandler');
         this.isStalled = false;
 
         this.emit(Events.VIDEO_PLAYING, this);
+        console.groupEnd();
     },
 
     /**
@@ -1525,9 +1587,11 @@ var Video = new Class({
      */
     loadErrorHandler: function (event)
     {
+        console.group('Video loadErrorHandler');
         this.stop(false);
 
         this.emit(Events.VIDEO_ERROR, this, event);
+        console.groupEnd();
     },
 
     /**
@@ -1541,7 +1605,9 @@ var Video = new Class({
      */
     metadataHandler: function (event)
     {
+        console.group('Video metadataHandler');
         this.emit(Events.VIDEO_METADATA, this, event);
+        console.groupEnd();
     },
 
     /**
@@ -1564,6 +1630,7 @@ var Video = new Class({
      */
     setSizeToFrame: function (frame)
     {
+        console.group('Video setSizeToFrame');
         if (!frame) { frame = this.frame; }
 
         this.width = frame.realWidth;
@@ -1587,6 +1654,7 @@ var Video = new Class({
             input.hitArea.height = this.height;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1601,9 +1669,11 @@ var Video = new Class({
      */
     stalledHandler: function (event)
     {
+        console.group('Video stalledHandler');
         this.isStalled = true;
 
         this.emit(Events.VIDEO_STALLED, this, event);
+        console.groupEnd();
     },
 
     /**
@@ -1617,9 +1687,11 @@ var Video = new Class({
      */
     completeHandler: function ()
     {
+        console.group('Video completeHandler');
         this._playCalled = false;
 
         this.emit(Events.VIDEO_COMPLETE, this);
+        console.groupEnd();
     },
 
     /**
@@ -1634,10 +1706,12 @@ var Video = new Class({
      */
     preUpdate: function (time, delta)
     {
+        console.group('Video preUpdate');
         var video = this.video;
 
         if (!video || !this._playCalled)
         {
+            console.groupEnd();
             return;
         }
 
@@ -1652,6 +1726,7 @@ var Video = new Class({
                 this.retry = 0;
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1677,6 +1752,7 @@ var Video = new Class({
      */
     seekTo: function (value)
     {
+        console.group('Video seekTo');
         var video = this.video;
 
         if (video)
@@ -1691,6 +1767,7 @@ var Video = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1708,7 +1785,10 @@ var Video = new Class({
      */
     getCurrentTime: function ()
     {
-        return (this.video) ? this.video.currentTime : 0;
+        console.group('Video getCurrentTime');
+        const result = (this.video) ? this.video.currentTime : 0;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1733,6 +1813,7 @@ var Video = new Class({
      */
     setCurrentTime: function (value)
     {
+        console.group('Video setCurrentTime');
         var video = this.video;
 
         if (video)
@@ -1755,6 +1836,7 @@ var Video = new Class({
             video.currentTime = value;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1768,9 +1850,11 @@ var Video = new Class({
      */
     seekingHandler: function ()
     {
+        console.group('Video seekingHandler');
         this.isSeeking = true;
 
         this.emit(Events.VIDEO_SEEKING, this);
+        console.groupEnd();
     },
 
     /**
@@ -1783,9 +1867,11 @@ var Video = new Class({
      */
     seekedHandler: function ()
     {
+        console.group('Video seekedHandler');
         this.isSeeking = false;
 
         this.emit(Events.VIDEO_SEEKED, this);
+        console.groupEnd();
     },
 
     /**
@@ -1804,6 +1890,7 @@ var Video = new Class({
      */
     getProgress: function ()
     {
+        console.group('Video getProgress');
         var video = this.video;
 
         if (video)
@@ -1812,10 +1899,12 @@ var Video = new Class({
 
             if (duration !== Infinity && !isNaN(duration))
             {
+                console.groupEnd();
                 return video.currentTime / duration;
             }
         }
 
+        console.groupEnd();
         return -1;
     },
 
@@ -1835,7 +1924,10 @@ var Video = new Class({
      */
     getDuration: function ()
     {
-        return (this.video) ? this.video.duration : 0;
+        console.group('Video getDuration');
+        const result = (this.video) ? this.video.duration : 0;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1850,6 +1942,7 @@ var Video = new Class({
      */
     setMute: function (value)
     {
+        console.group('Video setMute');
         if (value === undefined) { value = true; }
 
         this._codeMuted = value;
@@ -1861,6 +1954,7 @@ var Video = new Class({
             video.muted = (this._systemMuted) ? true : value;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1874,7 +1968,10 @@ var Video = new Class({
      */
     isMuted: function ()
     {
-        return this._codeMuted;
+        console.group('Video isMuted');
+        const result = this._codeMuted;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1889,6 +1986,7 @@ var Video = new Class({
      */
     globalMute: function (soundManager, value)
     {
+        console.group('Video globalMute');
         this._systemMuted = value;
 
         var video = this.video;
@@ -1897,6 +1995,7 @@ var Video = new Class({
         {
             video.muted = (this._codeMuted) ? true : value;
         }
+        console.groupEnd();
     },
 
     /**
@@ -1908,6 +2007,7 @@ var Video = new Class({
      */
     globalPause: function ()
     {
+        console.group('Video globalPause');
         this._systemPaused = true;
 
         if (this.video && !this.video.ended)
@@ -1916,6 +2016,7 @@ var Video = new Class({
 
             this.video.pause();
         }
+        console.groupEnd();
     },
 
     /**
@@ -1927,12 +2028,14 @@ var Video = new Class({
      */
     globalResume: function ()
     {
+        console.group('Video globalResume');
         this._systemPaused = false;
 
         if (this.video && !this._codePaused && !this.video.ended)
         {
             this.createPlayPromise();
         }
+        console.groupEnd();
     },
 
     /**
@@ -1956,6 +2059,7 @@ var Video = new Class({
      */
     setPaused: function (value)
     {
+        console.group('Video setPaused');
         if (value === undefined) { value = true; }
 
         var video = this.video;
@@ -1986,6 +2090,7 @@ var Video = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -2003,7 +2108,10 @@ var Video = new Class({
      */
     pause: function ()
     {
-        return this.setPaused(true);
+        console.group('Video pause');
+        const result = this.setPaused(true);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2020,7 +2128,10 @@ var Video = new Class({
      */
     resume: function ()
     {
-        return this.setPaused(false);
+        console.group('Video resume');
+        const result = this.setPaused(false);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2033,7 +2144,10 @@ var Video = new Class({
      */
     getVolume: function ()
     {
-        return (this.video) ? this.video.volume : 1;
+        console.group('Video getVolume');
+        const result = (this.video) ? this.video.volume : 1;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2050,6 +2164,7 @@ var Video = new Class({
      */
     setVolume: function (value)
     {
+        console.group('Video setVolume');
         if (value === undefined) { value = 1; }
 
         if (this.video)
@@ -2057,6 +2172,7 @@ var Video = new Class({
             this.video.volume = Clamp(value, 0, 1);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -2070,7 +2186,10 @@ var Video = new Class({
      */
     getPlaybackRate: function ()
     {
-        return (this.video) ? this.video.playbackRate : 1;
+        console.group('Video getPlaybackRate');
+        const result = (this.video) ? this.video.playbackRate : 1;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2087,11 +2206,13 @@ var Video = new Class({
      */
     setPlaybackRate: function (rate)
     {
+        console.group('Video getPlaybackRate');
         if (this.video)
         {
             this.video.playbackRate = rate;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -2105,7 +2226,10 @@ var Video = new Class({
      */
     getLoop: function ()
     {
-        return (this.video) ? this.video.loop : false;
+        console.group('Video getLoop');
+        const result = (this.video) ? this.video.loop : false;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2126,6 +2250,7 @@ var Video = new Class({
      */
     setLoop: function (value)
     {
+        console.group('Video setLoop');
         if (value === undefined) { value = true; }
 
         if (this.video)
@@ -2133,6 +2258,7 @@ var Video = new Class({
             this.video.loop = value;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -2146,7 +2272,10 @@ var Video = new Class({
      */
     isPlaying: function ()
     {
-        return (this.video) ? !(this.video.paused || this.video.ended) : false;
+        console.group('Video isPlaying');
+        const result = (this.video) ? !(this.video.paused || this.video.ended) : false;
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2159,7 +2288,10 @@ var Video = new Class({
      */
     isPaused: function ()
     {
-        return ((this.video && this._playCalled && this.video.paused) || this._codePaused || this._systemPaused);
+        console.group('Video isPaused');
+        const result = ((this.video && this._playCalled && this.video.paused) || this._codePaused || this._systemPaused);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -2215,6 +2347,7 @@ var Video = new Class({
      */
     saveTexture: function (key, flipY)
     {
+        console.group('Video saveTexture');
         if (flipY === undefined) { flipY = false; }
 
         if (this.videoTexture)
@@ -2226,6 +2359,7 @@ var Video = new Class({
         this._key = key;
         this.flipY = flipY;
 
+        console.groupEnd();
         return (this.videoTexture) ? true : false;
     },
 
@@ -2247,6 +2381,7 @@ var Video = new Class({
      */
     stop: function (emitStopEvent)
     {
+        console.group('Video stop');
         if (emitStopEvent === undefined) { emitStopEvent = true; }
 
         var video = this.video;
@@ -2268,6 +2403,7 @@ var Video = new Class({
             this.emit(Events.VIDEO_STOP, this);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -2287,10 +2423,12 @@ var Video = new Class({
      */
     removeVideoElement: function ()
     {
+        console.group('Video removeVideoElement');
         var video = this.video;
 
         if (!video)
         {
+            console.groupEnd();
             return;
         }
 
@@ -2308,6 +2446,7 @@ var Video = new Class({
         video.removeAttribute('src');
 
         this.video = null;
+        console.groupEnd();
     },
 
     /**
@@ -2323,6 +2462,7 @@ var Video = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Video preDestroy');
         this.stop(false);
 
         this.removeLoadEventHandlers();
@@ -2340,6 +2480,7 @@ var Video = new Class({
         {
             sound.off(SoundEvents.GLOBAL_MUTE, this.globalMute, this);
         }
+        console.groupEnd();
     }
 
 });

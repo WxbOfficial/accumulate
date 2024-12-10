@@ -29,8 +29,10 @@ var GameObjectFactory = require('../GameObjectFactory');
  */
 if (typeof WEBGL_RENDERER)
 {
+    console.group('GameObjectFactory.register rope');
     GameObjectFactory.register('rope', function (x, y, texture, frame, points, horizontal, colors, alphas)
     {
         return this.displayList.add(new Rope(this.scene, x, y, texture, frame, points, horizontal, colors, alphas));
     });
+    console.groupEnd();
 }

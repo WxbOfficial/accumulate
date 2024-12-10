@@ -28,6 +28,7 @@ var BaseCache = new Class({
 
     function BaseCache ()
     {
+        console.groupCollapsed('BaseCache');
         /**
          * The Map in which the cache objects are stored.
          *
@@ -47,6 +48,7 @@ var BaseCache = new Class({
          * @since 3.0.0
          */
         this.events = new EventEmitter();
+        console.groupEnd();
     },
 
     /**

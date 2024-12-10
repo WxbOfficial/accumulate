@@ -24,6 +24,7 @@ var SetTransform = require('../../../renderer/canvas/utils/SetTransform');
  */
 var CurveCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('CurveCanvasRenderer');
     camera.addToRenderList(src);
 
     var ctx = renderer.currentContext;
@@ -78,6 +79,7 @@ var CurveCanvasRenderer = function (renderer, src, camera, parentMatrix)
         //  Restore the context saved in SetTransform
         ctx.restore();
     }
+    console.groupEnd();
 };
 
 module.exports = CurveCanvasRenderer;

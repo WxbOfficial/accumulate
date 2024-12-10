@@ -63,6 +63,7 @@ var PipelineManager = new Class({
 
     function PipelineManager (renderer)
     {
+        console.group('PipelineManager');
         /**
          * A reference to the Game instance.
          *
@@ -349,6 +350,7 @@ var PipelineManager = new Class({
          * @since 3.60.0
          */
         this.targetIndex = 0;
+        console.groupEnd();
     },
 
     /**
@@ -368,6 +370,7 @@ var PipelineManager = new Class({
      */
     boot: function (pipelineConfig, defaultPipeline, autoMobilePipeline)
     {
+        console.group('PipelineManager boot');
         //  Create the default RenderTextures
         var renderer = this.renderer;
         var targets = this.renderTargets;
@@ -496,6 +499,7 @@ var PipelineManager = new Class({
         {
             this.default = this.MOBILE_PIPELINE;
         }
+        console.groupEnd();
     },
 
     /**
@@ -519,6 +523,7 @@ var PipelineManager = new Class({
      */
     setDefaultPipeline: function (pipeline)
     {
+        console.group('PipelineManager setDefaultPipeline');
         var instance = this.get(pipeline);
 
         if (instance)
@@ -526,6 +531,7 @@ var PipelineManager = new Class({
             this.default = instance;
         }
 
+        console.groupEnd();
         return instance;
     },
 
@@ -560,10 +566,12 @@ var PipelineManager = new Class({
      */
     add: function (name, pipeline)
     {
+        console.group('PipelineManager add');
         if (pipeline.isPostFX)
         {
             console.warn(name + ' is a Post Pipeline. Use `addPostPipeline` instead');
 
+            console.groupEnd();
             return;
         }
 
@@ -592,6 +600,7 @@ var PipelineManager = new Class({
             pipeline.resize(renderer.width, renderer.height);
         }
 
+        console.groupEnd();
         return pipeline;
     },
 
@@ -624,10 +633,12 @@ var PipelineManager = new Class({
      */
     addPostPipeline: function (name, pipeline)
     {
+        console.group('PipelineManager addPostPipeline');
         if (!this.postPipelineClasses.has(name))
         {
             this.postPipelineClasses.set(name, pipeline);
         }
+        console.groupEnd();
     },
 
     /**
@@ -638,10 +649,12 @@ var PipelineManager = new Class({
      */
     flush: function ()
     {
+        console.group('PipelineManager flush');
         if (this.current)
         {
             this.current.flush();
         }
+        console.groupEnd();
     },
 
     /**
@@ -656,17 +669,22 @@ var PipelineManager = new Class({
      */
     has: function (pipeline)
     {
+        console.group('PipelineManager has');
         var pipelines = this.pipelines;
 
         if (typeof pipeline === 'string')
         {
-            return pipelines.has(pipeline);
+            const result = pipelines.has(pipeline);
+            console.groupEnd();
+            return result;
         }
         else if (pipelines.contains(pipeline))
         {
+            console.groupEnd();
             return true;
         }
 
+        console.groupEnd();
         return false;
     },
 
@@ -684,16 +702,21 @@ var PipelineManager = new Class({
      */
     get: function (pipeline)
     {
+        console.group('PipelineManager get');
         var pipelines = this.pipelines;
 
         if (typeof pipeline === 'string')
         {
-            return pipelines.get(pipeline);
+            const result = pipelines.get(pipeline);
+            console.groupEnd();
+            return result;
         }
         else if (pipelines.contains(pipeline))
         {
+            console.groupEnd();
             return pipeline;
         }
+        console.groupEnd();
     },
 
     /**
@@ -712,6 +735,7 @@ var PipelineManager = new Class({
      */
     getPostPipeline: function (pipeline, gameObject, config)
     {
+        console.group('PipelineManager getPostPipeline');
         var pipelineClasses = this.postPipelineClasses;
 
         var instance;
@@ -754,8 +778,10 @@ var PipelineManager = new Class({
 
             this.postPipelineInstances.push(newPipeline);
 
+            console.groupEnd();
             return newPipeline;
         }
+        console.groupEnd();
     },
 
     /**
@@ -771,7 +797,9 @@ var PipelineManager = new Class({
      */
     removePostPipeline: function (pipeline)
     {
+        console.group('PipelineManager removePostPipeline');
         ArrayRemove(this.postPipelineInstances, pipeline);
+        console.groupEnd();
     },
 
     /**
@@ -791,6 +819,7 @@ var PipelineManager = new Class({
      */
     remove: function (name, removeClass, removePostPipelineClass)
     {
+        console.group('PipelineManager remove');
         if (removeClass === undefined) { removeClass = true; }
         if (removePostPipelineClass === undefined) { removePostPipelineClass = true; }
 
@@ -805,6 +834,7 @@ var PipelineManager = new Class({
         {
             this.postPipelineClasses.delete(name);
         }
+        console.groupEnd();
     },
 
     /**
@@ -828,8 +858,10 @@ var PipelineManager = new Class({
      */
     set: function (pipeline, gameObject, currentShader)
     {
+        console.group('PipelineManager set');
         if (pipeline.isPostFX)
         {
+            console.groupEnd();
             return;
         }
 
@@ -851,6 +883,7 @@ var PipelineManager = new Class({
 
         pipeline.onBind(gameObject);
 
+        console.groupEnd();
         return pipeline;
     },
 
@@ -873,6 +906,7 @@ var PipelineManager = new Class({
      */
     preBatch: function (gameObject)
     {
+        console.group('PipelineManager preBatch');
         if (gameObject.hasPostPipeline)
         {
             this.flush();
@@ -890,6 +924,7 @@ var PipelineManager = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -911,6 +946,7 @@ var PipelineManager = new Class({
      */
     postBatch: function (gameObject)
     {
+        console.group('PipelineManager postBatch');
         if (gameObject.hasPostPipeline)
         {
             this.flush();
@@ -927,6 +963,7 @@ var PipelineManager = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -942,6 +979,7 @@ var PipelineManager = new Class({
      */
     preBatchCamera: function (camera)
     {
+        console.group('PipelineManager preBatchCamera');
         if (camera.hasPostPipeline)
         {
             this.flush();
@@ -959,6 +997,7 @@ var PipelineManager = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -974,6 +1013,7 @@ var PipelineManager = new Class({
      */
     postBatchCamera: function (camera)
     {
+        console.group('PipelineManager postBatchCamera');
         if (camera.hasPostPipeline)
         {
             this.flush();
@@ -990,6 +1030,7 @@ var PipelineManager = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1006,6 +1047,7 @@ var PipelineManager = new Class({
      */
     isCurrent: function (pipeline, currentShader)
     {
+        console.group('PipelineManager isCurrent');
         var renderer = this.renderer;
         var current = this.current;
 
@@ -1014,7 +1056,9 @@ var PipelineManager = new Class({
             currentShader = current.currentShader;
         }
 
-        return !(current !== pipeline || currentShader.program !== renderer.currentProgram);
+        const result = !(current !== pipeline || currentShader.program !== renderer.currentProgram);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1041,8 +1085,10 @@ var PipelineManager = new Class({
      */
     copyFrame: function (source, target, brightness, clear, clearAlpha)
     {
+        console.group('PipelineManager copyFrame');
         this.setUtility(this.UTILITY_PIPELINE.copyShader).copyFrame(source, target, brightness, clear, clearAlpha);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1063,8 +1109,10 @@ var PipelineManager = new Class({
      */
     copyToGame: function (source)
     {
+        console.group('PipelineManager copyToGame');
         this.setUtility(this.UTILITY_PIPELINE.copyShader).copyToGame(source);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1091,8 +1139,10 @@ var PipelineManager = new Class({
      */
     drawFrame: function (source, target, clearAlpha, colorMatrix)
     {
+        console.group('PipelineManager drawFrame');
         this.setUtility(this.UTILITY_PIPELINE.colorMatrixShader).drawFrame(source, target, clearAlpha, colorMatrix);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1115,8 +1165,10 @@ var PipelineManager = new Class({
      */
     blendFrames: function (source1, source2, target, strength, clearAlpha)
     {
+        console.group('PipelineManager blendFrames');
         this.setUtility(this.UTILITY_PIPELINE.linearShader).blendFrames(source1, source2, target, strength, clearAlpha);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1139,8 +1191,10 @@ var PipelineManager = new Class({
      */
     blendFramesAdditive: function (source1, source2, target, strength, clearAlpha)
     {
+        console.group('PipelineManager blendFramesAdditive');
         this.setUtility(this.UTILITY_PIPELINE.addShader).blendFramesAdditive(source1, source2, target, strength, clearAlpha);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1157,8 +1211,10 @@ var PipelineManager = new Class({
      */
     clearFrame: function (target, clearAlpha)
     {
+        console.group('PipelineManager clearFrame');
         this.UTILITY_PIPELINE.clearFrame(target, clearAlpha);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1185,8 +1241,10 @@ var PipelineManager = new Class({
      */
     blitFrame: function (source, target, brightness, clear, clearAlpha, eraseMode)
     {
+        console.group('PipelineManager blitFrame');
         this.setUtility(this.UTILITY_PIPELINE.copyShader).blitFrame(source, target, brightness, clear, clearAlpha, eraseMode);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1215,8 +1273,10 @@ var PipelineManager = new Class({
      */
     copyFrameRect: function (source, target, x, y, width, height, clear, clearAlpha)
     {
+        console.group('PipelineManager copyFrameRect');
         this.UTILITY_PIPELINE.copyFrameRect(source, target, x, y, width, height, clear, clearAlpha);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1230,7 +1290,10 @@ var PipelineManager = new Class({
      */
     forceZero: function ()
     {
-        return (this.current && this.current.forceZero);
+        console.group('PipelineManager forceZero');
+        const result = (this.current && this.current.forceZero);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1245,7 +1308,10 @@ var PipelineManager = new Class({
      */
     setMulti: function ()
     {
-        return this.set(this.MULTI_PIPELINE);
+        console.group('PipelineManager setMulti');
+        const result = this.set(this.MULTI_PIPELINE);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1260,7 +1326,10 @@ var PipelineManager = new Class({
      */
     setUtility: function (currentShader)
     {
-        return this.UTILITY_PIPELINE.bind(currentShader);
+        console.group('PipelineManager setUtility');
+        const result = this.UTILITY_PIPELINE.bind(currentShader);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1273,7 +1342,10 @@ var PipelineManager = new Class({
      */
     setFX: function ()
     {
-        return this.set(this.FX_PIPELINE);
+        console.group('PipelineManager setFX');
+        const result = this.set(this.FX_PIPELINE);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1287,6 +1359,7 @@ var PipelineManager = new Class({
      */
     restoreContext: function ()
     {
+        console.group('PipelineManager restoreContext');
         this.rebind();
         this.pipelines.each(function (_, pipeline)
         {
@@ -1296,6 +1369,7 @@ var PipelineManager = new Class({
         {
             pipeline.restoreContext();
         });
+        console.groupEnd();
     },
 
     /**
@@ -1320,6 +1394,7 @@ var PipelineManager = new Class({
      */
     rebind: function (pipeline)
     {
+        console.group('PipelineManager rebind');
         if (pipeline === undefined && this.previous)
         {
             pipeline = this.previous;
@@ -1368,6 +1443,7 @@ var PipelineManager = new Class({
 
             pipeline.rebind();
         }
+        console.groupEnd();
     },
 
     /**
@@ -1384,6 +1460,7 @@ var PipelineManager = new Class({
      */
     clear: function ()
     {
+        console.group('PipelineManager clear');
         var renderer = this.renderer;
 
         this.flush();
@@ -1409,6 +1486,7 @@ var PipelineManager = new Class({
         {
             vao.bindVertexArrayOES(null);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1426,6 +1504,7 @@ var PipelineManager = new Class({
      */
     getRenderTarget: function (size)
     {
+        console.group('PipelineManager getRenderTarget');
         var targets = this.renderTargets;
 
         //  2 for just swap
@@ -1436,6 +1515,7 @@ var PipelineManager = new Class({
         {
             this.targetIndex = targets.length - offset;
 
+            console.groupEnd();
             return targets[this.targetIndex];
         }
         else
@@ -1444,6 +1524,7 @@ var PipelineManager = new Class({
 
             this.targetIndex = index;
 
+            console.groupEnd();
             return targets[index];
         }
     },
@@ -1459,7 +1540,10 @@ var PipelineManager = new Class({
      */
     getSwapRenderTarget: function ()
     {
-        return this.renderTargets[this.targetIndex + 1];
+        console.group('PipelineManager getSwapRenderTarget');
+        const result = this.renderTargets[this.targetIndex + 1];
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1473,7 +1557,10 @@ var PipelineManager = new Class({
      */
     getAltSwapRenderTarget: function ()
     {
-        return this.renderTargets[this.targetIndex + 2];
+        console.group('PipelineManager getAltSwapRenderTarget');
+        const result = this.renderTargets[this.targetIndex + 2];
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1484,6 +1571,7 @@ var PipelineManager = new Class({
      */
     destroy: function ()
     {
+        console.group('PipelineManager destroy');
         this.flush();
 
         this.classes.clear();
@@ -1498,6 +1586,7 @@ var PipelineManager = new Class({
         this.default = null;
         this.current = null;
         this.previous = null;
+        console.groupEnd();
     }
 
 });

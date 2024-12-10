@@ -40,9 +40,11 @@ var PackFile = new Class({
 
     function PackFile (loader, key, url, xhrSettings, dataKey)
     {
+        console.group('PackFile');
         JSONFile.call(this, loader, key, url, xhrSettings, dataKey);
 
         this.type = 'packfile';
+        console.groupEnd();
     },
 
     /**
@@ -54,6 +56,7 @@ var PackFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('PackFile onProcess');
         if (this.state !== CONST.FILE_POPULATED)
         {
             this.state = CONST.FILE_PROCESSING;
@@ -74,6 +77,7 @@ var PackFile = new Class({
         this.loader.addPack(this.data, this.config);
 
         this.onProcessComplete();
+        console.groupEnd();
     }
 
 });
@@ -197,8 +201,10 @@ var PackFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register pack');
 FileTypesManager.register('pack', function (key, url, dataKey, xhrSettings)
 {
+    console.group('FileTypesManager.register pack factoryFunction');
     //  Supports an Object file definition in the key argument
     //  Or an array of objects in the key argument
     //  Or a single entry where all arguments have been defined
@@ -215,7 +221,9 @@ FileTypesManager.register('pack', function (key, url, dataKey, xhrSettings)
         this.addFile(new PackFile(this, key, url, xhrSettings, dataKey));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = PackFile;

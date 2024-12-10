@@ -116,6 +116,8 @@ var DataManagerPlugin = new Class({
 
 });
 
+console.group("PluginCache.register DataManagerPlugin");
 PluginCache.register('DataManagerPlugin', DataManagerPlugin, 'data');
 
+console.groupEnd();
 module.exports = DataManagerPlugin;

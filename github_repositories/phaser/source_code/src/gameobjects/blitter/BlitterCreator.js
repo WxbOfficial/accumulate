@@ -22,6 +22,7 @@ var GetAdvancedValue = require('../../utils/object/GetAdvancedValue');
  *
  * @return {Phaser.GameObjects.Blitter} The Game Object that was created.
  */
+console.group('GameObjectCreator.register blitter');
 GameObjectCreator.register('blitter', function (config, addToScene)
 {
     if (config === undefined) { config = {}; }
@@ -41,4 +42,5 @@ GameObjectCreator.register('blitter', function (config, addToScene)
     return blitter;
 });
 
+console.groupEnd();
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

@@ -59,6 +59,7 @@ var LoaderPlugin = new Class({
 
     function LoaderPlugin (scene)
     {
+        console.group('LoaderPlugin');
         EventEmitter.call(this);
 
         var gameConfig = scene.sys.game.config;
@@ -367,6 +368,7 @@ var LoaderPlugin = new Class({
 
         scene.sys.events.once(SceneEvents.BOOT, this.boot, this);
         scene.sys.events.on(SceneEvents.START, this.pluginStart, this);
+        console.groupEnd();
     },
 
     /**
@@ -379,7 +381,9 @@ var LoaderPlugin = new Class({
      */
     boot: function ()
     {
+        console.group('LoaderPlugin boot');
         this.systems.events.once(SceneEvents.DESTROY, this.destroy, this);
+        console.groupEnd();
     },
 
     /**
@@ -393,7 +397,9 @@ var LoaderPlugin = new Class({
      */
     pluginStart: function ()
     {
+        console.group('LoaderPlugin pluginStart');
         this.systems.events.once(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -413,6 +419,7 @@ var LoaderPlugin = new Class({
      */
     setBaseURL: function (url)
     {
+        console.group('LoaderPlugin setBaseURL');
         if (url === undefined) { url = ''; }
 
         if (url !== '' && url.substr(-1) !== '/')
@@ -422,6 +429,7 @@ var LoaderPlugin = new Class({
 
         this.baseURL = url;
 
+        console.groupEnd();
         return this;
     },
 
@@ -453,6 +461,7 @@ var LoaderPlugin = new Class({
      */
     setPath: function (path)
     {
+        console.group('LoaderPlugin setPath');
         if (path === undefined) { path = ''; }
 
         if (path !== '' && path.substr(-1) !== '/')
@@ -462,6 +471,7 @@ var LoaderPlugin = new Class({
 
         this.path = path;
 
+        console.groupEnd();
         return this;
     },
 
@@ -482,10 +492,12 @@ var LoaderPlugin = new Class({
      */
     setPrefix: function (prefix)
     {
+        console.group('LoaderPlugin setPrefix');
         if (prefix === undefined) { prefix = ''; }
 
         this.prefix = prefix;
 
+        console.groupEnd();
         return this;
     },
 
@@ -508,8 +520,10 @@ var LoaderPlugin = new Class({
      */
     setCORS: function (crossOrigin)
     {
+        console.group('LoaderPlugin setCORS');
         this.crossOrigin = crossOrigin;
 
+        console.groupEnd();
         return this;
     },
 
@@ -532,6 +546,7 @@ var LoaderPlugin = new Class({
      */
     addFile: function (file)
     {
+        console.group('LoaderPlugin addFile');
         if (!Array.isArray(file))
         {
             file = [ file ];
@@ -556,6 +571,7 @@ var LoaderPlugin = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -571,6 +587,7 @@ var LoaderPlugin = new Class({
      */
     keyExists: function (file)
     {
+        console.group('LoaderPlugin keyExists');
         var keyConflict = file.hasCacheConflict();
 
         if (!keyConflict)
@@ -612,6 +629,7 @@ var LoaderPlugin = new Class({
             });
         }
 
+        console.groupEnd();
         return keyConflict;
     },
 
@@ -634,6 +652,7 @@ var LoaderPlugin = new Class({
      */
     addPack: function (pack, packKey)
     {
+        console.group('LoaderPlugin addPack');
         //  if no packKey provided we'll add everything to the queue
         if (typeof(packKey) === 'string')
         {
@@ -694,6 +713,7 @@ var LoaderPlugin = new Class({
         this.setPath(currentPath);
         this.setPrefix(currentPrefix);
 
+        console.groupEnd();
         return (total > 0);
     },
 
@@ -712,6 +732,7 @@ var LoaderPlugin = new Class({
      */
     removePack: function (packKey, dataKey)
     {
+        console.group('LoaderPlugin removePack');
         var animationManager = this.systems.anims;
         var cacheManager = this.cacheManager;
         var textureManager = this.textureManager;
@@ -754,6 +775,7 @@ var LoaderPlugin = new Class({
             {
                 console.warn('Asset Pack not found in JSON cache:', packKey);
 
+                console.groupEnd();
                 return;
             }
         }
@@ -869,6 +891,7 @@ var LoaderPlugin = new Class({
                 }
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -881,7 +904,10 @@ var LoaderPlugin = new Class({
      */
     isLoading: function ()
     {
-        return (this.state === CONST.LOADER_LOADING || this.state === CONST.LOADER_PROCESSING);
+        console.group('LoaderPlugin isLoading');
+        const result = (this.state === CONST.LOADER_LOADING || this.state === CONST.LOADER_PROCESSING);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -894,7 +920,10 @@ var LoaderPlugin = new Class({
      */
     isReady: function ()
     {
-        return (this.state === CONST.LOADER_IDLE || this.state === CONST.LOADER_COMPLETE);
+        console.group('LoaderPlugin isReady');
+        const result = (this.state === CONST.LOADER_IDLE || this.state === CONST.LOADER_COMPLETE);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -914,8 +943,10 @@ var LoaderPlugin = new Class({
      */
     start: function ()
     {
+        console.group('LoaderPlugin start');
         if (!this.isReady())
         {
+            console.groupEnd();
             return;
         }
 
@@ -944,6 +975,7 @@ var LoaderPlugin = new Class({
 
             this.systems.events.on(SceneEvents.UPDATE, this.update, this);
         }
+        console.groupEnd();
     },
 
     /**
@@ -957,9 +989,11 @@ var LoaderPlugin = new Class({
      */
     updateProgress: function ()
     {
+        console.group('LoaderPlugin updateProgress');
         this.progress = 1 - ((this.list.size + this.inflight.size) / this.totalToLoad);
 
         this.emit(Events.PROGRESS, this.progress);
+        console.groupEnd();
     },
 
     /**
@@ -970,10 +1004,12 @@ var LoaderPlugin = new Class({
      */
     update: function ()
     {
+        console.group('LoaderPlugin update');
         if (this.state === CONST.LOADER_LOADING && this.list.size > 0 && this.inflight.size < this.maxParallelDownloads)
         {
             this.checkLoadQueue();
         }
+        console.groupEnd();
     },
 
     /**
@@ -990,6 +1026,7 @@ var LoaderPlugin = new Class({
      */
     checkLoadQueue: function ()
     {
+        console.group('LoaderPlugin checkLoadQueue');
         this.list.each(function (file)
         {
             if (file.state === CONST.FILE_POPULATED || (file.state === CONST.FILE_PENDING && this.inflight.size < this.maxParallelDownloads))
@@ -1014,6 +1051,7 @@ var LoaderPlugin = new Class({
             }
 
         }, this);
+        console.groupEnd();
     },
 
     /**
@@ -1032,9 +1070,11 @@ var LoaderPlugin = new Class({
      */
     nextFile: function (file, success)
     {
+        console.group('LoaderPlugin nextFile');
         //  Has the game been destroyed during load? If so, bail out now.
         if (!this.inflight)
         {
+            console.groupEnd();
             return;
         }
 
@@ -1062,6 +1102,7 @@ var LoaderPlugin = new Class({
 
             this.fileProcessComplete(file);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1078,9 +1119,11 @@ var LoaderPlugin = new Class({
      */
     fileProcessComplete: function (file)
     {
+        console.group('LoaderPlugin fileProcessComplete');
         //  Has the game been destroyed during load? If so, bail out now.
         if (!this.scene || !this.systems || !this.systems.game || this.systems.game.pendingDestroy)
         {
+            console.groupEnd();
             return;
         }
 
@@ -1120,6 +1163,7 @@ var LoaderPlugin = new Class({
         {
             this.loadComplete();
         }
+        console.groupEnd();
     },
 
     /**
@@ -1135,6 +1179,7 @@ var LoaderPlugin = new Class({
      */
     loadComplete: function ()
     {
+        console.group('LoaderPlugin loadComplete');
         this.emit(Events.POST_PROCESS, this);
 
         this.list.clear();
@@ -1153,6 +1198,7 @@ var LoaderPlugin = new Class({
         this._deleteQueue.clear();
 
         this.emit(Events.COMPLETE, this, this.totalComplete, this.totalFailed);
+        console.groupEnd();
     },
 
     /**
@@ -1165,7 +1211,9 @@ var LoaderPlugin = new Class({
      */
     flagForRemoval: function (file)
     {
+        console.group('LoaderPlugin flagForRemoval');
         this._deleteQueue.set(file);
+        console.groupEnd();
     },
 
     /**
@@ -1183,7 +1231,10 @@ var LoaderPlugin = new Class({
      */
     saveJSON: function (data, filename)
     {
-        return this.save(JSON.stringify(data), filename);
+        console.group('LoaderPlugin saveJSON');
+        const result = this.save(JSON.stringify(data), filename);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1203,6 +1254,7 @@ var LoaderPlugin = new Class({
      */
     save: function (data, filename, filetype)
     {
+        console.group('LoaderPlugin save');
         if (filename === undefined) { filename = 'file.json'; }
         if (filetype === undefined) { filetype = 'application/json'; }
 
@@ -1217,6 +1269,7 @@ var LoaderPlugin = new Class({
         a.href = url;
         a.click();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1232,6 +1285,7 @@ var LoaderPlugin = new Class({
      */
     reset: function ()
     {
+        console.group('LoaderPlugin reset');
         this.list.clear();
         this.inflight.clear();
         this.queue.clear();
@@ -1244,6 +1298,7 @@ var LoaderPlugin = new Class({
         this.setPrefix(GetFastValue(sceneConfig, 'prefix', gameConfig.loaderPrefix));
 
         this.state = CONST.LOADER_IDLE;
+        console.groupEnd();
     },
 
     /**
@@ -1256,6 +1311,7 @@ var LoaderPlugin = new Class({
      */
     shutdown: function ()
     {
+        console.group('LoaderPlugin shutdown');
         this.reset();
 
         this.state = CONST.LOADER_SHUTDOWN;
@@ -1264,6 +1320,7 @@ var LoaderPlugin = new Class({
 
         this.systems.events.off(SceneEvents.UPDATE, this.update, this);
         this.systems.events.off(SceneEvents.SHUTDOWN, this.shutdown, this);
+        console.groupEnd();
     },
 
     /**
@@ -1276,6 +1333,7 @@ var LoaderPlugin = new Class({
      */
     destroy: function ()
     {
+        console.group('LoaderPlugin destroy');
         this.shutdown();
 
         this.state = CONST.LOADER_DESTROYED;
@@ -1292,10 +1350,13 @@ var LoaderPlugin = new Class({
         this.textureManager = null;
         this.cacheManager = null;
         this.sceneManager = null;
+        console.groupEnd();
     }
 
 });
 
+console.group('PluginCache.register Loader');
 PluginCache.register('Loader', LoaderPlugin, 'load');
 
+console.groupEnd();
 module.exports = LoaderPlugin;

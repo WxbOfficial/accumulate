@@ -62,6 +62,7 @@ var Polygon = new Class({
 
     function Polygon (scene, x, y, points, fillColor, fillAlpha)
     {
+        console.group('Polygon');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
 
@@ -79,6 +80,7 @@ var Polygon = new Class({
 
         this.updateDisplayOrigin();
         this.updateData();
+        console.groupEnd();
     },
 
     /**
@@ -95,6 +97,7 @@ var Polygon = new Class({
      */
     smooth: function (iterations)
     {
+        console.group('Polygon smooth');
         if (iterations === undefined) { iterations = 1; }
 
         for (var i = 0; i < iterations; i++)
@@ -102,7 +105,9 @@ var Polygon = new Class({
             Smooth(this.geom);
         }
 
-        return this.updateData();
+        const result = this.updateData();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -130,6 +135,7 @@ var Polygon = new Class({
      */
     setTo: function (points)
     {
+        console.group('Polygon setTo');
         this.geom.setTo(points);
 
         var bounds = GetAABB(this.geom);
@@ -138,7 +144,9 @@ var Polygon = new Class({
 
         this.updateDisplayOrigin();
 
-        return this.updateData();
+        const result = this.updateData();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -152,6 +160,7 @@ var Polygon = new Class({
      */
     updateData: function ()
     {
+        console.group('Polygon updateData');
         var path = [];
         var points = this.geom.points;
 
@@ -165,6 +174,7 @@ var Polygon = new Class({
         this.pathIndexes = Earcut(path);
         this.pathData = path;
 
+        console.groupEnd();
         return this;
     }
 

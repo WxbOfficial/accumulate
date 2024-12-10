@@ -37,6 +37,7 @@ var LightsManager = new Class({
 
     function LightsManager ()
     {
+        console.group('LightsManager');
         /**
          * The Lights in the Scene.
          *
@@ -86,6 +87,7 @@ var LightsManager = new Class({
          * @since 3.50.0
          */
         this.visibleLights = 0;
+        console.groupEnd();
     },
 
     /**
@@ -131,7 +133,10 @@ var LightsManager = new Class({
      */
     addPointLight: function (x, y, color, radius, intensity, attenuation)
     {
-        return this.systems.displayList.add(new PointLight(this.scene, x, y, color, radius, intensity, attenuation));
+        console.group('LightsManager addPointLight');
+        const result = this.systems.displayList.add(new PointLight(this.scene, x, y, color, radius, intensity, attenuation));
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -144,6 +149,7 @@ var LightsManager = new Class({
      */
     enable: function ()
     {
+        console.group('LightsManager enable');
         if (this.maxLights === -1)
         {
             this.maxLights = this.systems.renderer.config.maxLights;
@@ -151,6 +157,7 @@ var LightsManager = new Class({
 
         this.active = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -164,8 +171,10 @@ var LightsManager = new Class({
      */
     disable: function ()
     {
+        console.group('LightsManager disable');
         this.active = false;
 
+        console.groupEnd();
         return this;
     },
 
@@ -186,6 +195,7 @@ var LightsManager = new Class({
      */
     getLights: function (camera)
     {
+        console.group('LightsManager getLights');
         var lights = this.lights;
         var worldView = camera.worldView;
 
@@ -217,12 +227,16 @@ var LightsManager = new Class({
 
         this.visibleLights = visibleLights.length;
 
+        console.groupEnd();
         return visibleLights;
     },
 
     sortByDistance: function (a, b)
     {
-        return (a.distance >= b.distance);
+        console.group('LightsManager sortByDistance');
+        const result = (a.distance >= b.distance);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -237,10 +251,12 @@ var LightsManager = new Class({
      */
     setAmbientColor: function (rgb)
     {
+        console.group('LightsManager setAmbientColor');
         var color = Utils.getFloatsFromUintRGB(rgb);
 
         this.ambientColor.set(color[0], color[1], color[2]);
 
+        console.groupEnd();
         return this;
     },
 
@@ -254,6 +270,8 @@ var LightsManager = new Class({
      */
     getMaxVisibleLights: function ()
     {
+        console.group('LightsManager getMaxVisibleLights');
+        console.groupEnd();
         return this.maxLights;
     },
 
@@ -267,6 +285,8 @@ var LightsManager = new Class({
      */
     getLightCount: function ()
     {
+        console.group('LightsManager getLightCount');
+        console.groupEnd();
         return this.lights.length;
     },
 
@@ -286,6 +306,7 @@ var LightsManager = new Class({
      */
     addLight: function (x, y, radius, rgb, intensity)
     {
+        console.group('LightsManager addLight');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (radius === undefined) { radius = 128; }
@@ -298,6 +319,7 @@ var LightsManager = new Class({
 
         this.lights.push(light);
 
+        console.groupEnd();
         return light;
     },
 
@@ -313,6 +335,7 @@ var LightsManager = new Class({
      */
     removeLight: function (light)
     {
+        console.group('LightsManager removeLight');
         var index = this.lights.indexOf(light);
 
         if (index >= 0)
@@ -320,6 +343,7 @@ var LightsManager = new Class({
             SpliceOne(this.lights, index);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -334,7 +358,9 @@ var LightsManager = new Class({
      */
     shutdown: function ()
     {
+        console.group('LightsManager shutdown');
         this.lights.length = 0;
+        console.groupEnd();
     },
 
     /**
@@ -347,7 +373,9 @@ var LightsManager = new Class({
      */
     destroy: function ()
     {
+        console.group('LightsManager destroy');
         this.shutdown();
+        console.groupEnd();
     }
 
 });

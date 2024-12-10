@@ -37,9 +37,11 @@ var SpriteSheetFile = new Class({
 
     function SpriteSheetFile (loader, key, url, frameConfig, xhrSettings)
     {
+        console.group('SpriteSheetFile');
         ImageFile.call(this, loader, key, url, xhrSettings, frameConfig);
 
         this.type = 'spritesheet';
+        console.groupEnd();
     },
 
     /**
@@ -50,6 +52,7 @@ var SpriteSheetFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('SpriteSheetFile addToCache');
         //  Check if we have a linked normal map
         var linkFile = this.linkFile;
 
@@ -80,6 +83,7 @@ var SpriteSheetFile = new Class({
         {
             this.cache.addSpriteSheet(this.key, this.data, this.config);
         }
+        console.groupEnd();
     }
 
 });
@@ -192,8 +196,10 @@ var SpriteSheetFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register spritesheet');
 FileTypesManager.register('spritesheet', function (key, url, frameConfig, xhrSettings)
 {
+    console.group('FileTypesManager.register spritesheet factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -207,7 +213,9 @@ FileTypesManager.register('spritesheet', function (key, url, frameConfig, xhrSet
         this.addFile(new SpriteSheetFile(this, key, url, frameConfig, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = SpriteSheetFile;

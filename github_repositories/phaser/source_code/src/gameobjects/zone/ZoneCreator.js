@@ -20,14 +20,19 @@ var Zone = require('./Zone');
  *
  * @return {Phaser.GameObjects.Zone} The Game Object that was created.
  */
+console.group('GameObjectCreator.register zone');
 GameObjectCreator.register('zone', function (config)
 {
+    console.group('GameObjectCreator.register zone factoryFunction');
     var x = GetAdvancedValue(config, 'x', 0);
     var y = GetAdvancedValue(config, 'y', 0);
     var width = GetAdvancedValue(config, 'width', 1);
     var height = GetAdvancedValue(config, 'height', width);
 
-    return new Zone(this.scene, x, y, width, height);
+    const result = new Zone(this.scene, x, y, width, height);
+    console.groupEnd();
+    return result;
 });
 
+console.groupEnd();
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

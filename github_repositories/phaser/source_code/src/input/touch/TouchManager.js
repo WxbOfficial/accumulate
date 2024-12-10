@@ -33,6 +33,7 @@ var TouchManager = new Class({
 
     function TouchManager (inputManager)
     {
+        console.group('TouchManager');
         /**
          * A reference to the Input Manager.
          *
@@ -158,6 +159,7 @@ var TouchManager = new Class({
         this.isTop = true;
 
         inputManager.events.once(InputEvents.MANAGER_BOOT, this.boot, this);
+        console.groupEnd();
     },
 
     /**
@@ -169,6 +171,7 @@ var TouchManager = new Class({
      */
     boot: function ()
     {
+        console.group('TouchManager boot');
         var config = this.manager.config;
 
         this.enabled = config.inputTouch;
@@ -193,6 +196,7 @@ var TouchManager = new Class({
         {
             this.startListeners();
         }
+        console.groupEnd();
     },
 
     /**
@@ -209,12 +213,14 @@ var TouchManager = new Class({
      */
     disableContextMenu: function ()
     {
+        console.group('TouchManager disableContextMenu');
         this.target.addEventListener('contextmenu', function (event)
         {
             event.preventDefault();
             return false;
         });
 
+        console.groupEnd();
         return this;
     },
 
@@ -230,10 +236,12 @@ var TouchManager = new Class({
      */
     startListeners: function ()
     {
+        console.group('TouchManager startListeners');
         var target = this.target;
 
         if (!target)
         {
+            console.groupEnd();
             return;
         }
 
@@ -244,6 +252,7 @@ var TouchManager = new Class({
 
         this.onTouchMove = function (event)
         {
+            console.group('TouchManager startListeners onTouchMove');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onTouchMove(event);
@@ -253,10 +262,12 @@ var TouchManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onTouchStart = function (event)
         {
+            console.group('TouchManager startListeners onTouchStart');
             if (autoFocus)
             {
                 window.focus();
@@ -271,19 +282,23 @@ var TouchManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onTouchStartWindow = function (event)
         {
+            console.group('TouchManager startListeners onTouchStartWindow');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled && event.target !== canvas)
             {
                 //  Only process the event if the target isn't the canvas
                 manager.onTouchStart(event);
             }
+            console.groupEnd();
         };
 
         this.onTouchEnd = function (event)
         {
+            console.group('TouchManager startListeners onTouchEnd');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onTouchEnd(event);
@@ -293,19 +308,23 @@ var TouchManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onTouchEndWindow = function (event)
         {
+            console.group('TouchManager startListeners onTouchEndWindow');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled && event.target !== canvas)
             {
                 //  Only process the event if the target isn't the canvas
                 manager.onTouchEnd(event);
             }
+            console.groupEnd();
         };
 
         this.onTouchCancel = function (event)
         {
+            console.group('TouchManager startListeners onTouchCancel');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onTouchCancel(event);
@@ -315,14 +334,17 @@ var TouchManager = new Class({
                     event.preventDefault();
                 }
             }
+            console.groupEnd();
         };
 
         this.onTouchCancelWindow = function (event)
         {
+            console.group('TouchManager startListeners onTouchCancelWindow');
             if (!event.defaultPrevented && _this.enabled && manager && manager.enabled)
             {
                 manager.onTouchCancel(event);
             }
+            console.groupEnd();
         };
 
         var capture = this.capture;
@@ -353,6 +375,7 @@ var TouchManager = new Class({
         }
 
         this.enabled = true;
+        console.groupEnd();
     },
 
     /**
@@ -364,6 +387,7 @@ var TouchManager = new Class({
      */
     stopListeners: function ()
     {
+        console.group('TouchManager stopListeners');
         var target = this.target;
 
         target.removeEventListener('touchstart', this.onTouchStart);
@@ -379,6 +403,7 @@ var TouchManager = new Class({
             target.removeEventListener('touchend', this.onTouchEndWindow);
             target.removeEventListener('touchcancel', this.onTouchCancelWindow);
         }
+        console.groupEnd();
     },
 
     /**
@@ -389,11 +414,13 @@ var TouchManager = new Class({
      */
     destroy: function ()
     {
+        console.group('TouchManager destroy');
         this.stopListeners();
 
         this.target = null;
         this.enabled = false;
         this.manager = null;
+        console.groupEnd();
     }
 
 });

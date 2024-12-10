@@ -43,6 +43,7 @@ var AtlasJSONFile = new Class({
 
     function AtlasJSONFile (loader, key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
     {
+        console.group('AtlasJSONFile');
         var image;
         var data;
 
@@ -82,6 +83,7 @@ var AtlasJSONFile = new Class({
         {
             MultiFile.call(this, loader, 'atlasjson', key, [ image, data ]);
         }
+        console.groupEnd();
     },
 
     /**
@@ -92,6 +94,7 @@ var AtlasJSONFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('AtlasJSONFile addToCache');
         if (this.isReadyToProcess())
         {
             var image = this.files[0];
@@ -102,6 +105,7 @@ var AtlasJSONFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -220,8 +224,10 @@ var AtlasJSONFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register atlas');
 FileTypesManager.register('atlas', function (key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
 {
+    console.group('FileTypesManager.register atlas factoryFunction');
     var multifile;
 
     //  Supports an Object file definition in the key argument
@@ -244,7 +250,9 @@ FileTypesManager.register('atlas', function (key, textureURL, atlasURL, textureX
         this.addFile(multifile.files);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = AtlasJSONFile;

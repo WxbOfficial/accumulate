@@ -8,10 +8,12 @@ var AddToDOM = require('../dom/AddToDOM');
 
 var CreateDOMContainer = function (game)
 {
+    console.group('CreateDOMContainer');
     var config = game.config;
 
     if (!config.parent || !config.domCreateContainer)
     {
+        console.groupEnd();
         return;
     }
 
@@ -33,6 +35,7 @@ var CreateDOMContainer = function (game)
     game.domContainer = div;
 
     AddToDOM(div, config.parent);
+    console.groupEnd();
 };
 
 module.exports = CreateDOMContainer;

@@ -23,8 +23,10 @@ var NineSlice = require('./NineSlice');
  *
  * @return {Phaser.GameObjects.NineSlice} The Game Object that was created.
  */
+console.group('GameObjectCreator.register nineslice');
 GameObjectCreator.register('nineslice', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register nineslice factoryFunction');
     if (config === undefined) { config = {}; }
 
     var key = GetAdvancedValue(config, 'key', null);
@@ -45,5 +47,7 @@ GameObjectCreator.register('nineslice', function (config, addToScene)
 
     BuildGameObject(this.scene, nineslice, config);
 
+    console.groupEnd();
     return nineslice;
 });
+console.groupEnd();

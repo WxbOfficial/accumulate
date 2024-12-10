@@ -17,6 +17,7 @@
  */
 var KTXParser = function (data)
 {
+    console.group('Parsers KTXParser');
     var idCheck = [ 0xab, 0x4b, 0x54, 0x58, 0x20, 0x31, 0x31, 0xbb, 0x0d, 0x0a, 0x1a, 0x0a ];
 
     var i;
@@ -28,6 +29,7 @@ var KTXParser = function (data)
         {
             console.warn('KTXParser - Invalid file format');
 
+            console.groupEnd();
             return;
         }
     }
@@ -44,6 +46,7 @@ var KTXParser = function (data)
     {
         console.warn('KTXParser - Only compressed formats supported');
 
+        console.groupEnd();
         return;
     }
 
@@ -83,6 +86,7 @@ var KTXParser = function (data)
         offset += levelSize;
     }
 
+    console.groupEnd();
     return {
         mipmaps: mipmaps,
         width: width,

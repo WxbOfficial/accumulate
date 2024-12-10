@@ -31,6 +31,7 @@ var MultiFile = new Class({
 
     function MultiFile (loader, type, key, files)
     {
+        console.group('MultiFile');
         var finalFiles = [];
 
         //  Clean out any potential 'null' or 'undefined' file entries
@@ -178,6 +179,7 @@ var MultiFile = new Class({
         {
             finalFiles[i].multiFile = this;
         }
+        console.groupEnd();
     },
 
     /**
@@ -190,7 +192,10 @@ var MultiFile = new Class({
      */
     isReadyToProcess: function ()
     {
-        return (this.pending === 0 && this.failed === 0 && !this.complete);
+        console.group('MultiFile isReadyToProcess');
+        const result = (this.pending === 0 && this.failed === 0 && !this.complete);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -205,6 +210,7 @@ var MultiFile = new Class({
      */
     addToMultiFile: function (file)
     {
+        console.group('MultiFile addToMultiFile');
         this.files.push(file);
 
         file.multiFile = this;
@@ -213,6 +219,7 @@ var MultiFile = new Class({
 
         this.complete = false;
 
+        console.groupEnd();
         return this;
     },
 
@@ -226,12 +233,14 @@ var MultiFile = new Class({
      */
     onFileComplete: function (file)
     {
+        console.group('MultiFile onFileComplete');
         var index = this.files.indexOf(file);
 
         if (index !== -1)
         {
             this.pending--;
         }
+        console.groupEnd();
     },
 
     /**
@@ -244,6 +253,7 @@ var MultiFile = new Class({
      */
     onFileFailed: function (file)
     {
+        console.group('MultiFile onFileFailed');
         var index = this.files.indexOf(file);
 
         if (index !== -1)
@@ -253,6 +263,7 @@ var MultiFile = new Class({
             // eslint-disable-next-line no-console
             console.error('File failed: %s "%s" (via %s "%s")', this.type, this.key, file.type, file.key);
         }
+        console.groupEnd();
     },
 
     /**
@@ -268,8 +279,10 @@ var MultiFile = new Class({
      */
     pendingDestroy: function ()
     {
+        console.group('MultiFile pendingDestroy');
         if (this.state === CONST.FILE_PENDING_DESTROY)
         {
+            console.groupEnd();
             return;
         }
 
@@ -287,6 +300,7 @@ var MultiFile = new Class({
         }
 
         this.state = CONST.FILE_PENDING_DESTROY;
+        console.groupEnd();
     },
 
     /**
@@ -297,9 +311,11 @@ var MultiFile = new Class({
      */
     destroy: function ()
     {
+        console.group('MultiFile destroy');
         this.loader = null;
         this.files = null;
         this.config = null;
+        console.groupEnd();
     }
 
 });

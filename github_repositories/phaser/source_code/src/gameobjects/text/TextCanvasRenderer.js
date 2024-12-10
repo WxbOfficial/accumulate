@@ -20,14 +20,17 @@
  */
 var TextCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('TextCanvasRenderer');
     if (src.width === 0 || src.height === 0)
     {
+        console.groupEnd();
         return;
     }
 
     camera.addToRenderList(src);
 
     renderer.batchSprite(src, src.frame, camera, parentMatrix);
+    console.groupEnd();
 };
 
 module.exports = TextCanvasRenderer;

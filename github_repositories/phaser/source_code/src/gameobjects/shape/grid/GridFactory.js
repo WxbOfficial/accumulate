@@ -43,7 +43,10 @@ var Grid = require('./Grid');
  *
  * @return {Phaser.GameObjects.Grid} The Game Object that was created.
  */
+console.group('GameObjectFactory.register grid');
 GameObjectFactory.register('grid', function (x, y, width, height, cellWidth, cellHeight, fillColor, fillAlpha, outlineFillColor, outlineFillAlpha)
 {
     return this.displayList.add(new Grid(this.scene, x, y, width, height, cellWidth, cellHeight, fillColor, fillAlpha, outlineFillColor, outlineFillAlpha));
 });
+
+console.groupEnd();

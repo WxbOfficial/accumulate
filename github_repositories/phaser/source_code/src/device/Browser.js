@@ -52,6 +52,7 @@ var Browser = {
 
 function init ()
 {
+    console.group('Device Browser init');
     var ua = navigator.userAgent;
 
     if ((/Edg\/\d+/).test(ua))
@@ -106,6 +107,8 @@ function init ()
         Browser.silk = true;
     }
 
+    console.info('Browser:', JSON.stringify(Browser, null, 2));
+    console.groupEnd();
     return Browser;
 }
 

@@ -42,6 +42,7 @@ var MultiAtlasFile = new Class({
 
     function MultiAtlasFile (loader, key, atlasURL, path, baseURL, atlasXhrSettings, textureXhrSettings)
     {
+        console.group('MultiAtlasFile');
         if (IsPlainObject(key))
         {
             var config = key;
@@ -70,6 +71,7 @@ var MultiAtlasFile = new Class({
         this.config.path = path;
         this.config.baseURL = baseURL;
         this.config.textureXhrSettings = textureXhrSettings;
+        console.groupEnd();
     },
 
     /**
@@ -82,6 +84,7 @@ var MultiAtlasFile = new Class({
      */
     onFileComplete: function (file)
     {
+        console.group('MultiAtlasFile onFileComplete');
         var index = this.files.indexOf(file);
 
         if (index !== -1)
@@ -143,6 +146,7 @@ var MultiAtlasFile = new Class({
                 loader.setPrefix(currentPrefix);
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -153,6 +157,7 @@ var MultiAtlasFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('MultiAtlasFile addToCache');
         if (this.isReadyToProcess())
         {
             var fileJSON = this.files[0];
@@ -205,6 +210,7 @@ var MultiAtlasFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -292,8 +298,10 @@ var MultiAtlasFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register');
 FileTypesManager.register('multiatlas', function (key, atlasURL, path, baseURL, atlasXhrSettings)
 {
+    console.group('FileTypesManager.register multiatlas factoryFunction');
     var multifile;
 
     //  Supports an Object file definition in the key argument
@@ -316,7 +324,9 @@ FileTypesManager.register('multiatlas', function (key, atlasURL, path, baseURL, 
         this.addFile(multifile.files);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = MultiAtlasFile;

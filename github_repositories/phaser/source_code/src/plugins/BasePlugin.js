@@ -24,6 +24,7 @@ var BasePlugin = new Class({
 
     function BasePlugin (pluginManager)
     {
+        console.group('BasePlugin');
         /**
          * A handy reference to the Plugin Manager that is responsible for this plugin.
          * Can be used as a route to gain access to game systems and  events.
@@ -44,6 +45,7 @@ var BasePlugin = new Class({
          * @since 3.8.0
          */
         this.game = pluginManager.game;
+        console.groupEnd();
     },
 
     /**
@@ -113,10 +115,12 @@ var BasePlugin = new Class({
      */
     destroy: function ()
     {
+        console.group('BasePlugin destroy');
         this.pluginManager = null;
         this.game = null;
         this.scene = null;
         this.systems = null;
+        console.groupEnd();
     }
 
 });

@@ -23,6 +23,7 @@ var Utils = require('../../../renderer/webgl/Utils');
  */
 var IsoTriangleWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('IsoTriangleWebGLRenderer');
     camera.addToRenderList(src);
 
     var pipeline = renderer.pipelines.set(src.pipeline);
@@ -43,6 +44,7 @@ var IsoTriangleWebGLRenderer = function (renderer, src, camera, parentMatrix)
 
     if (!src.isFilled)
     {
+        console.groupEnd();
         return;
     }
 
@@ -145,6 +147,7 @@ var IsoTriangleWebGLRenderer = function (renderer, src, camera, parentMatrix)
     }
 
     renderer.pipelines.postBatch(src);
+    console.groupEnd();
 };
 
 module.exports = IsoTriangleWebGLRenderer;

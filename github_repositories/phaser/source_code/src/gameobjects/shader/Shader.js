@@ -101,6 +101,7 @@ var Shader = new Class({
 
     function Shader (scene, key, x, y, width, height, textures, textureData)
     {
+        console.group('Shader');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (width === undefined) { width = 128; }
@@ -376,6 +377,7 @@ var Shader = new Class({
         this.setShader(key, textures, textureData);
 
         this.renderer.on(RenderEvents.RESTORE_WEBGL, this.onContextRestored, this);
+        console.groupEnd();
     },
 
     /**
@@ -391,12 +393,15 @@ var Shader = new Class({
      */
     willRender: function (camera)
     {
+        console.group('Shader willRender');
         if (this.renderToTexture)
         {
+            console.groupEnd();
             return true;
         }
         else
         {
+            console.groupEnd();
             return !(GameObject.RENDER_MASK !== this.renderFlags || (this.cameraFilter !== 0 && (this.cameraFilter & camera.id)));
         }
     },
@@ -442,6 +447,7 @@ var Shader = new Class({
      */
     setRenderToTexture: function (key, flipY)
     {
+        console.group('Shader setRenderToTexture');
         if (flipY === undefined) { flipY = false; }
 
         if (!this.renderToTexture)
@@ -479,6 +485,7 @@ var Shader = new Class({
             renderer.pipelines.rebind();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -498,6 +505,7 @@ var Shader = new Class({
      */
     setShader: function (key, textures, textureData)
     {
+        console.group('Shader setShader');
         if (this.renderer.contextLost)
         {
             this._deferSetShader = { key: key, textures: textures, textureData: textureData };
@@ -576,6 +584,7 @@ var Shader = new Class({
 
         this.projOrtho(0, this._rendererWidth, this._rendererHeight, 0);
 
+        console.groupEnd();
         return this;
     },
 
@@ -594,8 +603,10 @@ var Shader = new Class({
      */
     setPointer: function (pointer)
     {
+        console.group('Shader setPointer');
         this.pointer = pointer;
 
+        console.groupEnd();
         return this;
     },
 
@@ -614,9 +625,11 @@ var Shader = new Class({
      */
     projOrtho: function (left, right, bottom, top)
     {
+        console.group('Shader projOrtho');
         if (this.renderer.contextLost)
         {
             this._deferProjOrtho = { left: left, right: right, bottom: bottom, top: top };
+            console.groupEnd();
             return;
         }
 
@@ -647,6 +660,7 @@ var Shader = new Class({
 
         this._rendererWidth = right;
         this._rendererHeight = bottom;
+        console.groupEnd();
     },
 
     // Uniforms are specified in the GLSL_ES Specification: http://www.khronos.org/registry/webgl/specs/latest/1.0/
@@ -661,6 +675,7 @@ var Shader = new Class({
      */
     initUniforms: function ()
     {
+        console.group('Shader initUniforms');
         var map = this.renderer.glFuncMap;
         var program = this.program;
 
@@ -682,6 +697,7 @@ var Shader = new Class({
                 uniform.glFunc = data.func;
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -717,6 +733,7 @@ var Shader = new Class({
      */
     setSampler2DBuffer: function (uniformKey, texture, width, height, textureIndex, textureData)
     {
+        console.group('Shader setSampler2DBuffer');
         if (textureIndex === undefined) { textureIndex = 0; }
         if (textureData === undefined) { textureData = {}; }
 
@@ -733,6 +750,7 @@ var Shader = new Class({
 
         this.initSampler2D(uniform);
 
+        console.groupEnd();
         return this;
     },
 
@@ -756,6 +774,7 @@ var Shader = new Class({
      */
     setSampler2D: function (uniformKey, textureKey, textureIndex, textureData)
     {
+        console.group('Shader setSampler2D');
         if (textureIndex === undefined) { textureIndex = 0; }
 
         var textureManager = this.scene.sys.textures;
@@ -766,7 +785,9 @@ var Shader = new Class({
 
             if (frame.glTexture && frame.glTexture.isRenderTexture)
             {
-                return this.setSampler2DBuffer(uniformKey, frame.glTexture, frame.width, frame.height, textureIndex, textureData);
+                const result = this.setSampler2DBuffer(uniformKey, frame.glTexture, frame.width, frame.height, textureIndex, textureData);
+                console.groupEnd();
+                return result;
             }
 
             var uniform = this.uniforms[uniformKey];
@@ -797,6 +818,7 @@ var Shader = new Class({
             this.initSampler2D(uniform);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -827,8 +849,10 @@ var Shader = new Class({
      */
     setUniform: function (key, value)
     {
+        console.group('Shader setUniform');
         SetValue(this.uniforms, key, value);
 
+        console.groupEnd();
         return this;
     },
 
@@ -844,7 +868,10 @@ var Shader = new Class({
      */
     getUniform: function (key)
     {
-        return GetFastValue(this.uniforms, key, null);
+        console.group('Shader getUniform');
+        const result = GetFastValue(this.uniforms, key, null);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -863,7 +890,10 @@ var Shader = new Class({
      */
     setChannel0: function (textureKey, textureData)
     {
-        return this.setSampler2D('iChannel0', textureKey, 0, textureData);
+        console.group('Shader setChannel0');
+        const result = this.setSampler2D('iChannel0', textureKey, 0, textureData);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -882,7 +912,10 @@ var Shader = new Class({
      */
     setChannel1: function (textureKey, textureData)
     {
-        return this.setSampler2D('iChannel1', textureKey, 1, textureData);
+        console.group('Shader setChannel1');
+        const result = this.setSampler2D('iChannel1', textureKey, 1, textureData);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -901,7 +934,10 @@ var Shader = new Class({
      */
     setChannel2: function (textureKey, textureData)
     {
-        return this.setSampler2D('iChannel2', textureKey, 2, textureData);
+        console.group('Shader setChannel2');
+        const result = this.setSampler2D('iChannel2', textureKey, 2, textureData);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -920,7 +956,10 @@ var Shader = new Class({
      */
     setChannel3: function (textureKey, textureData)
     {
-        return this.setSampler2D('iChannel3', textureKey, 3, textureData);
+        console.group('Shader setChannel3');
+        const result = this.setSampler2D('iChannel3', textureKey, 3, textureData);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -935,8 +974,10 @@ var Shader = new Class({
      */
     initSampler2D: function (uniform)
     {
+        console.group('Shader initSampler2D');
         if (!uniform.value)
         {
+            console.groupEnd();
             return;
         }
 
@@ -983,6 +1024,7 @@ var Shader = new Class({
         this.renderer.setProgram(this.program);
 
         this._textureCount++;
+        console.groupEnd();
     },
 
     /**
@@ -995,6 +1037,7 @@ var Shader = new Class({
      */
     syncUniforms: function ()
     {
+        console.group('Shader syncUniforms');
         var gl = this.gl;
 
         var uniforms = this.uniforms;
@@ -1053,6 +1096,7 @@ var Shader = new Class({
                 textureCount++;
             }
         }
+        console.groupEnd();
     },
 
     /**
@@ -1069,6 +1113,7 @@ var Shader = new Class({
      */
     load: function (matrix2D)
     {
+        console.group('Shader load');
         //  ITRS
 
         var gl = this.gl;
@@ -1125,6 +1170,7 @@ var Shader = new Class({
         }
 
         this.syncUniforms();
+        console.groupEnd();
     },
 
     /**
@@ -1137,6 +1183,7 @@ var Shader = new Class({
      */
     flush: function ()
     {
+        console.group('Shader flush');
         //  Bind
 
         var width = this.width;
@@ -1191,6 +1238,7 @@ var Shader = new Class({
         {
             renderer.setFramebuffer(null, false);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1225,6 +1273,7 @@ var Shader = new Class({
      */
     onContextRestored: function ()
     {
+        console.group('Shader onContextRestored');
         if (this._deferSetShader !== null)
         {
             var key = this._deferSetShader.key;
@@ -1243,6 +1292,7 @@ var Shader = new Class({
             this._deferProjOrtho = null;
             this.projOrtho(left, right, bottom, top);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1254,6 +1304,7 @@ var Shader = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Shader preDestroy');
         var renderer = this.renderer;
 
         renderer.off(RenderEvents.RESTORE_WEBGL, this.onContextRestored, this);
@@ -1276,6 +1327,7 @@ var Shader = new Class({
             renderer.deleteUniformLocation(uniform.uniformLocation);
             uniform.uniformLocation = null;
         });
+        console.groupEnd();
     }
 
 });

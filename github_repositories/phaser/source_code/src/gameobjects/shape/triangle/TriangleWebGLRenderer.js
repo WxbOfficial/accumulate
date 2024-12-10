@@ -24,6 +24,7 @@ var Utils = require('../../../renderer/webgl/Utils');
  */
 var TriangleWebGLRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('TriangleWebGLRenderer');
     camera.addToRenderList(src);
 
     var pipeline = renderer.pipelines.set(src.pipeline);
@@ -73,6 +74,7 @@ var TriangleWebGLRenderer = function (renderer, src, camera, parentMatrix)
     }
 
     renderer.pipelines.postBatch(src);
+    console.groupEnd();
 };
 
 module.exports = TriangleWebGLRenderer;

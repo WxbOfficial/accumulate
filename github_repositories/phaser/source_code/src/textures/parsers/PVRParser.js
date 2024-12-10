@@ -246,6 +246,7 @@ var FORMATS = {
  */
 var PVRParser = function (data)
 {
+    console.group('Parsers PVRParser');
     var header = new Uint32Array(data, 0, 13);
 
     // VERSION
@@ -297,6 +298,7 @@ var PVRParser = function (data)
         offset += levelSize;
     }
 
+    console.groupEnd();
     return {
         mipmaps: mipmaps,
         width: width,

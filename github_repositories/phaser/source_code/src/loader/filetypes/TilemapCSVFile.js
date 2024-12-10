@@ -39,6 +39,7 @@ var TilemapCSVFile = new Class({
 
     function TilemapCSVFile (loader, key, url, xhrSettings)
     {
+        console.group('TilemapCSVFile');
         var extension = 'csv';
 
         if (IsPlainObject(key))
@@ -64,6 +65,7 @@ var TilemapCSVFile = new Class({
         File.call(this, loader, fileConfig);
 
         this.tilemapFormat = TILEMAP_FORMATS.CSV;
+        console.groupEnd();
     },
 
     /**
@@ -75,11 +77,13 @@ var TilemapCSVFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('TilemapCSVFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         this.data = this.xhrLoader.responseText;
 
         this.onProcessComplete();
+        console.groupEnd();
     },
 
     /**
@@ -90,9 +94,11 @@ var TilemapCSVFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('TilemapCSVFile addToCache');
         var tiledata = { format: this.tilemapFormat, data: this.data };
 
         this.cache.add(this.key, tiledata);
+        console.groupEnd();
     }
 
 });
@@ -166,8 +172,10 @@ var TilemapCSVFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register tilemapCSV');
 FileTypesManager.register('tilemapCSV', function (key, url, xhrSettings)
 {
+    console.group('FileTypesManager.register tilemapCSV factoryFunction');
     if (Array.isArray(key))
     {
         for (var i = 0; i < key.length; i++)
@@ -181,7 +189,9 @@ FileTypesManager.register('tilemapCSV', function (key, url, xhrSettings)
         this.addFile(new TilemapCSVFile(this, key, url, xhrSettings));
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = TilemapCSVFile;

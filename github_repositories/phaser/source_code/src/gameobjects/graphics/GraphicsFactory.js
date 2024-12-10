@@ -19,10 +19,12 @@ var GameObjectFactory = require('../GameObjectFactory');
  *
  * @return {Phaser.GameObjects.Graphics} The Game Object that was created.
  */
+console.group('GameObjectFactory.register graphics');
 GameObjectFactory.register('graphics', function (config)
 {
     return this.displayList.add(new Graphics(this.scene, config));
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

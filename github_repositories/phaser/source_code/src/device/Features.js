@@ -53,6 +53,7 @@ var Features = {
 // @author Matt DesLauriers (@mattdesl)
 function checkIsLittleEndian ()
 {
+    console.group('checkIsLittleEndian');
     var a = new ArrayBuffer(4);
     var b = new Uint8Array(a);
     var c = new Uint32Array(a);
@@ -64,24 +65,29 @@ function checkIsLittleEndian ()
 
     if (c[0] === 0xd4c3b2a1)
     {
+        console.groupEnd();
         return true;
     }
 
     if (c[0] === 0xa1b2c3d4)
     {
+        console.groupEnd();
         return false;
     }
     else
     {
         //  Could not determine endianness
+        console.groupEnd();
         return null;
     }
 }
 
 function init ()
 {
+    console.group('Device Features init');
     if (typeof importScripts === 'function')
     {
+        console.groupEnd();
         return Features;
     }
 
@@ -103,6 +109,7 @@ function init ()
 
     var testWebGL = function ()
     {
+        console.group('Device Features init testWebGL');
         if (window['WebGLRenderingContext'])
         {
             try
@@ -125,14 +132,17 @@ function init ()
                 CanvasPool.remove(canvas);
                 CanvasPool.remove(canvas2D);
 
+                console.groupEnd();
                 return !!ctx;
             }
             catch (e)
             {
+                console.groupEnd();
                 return false;
             }
         }
 
+        console.groupEnd();
         return false;
     };
 
@@ -187,6 +197,8 @@ function init ()
         isUint8
     );
 
+    console.info('Features:', JSON.stringify(Features, null, 2));
+    console.groupEnd();
     return Features;
 }
 

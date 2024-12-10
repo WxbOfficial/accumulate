@@ -22,8 +22,10 @@ var Text = require('./Text');
  *
  * @return {Phaser.GameObjects.Text} The Game Object that was created.
  */
+console.group('GameObjectCreator.register text');
 GameObjectCreator.register('text', function (config, addToScene)
 {
+    console.group('GameObjectCreator.register text factoryFunction');
     if (config === undefined) { config = {}; }
 
     // style Object = {
@@ -75,7 +77,9 @@ GameObjectCreator.register('text', function (config, addToScene)
     text.autoRound = GetAdvancedValue(config, 'autoRound', true);
     text.resolution = GetAdvancedValue(config, 'resolution', 1);
 
+    console.groupEnd();
     return text;
 });
 
+console.groupEnd();
 //  When registering a factory function 'this' refers to the GameObjectCreator context.

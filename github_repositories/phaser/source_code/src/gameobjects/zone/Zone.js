@@ -63,6 +63,7 @@ var Zone = new Class({
 
     function Zone (scene, x, y, width, height)
     {
+        console.group('Zone');
         if (width === undefined) { width = 1; }
         if (height === undefined) { height = width; }
 
@@ -100,6 +101,7 @@ var Zone = new Class({
         this.blendMode = BlendModes.NORMAL;
 
         this.updateDisplayOrigin();
+        console.groupEnd();
     },
 
     /**
@@ -160,6 +162,7 @@ var Zone = new Class({
      */
     setSize: function (width, height, resizeInput)
     {
+        console.group('Zone setSize');
         if (resizeInput === undefined) { resizeInput = true; }
 
         this.width = width;
@@ -175,6 +178,7 @@ var Zone = new Class({
             input.hitArea.height = height;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -192,9 +196,11 @@ var Zone = new Class({
      */
     setDisplaySize: function (width, height)
     {
+        console.group('Zone setDisplaySize');
         this.displayWidth = width;
         this.displayHeight = height;
 
+        console.groupEnd();
         return this;
     },
 
@@ -211,7 +217,11 @@ var Zone = new Class({
      */
     setCircleDropZone: function (radius)
     {
-        return this.setDropZone(new Circle(0, 0, radius), CircleContains);
+        console.group('Zone setCircleDropZone');
+        const result = this.setDropZone(new Circle(0, 0, radius), CircleContains);
+        console.groupEnd();
+        return result;
+
     },
 
     /**
@@ -228,7 +238,10 @@ var Zone = new Class({
      */
     setRectangleDropZone: function (width, height)
     {
-        return this.setDropZone(new Rectangle(0, 0, width, height), RectangleContains);
+        console.group('Zone setRectangleDropZone');
+        const result = this.setDropZone(new Rectangle(0, 0, width, height), RectangleContains);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -244,11 +257,13 @@ var Zone = new Class({
      */
     setDropZone: function (hitArea, hitAreaCallback)
     {
+        console.group('Zone setDropZone');
         if (!this.input)
         {
             this.setInteractive(hitArea, hitAreaCallback, true);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -290,7 +305,9 @@ var Zone = new Class({
      */
     renderCanvas: function (renderer, src, camera)
     {
+        console.group('Zone renderCanvas');
         camera.addToRenderList(src);
+        console.groupEnd();
     },
 
     /**
@@ -307,7 +324,9 @@ var Zone = new Class({
      */
     renderWebGL: function (renderer, src, camera)
     {
+        console.group('Zone renderWebGL');
         camera.addToRenderList(src);
+        console.groupEnd();
     }
 
 });

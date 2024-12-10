@@ -142,6 +142,7 @@ var NineSlice = new Class({
 
     function NineSlice (scene, x, y, texture, frame, width, height, leftWidth, rightWidth, topHeight, bottomHeight)
     {
+        console.group('NineSlice');
         // if (width === undefined) { width = 256; }
         // if (height === undefined) { height = 256; }
 
@@ -335,6 +336,7 @@ var NineSlice = new Class({
 
         this.initPipeline();
         this.initPostPipeline();
+        console.groupEnd();
     },
 
     /**
@@ -360,6 +362,7 @@ var NineSlice = new Class({
      */
     setSlices: function (width, height, leftWidth, rightWidth, topHeight, bottomHeight, skipScale9)
     {
+        console.group('NineSlice setSlices');
         if (leftWidth === undefined) { leftWidth = 10; }
         if (rightWidth === undefined) { rightWidth = 10; }
         if (topHeight === undefined) { topHeight = 0; }
@@ -431,6 +434,7 @@ var NineSlice = new Class({
             this.updateUVs();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -446,6 +450,7 @@ var NineSlice = new Class({
      */
     updateUVs: function ()
     {
+        console.group('NineSlice updateUVs');
         var left = this.leftWidth;
         var right = this.rightWidth;
         var top = this.topHeight;
@@ -467,6 +472,7 @@ var NineSlice = new Class({
             this.updateQuadUVs(42, left / width, 1 - bot / height, 1 - right / width, 1);
             this.updateQuadUVs(48, 1 - right / width, 1 - bot / height, 1, 1);
         }
+        console.groupEnd();
     },
 
     /**
@@ -486,6 +492,7 @@ var NineSlice = new Class({
      */
     updateVertices: function ()
     {
+        console.group('NineSlice updateVertices');
         var left = this.leftWidth;
         var right = this.rightWidth;
         var top = this.topHeight;
@@ -507,6 +514,7 @@ var NineSlice = new Class({
             this.updateQuad(42, -0.5 + (left / width), -0.5 + (bot / height), 0.5 - (right / width), -0.5);
             this.updateQuad(48, 0.5 - (right / width), -0.5 + (bot / height), 0.5, -0.5);
         }
+        console.groupEnd();
     },
 
     /**
@@ -527,6 +535,7 @@ var NineSlice = new Class({
      */
     updateQuad: function (offset, x1, y1, x2, y2)
     {
+        console.group('NineSlice updateQuad');
         var width = this.width;
         var height = this.height;
         var originX = this.originX;
@@ -540,6 +549,7 @@ var NineSlice = new Class({
         verts[offset + 3].resize(x1, y2, width, height, originX, originY);
         verts[offset + 4].resize(x2, y2, width, height, originX, originY);
         verts[offset + 5].resize(x2, y1, width, height, originX, originY);
+        console.groupEnd();
     },
 
     /**
@@ -560,6 +570,7 @@ var NineSlice = new Class({
      */
     updateQuadUVs: function (offset, u1, v1, u2, v2)
     {
+        console.group('NineSlice updateQuadUVs');
         var verts = this.vertices;
 
         //  Adjust for frame offset
@@ -593,6 +604,7 @@ var NineSlice = new Class({
         verts[offset + 3].setUVs(u1, v2);
         verts[offset + 4].setUVs(u2, v2);
         verts[offset + 5].setUVs(u2, v1);
+        console.groupEnd();
     },
 
     /**
@@ -609,8 +621,10 @@ var NineSlice = new Class({
      */
     clearTint: function ()
     {
+        console.group('NineSlice clearTint');
         this.setTint(0xffffff);
 
+        console.groupEnd();
         return this;
     },
 
@@ -637,12 +651,14 @@ var NineSlice = new Class({
      */
     setTint: function (color)
     {
+        console.group('NineSlice setTint');
         if (color === undefined) { color = 0xffffff; }
 
         this.tint = color;
 
         this.tintFill = false;
 
+        console.groupEnd();
         return this;
     },
 
@@ -670,10 +686,12 @@ var NineSlice = new Class({
      */
     setTintFill: function (color)
     {
+        console.group('NineSlice setTintFill');
         this.setTint(color);
 
         this.tintFill = true;
 
+        console.groupEnd();
         return this;
     },
 
@@ -837,6 +855,7 @@ var NineSlice = new Class({
      */
     setSize: function (width, height)
     {
+        console.group('NineSlice setSize');
         this.width = width;
         this.height = height;
 
@@ -850,6 +869,7 @@ var NineSlice = new Class({
             input.hitArea.height = this.height;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -868,9 +888,11 @@ var NineSlice = new Class({
      */
     setDisplaySize: function (width, height)
     {
+        console.group('NineSlice setDisplaySize');
         this.displayWidth = width;
         this.displayHeight = height;
 
+        console.groupEnd();
         return this;
     },
 
@@ -939,6 +961,7 @@ var NineSlice = new Class({
      */
     setOrigin: function (x, y)
     {
+        console.group('NineSlice setOrigin');
         if (x === undefined) { x = 0.5; }
         if (y === undefined) { y = x; }
 
@@ -947,7 +970,9 @@ var NineSlice = new Class({
 
         this.updateVertices();
 
-        return this.updateDisplayOrigin();
+        const result = this.updateDisplayOrigin();
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -963,6 +988,7 @@ var NineSlice = new Class({
      */
     setSizeToFrame: function ()
     {
+        console.group('NineSlice setSizeToFrame');
         if (this.is3Slice)
         {
             var height = this.frame.height;
@@ -974,6 +1000,7 @@ var NineSlice = new Class({
 
         this.updateUVs();
 
+        console.groupEnd();
         return this;
     },
 

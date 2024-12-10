@@ -20,9 +20,11 @@
  */
 var ImageCanvasRenderer = function (renderer, src, camera, parentMatrix)
 {
+    console.group('ImageCanvasRenderer');
     camera.addToRenderList(src);
 
     renderer.batchSprite(src, src.frame, camera, parentMatrix);
+    console.groupEnd();
 };
 
 module.exports = ImageCanvasRenderer;

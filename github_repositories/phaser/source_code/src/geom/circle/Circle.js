@@ -34,6 +34,7 @@ var Circle = new Class({
 
     function Circle (x, y, radius)
     {
+        console.group('Circle');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (radius === undefined) { radius = 0; }
@@ -88,6 +89,7 @@ var Circle = new Class({
          * @since 3.0.0
          */
         this._diameter = radius * 2;
+        console.groupEnd();
     },
 
     /**
@@ -103,7 +105,10 @@ var Circle = new Class({
      */
     contains: function (x, y)
     {
-        return Contains(this, x, y);
+        console.group('Circle contains');
+        const result = Contains(this, x, y);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -123,7 +128,10 @@ var Circle = new Class({
      */
     getPoint: function (position, point)
     {
-        return GetPoint(this, position, point);
+        console.group('Circle getPoint');
+        const result = GetPoint(this, position, point);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -143,7 +151,10 @@ var Circle = new Class({
      */
     getPoints: function (quantity, stepRate, output)
     {
-        return GetPoints(this, quantity, stepRate, output);
+        console.group('Circle getPoints');
+        const result = GetPoints(this, quantity, stepRate, output);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -160,7 +171,10 @@ var Circle = new Class({
      */
     getRandomPoint: function (point)
     {
-        return Random(this, point);
+        console.group('Circle getRandomPoint');
+        const result = Random(this, point);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -177,11 +191,13 @@ var Circle = new Class({
      */
     setTo: function (x, y, radius)
     {
+        console.group('Circle setTo');
         this.x = x;
         this.y = y;
         this._radius = radius;
         this._diameter = radius * 2;
 
+        console.groupEnd();
         return this;
     },
 
@@ -196,9 +212,11 @@ var Circle = new Class({
      */
     setEmpty: function ()
     {
+        console.group('Circle setEmpty');
         this._radius = 0;
         this._diameter = 0;
 
+        console.groupEnd();
         return this;
     },
 
@@ -215,11 +233,13 @@ var Circle = new Class({
      */
     setPosition: function (x, y)
     {
+        console.group('Circle setPosition');
         if (y === undefined) { y = x; }
 
         this.x = x;
         this.y = y;
 
+        console.groupEnd();
         return this;
     },
 
@@ -233,7 +253,10 @@ var Circle = new Class({
      */
     isEmpty: function ()
     {
-        return (this._radius <= 0);
+        console.group('Circle isEmpty');
+        const result = (this._radius <= 0);
+        console.groupEnd();
+        return result;
     },
 
     /**

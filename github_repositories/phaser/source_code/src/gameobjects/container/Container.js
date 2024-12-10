@@ -101,6 +101,7 @@ var Container = new Class({
 
     function Container (scene, x, y, children)
     {
+        console.group('Container');
         GameObject.call(this, scene, 'Container');
 
         /**
@@ -246,6 +247,7 @@ var Container = new Class({
         {
             this.add(children);
         }
+        console.groupEnd();
     },
 
     /**
@@ -346,10 +348,12 @@ var Container = new Class({
      */
     setExclusive: function (value)
     {
+        console.group('Container setExclusive');
         if (value === undefined) { value = true; }
 
         this.exclusive = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -375,6 +379,7 @@ var Container = new Class({
      */
     getBounds: function (output)
     {
+        console.group('Container getBounds');
         if (output === undefined) { output = new Rectangle(); }
 
         output.setTo(this.x, this.y, 0, 0);
@@ -416,6 +421,7 @@ var Container = new Class({
             }
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -430,6 +436,7 @@ var Container = new Class({
      */
     addHandler: function (gameObject)
     {
+        console.group('Container addHandler');
         gameObject.once(Events.DESTROY, this.onChildDestroyed, this);
 
         if (this.exclusive)
@@ -445,6 +452,7 @@ var Container = new Class({
 
             gameObject.addedToScene();
         }
+        console.groupEnd();
     },
 
     /**
@@ -458,6 +466,7 @@ var Container = new Class({
      */
     removeHandler: function (gameObject)
     {
+        console.group('Container removeHandler');
         gameObject.off(Events.DESTROY, this.remove, this);
 
         if (this.exclusive)
@@ -468,6 +477,7 @@ var Container = new Class({
 
             gameObject.addToDisplayList();
         }
+        console.groupEnd();
     },
 
     /**
@@ -484,6 +494,7 @@ var Container = new Class({
      */
     pointToContainer: function (source, output)
     {
+        console.group('Container pointToContainer');
         if (output === undefined) { output = new Vector2(); }
 
         if (this.parentContainer)
@@ -505,6 +516,7 @@ var Container = new Class({
 
         tempMatrix.transformPoint(source.x, source.y, output);
 
+        console.groupEnd();
         return output;
     },
 
@@ -520,7 +532,10 @@ var Container = new Class({
      */
     getBoundsTransformMatrix: function ()
     {
-        return this.getWorldTransformMatrix(tempTransformMatrix, this.localTransform);
+        console.group('Container getBoundsTransformMatrix');
+        const result = this.getWorldTransformMatrix(tempTransformMatrix, this.localTransform);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -540,8 +555,10 @@ var Container = new Class({
      */
     add: function (child)
     {
+        console.group('Container add');
         ArrayUtils.Add(this.list, child, this.maxSize, this.addHandler, this);
 
+        console.groupEnd();
         return this;
     },
 
@@ -565,8 +582,10 @@ var Container = new Class({
      */
     addAt: function (child, index)
     {
+        console.group('Container addAt');
         ArrayUtils.AddAt(this.list, child, index, this.maxSize, this.addHandler, this);
 
+        console.groupEnd();
         return this;
     },
 
@@ -585,7 +604,10 @@ var Container = new Class({
      */
     getAt: function (index)
     {
-        return this.list[index];
+        console.group('Container getAt');
+        const result = this.list[index];
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -603,7 +625,10 @@ var Container = new Class({
      */
     getIndex: function (child)
     {
-        return this.list.indexOf(child);
+        console.group('Container getIndex');
+        const result = this.list.indexOf(child);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -620,8 +645,10 @@ var Container = new Class({
      */
     sort: function (property, handler)
     {
+        console.group('Container sort');
         if (!property)
         {
+            console.groupEnd();
             return this;
         }
 
@@ -635,6 +662,7 @@ var Container = new Class({
 
         ArrayUtils.StableSort(this.list, handler);
 
+        console.groupEnd();
         return this;
     },
 
@@ -654,7 +682,10 @@ var Container = new Class({
      */
     getByName: function (name)
     {
-        return ArrayUtils.GetFirst(this.list, 'name', name);
+        console.group('Container getByName');
+        const result = ArrayUtils.GetFirst(this.list, 'name', name);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -673,7 +704,10 @@ var Container = new Class({
      */
     getRandom: function (startIndex, length)
     {
-        return ArrayUtils.GetRandom(this.list, startIndex, length);
+        console.group('Container getRandom');
+        const result = ArrayUtils.GetRandom(this.list, startIndex, length);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -701,7 +735,10 @@ var Container = new Class({
      */
     getFirst: function (property, value, startIndex, endIndex)
     {
-        return ArrayUtils.GetFirst(this.list, property, value, startIndex, endIndex);
+        console.group('Container getFirst');
+        const result = ArrayUtils.GetFirst(this.list, property, value, startIndex, endIndex);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -734,7 +771,10 @@ var Container = new Class({
      */
     getAll: function (property, value, startIndex, endIndex)
     {
-        return ArrayUtils.GetAll(this.list, property, value, startIndex, endIndex);
+        console.group('Container getAll');
+        const result = ArrayUtils.GetAll(this.list, property, value, startIndex, endIndex);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -757,7 +797,10 @@ var Container = new Class({
      */
     count: function (property, value, startIndex, endIndex)
     {
-        return ArrayUtils.CountAllMatching(this.list, property, value, startIndex, endIndex);
+        console.group('Container count');
+        const result = ArrayUtils.CountAllMatching(this.list, property, value, startIndex, endIndex);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -777,8 +820,10 @@ var Container = new Class({
      */
     swap: function (child1, child2)
     {
+        console.group('Container swap');
         ArrayUtils.Swap(this.list, child1, child2);
 
+        console.groupEnd();
         return this;
     },
 
@@ -803,8 +848,10 @@ var Container = new Class({
      */
     moveTo: function (child, index)
     {
+        console.group('Container moveTo');
         ArrayUtils.MoveTo(this.list, child, index);
 
+        console.groupEnd();
         return this;
     },
 
@@ -827,8 +874,10 @@ var Container = new Class({
      */
     moveAbove: function (child1, child2)
     {
+        console.group('Container moveAbove');
         ArrayUtils.MoveAbove(this.list, child1, child2);
 
+        console.groupEnd();
         return this;
     },
 
@@ -851,8 +900,10 @@ var Container = new Class({
      */
     moveBelow: function (child1, child2)
     {
+        console.group('Container moveBelow');
         ArrayUtils.MoveBelow(this.list, child1, child2);
 
+        console.groupEnd();
         return this;
     },
 
@@ -876,6 +927,7 @@ var Container = new Class({
      */
     remove: function (child, destroyChild)
     {
+        console.group('Container remove');
         var removed = ArrayUtils.Remove(this.list, child, this.removeHandler, this);
 
         if (destroyChild && removed)
@@ -891,6 +943,7 @@ var Container = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -909,6 +962,7 @@ var Container = new Class({
      */
     removeAt: function (index, destroyChild)
     {
+        console.group('Container removeAt');
         var removed = ArrayUtils.RemoveAt(this.list, index, this.removeHandler, this);
 
         if (destroyChild && removed)
@@ -916,6 +970,7 @@ var Container = new Class({
             removed.destroy();
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -935,6 +990,7 @@ var Container = new Class({
      */
     removeBetween: function (startIndex, endIndex, destroyChild)
     {
+        console.group('Container removeBetween');
         var removed = ArrayUtils.RemoveBetween(this.list, startIndex, endIndex, this.removeHandler, this);
 
         if (destroyChild)
@@ -945,6 +1001,7 @@ var Container = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -962,6 +1019,7 @@ var Container = new Class({
      */
     removeAll: function (destroyChild)
     {
+        console.group('Container removeAll');
         var list = this.list;
 
         if (destroyChild)
@@ -983,6 +1041,7 @@ var Container = new Class({
             ArrayUtils.RemoveBetween(list, 0, list.length, this.removeHandler, this);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1002,8 +1061,10 @@ var Container = new Class({
      */
     bringToTop: function (child)
     {
+        console.group('Container bringToTop');
         ArrayUtils.BringToTop(this.list, child);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1023,8 +1084,10 @@ var Container = new Class({
      */
     sendToBack: function (child)
     {
+        console.group('Container sendToBack');
         ArrayUtils.SendToBack(this.list, child);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1043,8 +1106,10 @@ var Container = new Class({
      */
     moveUp: function (child)
     {
+        console.group('Container moveUp');
         ArrayUtils.MoveUp(this.list, child);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1063,8 +1128,10 @@ var Container = new Class({
      */
     moveDown: function (child)
     {
+        console.group('Container moveDown');
         ArrayUtils.MoveDown(this.list, child);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1078,8 +1145,10 @@ var Container = new Class({
      */
     reverse: function ()
     {
+        console.group('Container reverse');
         this.list.reverse();
 
+        console.groupEnd();
         return this;
     },
 
@@ -1093,8 +1162,10 @@ var Container = new Class({
      */
     shuffle: function ()
     {
+        console.group('Container shuffle');
         ArrayUtils.Shuffle(this.list);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1116,6 +1187,7 @@ var Container = new Class({
      */
     replace: function (oldChild, newChild, destroyChild)
     {
+        console.group('Container replace');
         var moved = ArrayUtils.Replace(this.list, oldChild, newChild);
 
         if (moved)
@@ -1129,6 +1201,7 @@ var Container = new Class({
             }
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1149,7 +1222,10 @@ var Container = new Class({
      */
     exists: function (child)
     {
-        return (this.list.indexOf(child) > -1);
+        console.group('Container exists');
+        const result = (this.list.indexOf(child) > -1);
+        console.groupEnd();
+        return result;
     },
 
     /**
@@ -1171,8 +1247,10 @@ var Container = new Class({
      */
     setAll: function (property, value, startIndex, endIndex)
     {
+        console.group('Container setAll');
         ArrayUtils.SetAll(this.list, property, value, startIndex, endIndex);
 
+        console.groupEnd();
         return this;
     },
 
@@ -1204,6 +1282,7 @@ var Container = new Class({
      */
     each: function (callback, context)
     {
+        console.group('Container each');
         var args = [ null ];
         var i;
         var temp = this.list.slice();
@@ -1221,6 +1300,7 @@ var Container = new Class({
             callback.apply(context, args);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1241,6 +1321,7 @@ var Container = new Class({
      */
     iterate: function (callback, context)
     {
+        console.group('Container iterate');
         var args = [ null ];
         var i;
 
@@ -1256,6 +1337,7 @@ var Container = new Class({
             callback.apply(context, args);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1287,6 +1369,7 @@ var Container = new Class({
      */
     setScrollFactor: function (x, y, updateChildren)
     {
+        console.group('Container setScrollFactor');
         if (y === undefined) { y = x; }
         if (updateChildren === undefined) { updateChildren = false; }
 
@@ -1299,6 +1382,7 @@ var Container = new Class({
             ArrayUtils.SetAll(this.list, 'scrollFactorY', y);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -1440,11 +1524,13 @@ var Container = new Class({
      */
     preDestroy: function ()
     {
+        console.group('Container preDestroy');
         this.removeAll(!!this.exclusive);
 
         this.localTransform.destroy();
 
         this.list = [];
+        console.groupEnd();
     },
 
     /**
@@ -1456,6 +1542,7 @@ var Container = new Class({
      */
     onChildDestroyed: function (gameObject)
     {
+        console.group('Container onChildDestroyed');
         ArrayUtils.Remove(this.list, gameObject);
 
         if (this.exclusive)
@@ -1464,6 +1551,7 @@ var Container = new Class({
 
             gameObject.removedFromScene();
         }
+        console.groupEnd();
     }
 
 });

@@ -39,7 +39,10 @@ var IsoBox = require('./IsoBox');
  *
  * @return {Phaser.GameObjects.IsoBox} The Game Object that was created.
  */
+console.group('GameObjectFactory.register isobox');
 GameObjectFactory.register('isobox', function (x, y, size, height, fillTop, fillLeft, fillRight)
 {
     return this.displayList.add(new IsoBox(this.scene, x, y, size, height, fillTop, fillLeft, fillRight));
 });
+
+console.groupEnd();

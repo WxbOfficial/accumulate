@@ -55,6 +55,7 @@ var BitmapMask = new Class({
 
     function BitmapMask (scene, maskObject, x, y, texture, frame)
     {
+        console.group('BitmapMask');
         if (!maskObject)
         {
             maskObject = scene.sys.make.image({ x: x, y: y, key: texture, frame: frame, add: false });
@@ -91,6 +92,7 @@ var BitmapMask = new Class({
          * @since 3.17.0
          */
         this.isStencil = false;
+        console.groupEnd();
     },
 
     /**
@@ -107,7 +109,9 @@ var BitmapMask = new Class({
      */
     setBitmap: function (maskObject)
     {
+        console.group('BitmapMask setBitmap');
         this.bitmapMask = maskObject;
+        console.groupEnd();
     },
 
     /**
@@ -124,7 +128,9 @@ var BitmapMask = new Class({
      */
     preRenderWebGL: function (renderer, maskedObject, camera)
     {
+        console.group('BitmapMask preRenderWebGL');
         renderer.pipelines.BITMAPMASK_PIPELINE.beginMask(this, maskedObject, camera);
+        console.groupEnd();
     },
 
     /**
@@ -141,7 +147,9 @@ var BitmapMask = new Class({
      */
     postRenderWebGL: function (renderer, camera, renderTarget)
     {
+        console.group('BitmapMask postRenderWebGL');
         renderer.pipelines.BITMAPMASK_PIPELINE.endMask(this, camera, renderTarget);
+        console.groupEnd();
     },
 
     /**
@@ -156,7 +164,9 @@ var BitmapMask = new Class({
      */
     preRenderCanvas: function ()
     {
+        console.group('BitmapMask preRenderCanvas');
         // NOOP
+        console.groupEnd();
     },
 
     /**
@@ -169,7 +179,9 @@ var BitmapMask = new Class({
      */
     postRenderCanvas: function ()
     {
+        console.group('BitmapMask postRenderCanvas');
         // NOOP
+        console.groupEnd();
     },
 
     /**
@@ -183,7 +195,9 @@ var BitmapMask = new Class({
      */
     destroy: function ()
     {
+        console.group('BitmapMask destroy');
         this.bitmapMask = null;
+        console.groupEnd();
     }
 
 });
@@ -228,9 +242,11 @@ var BitmapMask = new Class({
  *
  * @return {Phaser.Display.Masks.BitmapMask} The Bitmap Mask that was created.
  */
+console.group("GameObjectFactory.register bitmapMask");
 GameObjectFactory.register('bitmapMask', function (maskObject, x, y, key, frame)
 {
     return new BitmapMask(this.scene, maskObject, x, y, key, frame);
 });
 
+console.groupEnd();
 module.exports = BitmapMask;

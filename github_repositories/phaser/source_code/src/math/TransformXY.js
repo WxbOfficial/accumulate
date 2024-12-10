@@ -26,6 +26,7 @@ var Vector2 = require('./Vector2');
  */
 var TransformXY = function (x, y, positionX, positionY, rotation, scaleX, scaleY, output)
 {
+    console.group('TransformXY');
     if (output === undefined) { output = new Vector2(); }
 
     var radianSin = Math.sin(rotation);
@@ -43,6 +44,7 @@ var TransformXY = function (x, y, positionX, positionY, rotation, scaleX, scaleY
     output.x = (d * id * x) + (-c * id * y) + (((positionY * c) - (positionX * d)) * id);
     output.y = (a * id * y) + (-b * id * x) + (((-positionY * a) + (positionX * b)) * id);
 
+    console.groupEnd();
     return output;
 };
 

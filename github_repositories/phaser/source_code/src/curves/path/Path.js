@@ -40,6 +40,7 @@ var Path = new Class({
 
     function Path (x, y)
     {
+        console.group('Path');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
 
@@ -135,6 +136,7 @@ var Path = new Class({
         {
             this.startPoint.set(x, y);
         }
+        console.groupEnd();
     },
 
     /**
@@ -915,10 +917,15 @@ var Path = new Class({
  *
  * @return {Phaser.Curves.Path} The Path Object that was created.
  */
+console.group('GameObjectFactory.register path');
 GameObjectFactory.register('path', function (x, y)
 {
-    return new Path(x, y);
+    console.group('GameObjectFactory.register path factoryFunction');
+    const result = new Path(x, y);
+    console.groupEnd();
+    return result;
 });
+console.groupEnd();
 
 //  When registering a factory function 'this' refers to the GameObjectFactory context.
 //

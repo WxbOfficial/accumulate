@@ -56,117 +56,118 @@ var TextureManager = new Class({
 
     initialize:
 
-    function TextureManager (game)
-    {
-        EventEmitter.call(this);
+        function TextureManager(game) {
+            console.group('TextureManager');
+            EventEmitter.call(this);
 
-        /**
-         * The Game that the Texture Manager belongs to.
-         *
-         * A game will only ever have one instance of a Texture Manager.
-         *
-         * @name Phaser.Textures.TextureManager#game
-         * @type {Phaser.Game}
-         * @since 3.0.0
-         */
-        this.game = game;
+            /**
+             * The Game that the Texture Manager belongs to.
+             *
+             * A game will only ever have one instance of a Texture Manager.
+             *
+             * @name Phaser.Textures.TextureManager#game
+             * @type {Phaser.Game}
+             * @since 3.0.0
+             */
+            this.game = game;
 
-        /**
-         * The internal name of this manager.
-         *
-         * @name Phaser.Textures.TextureManager#name
-         * @type {string}
-         * @readonly
-         * @since 3.0.0
-         */
-        this.name = 'TextureManager';
+            /**
+             * The internal name of this manager.
+             *
+             * @name Phaser.Textures.TextureManager#name
+             * @type {string}
+             * @readonly
+             * @since 3.0.0
+             */
+            this.name = 'TextureManager';
 
-        /**
-         * This object contains all Textures that belong to this Texture Manager.
-         *
-         * Textures are identified by string-based keys, which are used as the property
-         * within this object. Therefore, you can access any texture directly from this
-         * object without any iteration.
-         *
-         * You should not typically modify this object directly, but instead use the
-         * methods provided by the Texture Manager to add and remove entries from it.
-         *
-         * @name Phaser.Textures.TextureManager#list
-         * @type {object}
-         * @default {}
-         * @since 3.0.0
-         */
-        this.list = {};
+            /**
+             * This object contains all Textures that belong to this Texture Manager.
+             *
+             * Textures are identified by string-based keys, which are used as the property
+             * within this object. Therefore, you can access any texture directly from this
+             * object without any iteration.
+             *
+             * You should not typically modify this object directly, but instead use the
+             * methods provided by the Texture Manager to add and remove entries from it.
+             *
+             * @name Phaser.Textures.TextureManager#list
+             * @type {object}
+             * @default {}
+             * @since 3.0.0
+             */
+            this.list = {};
 
-        /**
-         * The temporary canvas element used to save the pixel data of an arbitrary texture
-         * during the `TextureManager.getPixel` and `getPixelAlpha` methods.
-         *
-         * @name Phaser.Textures.TextureManager#_tempCanvas
-         * @type {HTMLCanvasElement}
-         * @private
-         * @since 3.0.0
-         */
-        this._tempCanvas = CanvasPool.create2D(this);
+            /**
+             * The temporary canvas element used to save the pixel data of an arbitrary texture
+             * during the `TextureManager.getPixel` and `getPixelAlpha` methods.
+             *
+             * @name Phaser.Textures.TextureManager#_tempCanvas
+             * @type {HTMLCanvasElement}
+             * @private
+             * @since 3.0.0
+             */
+            this._tempCanvas = CanvasPool.create2D(this);
 
-        /**
-         * The 2d context of the `_tempCanvas` element.
-         *
-         * @name Phaser.Textures.TextureManager#_tempContext
-         * @type {CanvasRenderingContext2D}
-         * @private
-         * @since 3.0.0
-         */
-        this._tempContext = this._tempCanvas.getContext('2d', { willReadFrequently: true });
+            /**
+             * The 2d context of the `_tempCanvas` element.
+             *
+             * @name Phaser.Textures.TextureManager#_tempContext
+             * @type {CanvasRenderingContext2D}
+             * @private
+             * @since 3.0.0
+             */
+            this._tempContext = this._tempCanvas.getContext('2d', { willReadFrequently: true });
 
-        /**
-         * An internal tracking value used for emitting the 'READY' event after all of
-         * the managers in the game have booted.
-         *
-         * @name Phaser.Textures.TextureManager#_pending
-         * @type {number}
-         * @private
-         * @default 0
-         * @since 3.0.0
-         */
-        this._pending = 0;
+            /**
+             * An internal tracking value used for emitting the 'READY' event after all of
+             * the managers in the game have booted.
+             *
+             * @name Phaser.Textures.TextureManager#_pending
+             * @type {number}
+             * @private
+             * @default 0
+             * @since 3.0.0
+             */
+            this._pending = 0;
 
-        /**
-         * An Image Game Object that belongs to this Texture Manager.
-         *
-         * Used as a drawing stamp within Dynamic Textures.
-         *
-         * This is not part of the display list and doesn't render.
-         *
-         * @name Phaser.Textures.TextureManager#stamp
-         * @type {Phaser.GameObjects.Image}
-         * @readonly
-         * @since 3.60.0
-         */
-        this.stamp;
+            /**
+             * An Image Game Object that belongs to this Texture Manager.
+             *
+             * Used as a drawing stamp within Dynamic Textures.
+             *
+             * This is not part of the display list and doesn't render.
+             *
+             * @name Phaser.Textures.TextureManager#stamp
+             * @type {Phaser.GameObjects.Image}
+             * @readonly
+             * @since 3.60.0
+             */
+            this.stamp;
 
-        /**
-         * The crop Rectangle as used by the Stamp when it needs to crop itself.
-         *
-         * @name Phaser.Textures.TextureManager#stampCrop
-         * @type {Phaser.Geom.Rectangle}
-         * @since 3.60.0
-         */
-        this.stampCrop = new Rectangle();
+            /**
+             * The crop Rectangle as used by the Stamp when it needs to crop itself.
+             *
+             * @name Phaser.Textures.TextureManager#stampCrop
+             * @type {Phaser.Geom.Rectangle}
+             * @since 3.60.0
+             */
+            this.stampCrop = new Rectangle();
 
-        /**
-         * If this flag is `true` then the Texture Manager will never emit any
-         * warnings to the console log that report missing textures.
-         *
-         * @name Phaser.Textures.TextureManager#silentWarnings
-         * @type {boolean}
-         * @default false
-         * @since 3.60.0
-         */
-        this.silentWarnings = false;
+            /**
+             * If this flag is `true` then the Texture Manager will never emit any
+             * warnings to the console log that report missing textures.
+             *
+             * @name Phaser.Textures.TextureManager#silentWarnings
+             * @type {boolean}
+             * @default false
+             * @since 3.60.0
+             */
+            this.silentWarnings = false;
 
-        game.events.once(GameEvents.BOOT, this.boot, this);
-    },
+            game.events.once(GameEvents.BOOT, this.boot, this);
+            console.groupEnd();
+        },
 
     /**
      * The Boot Handler called by Phaser.Game when it first starts up.
@@ -175,8 +176,8 @@ var TextureManager = new Class({
      * @private
      * @since 3.0.0
      */
-    boot: function ()
-    {
+    boot: function () {
+        console.group('TextureManager boot');
         this._pending = 3;
 
         this.on(Events.LOAD, this.updatePending, this);
@@ -184,33 +185,29 @@ var TextureManager = new Class({
 
         var config = this.game.config;
 
-        if (config.defaultImage !== null)
-        {
+        if (config.defaultImage !== null) {
             this.addBase64('__DEFAULT', config.defaultImage);
         }
 
-        if (config.missingImage !== null)
-        {
+        if (config.missingImage !== null) {
             this.addBase64('__MISSING', config.missingImage);
         }
-        
-        if (config.whiteImage !== null)
-        {
+
+        if (config.whiteImage !== null) {
             this.addBase64('__WHITE', config.whiteImage);
         }
 
-        if (this.game.renderer && this.game.renderer.gl)
-        {
-            this.addUint8Array('__NORMAL', new Uint8Array([ 127, 127, 255, 255 ]), 1, 1);
+        if (this.game.renderer && this.game.renderer.gl) {
+            this.addUint8Array('__NORMAL', new Uint8Array([127, 127, 255, 255]), 1, 1);
         }
 
         this.game.events.once(GameEvents.DESTROY, this.destroy, this);
 
-        this.game.events.once(GameEvents.SYSTEM_READY, function (scene)
-        {
+        this.game.events.once(GameEvents.SYSTEM_READY, function (scene) {
             this.stamp = new ImageGameObject(scene).setOrigin(0);
 
         }, this);
+        console.groupEnd();
     },
 
     /**
@@ -220,17 +217,17 @@ var TextureManager = new Class({
      * @private
      * @since 3.0.0
      */
-    updatePending: function ()
-    {
+    updatePending: function () {
+        console.group('TextureManager updatePending');
         this._pending--;
 
-        if (this._pending === 0)
-        {
+        if (this._pending === 0) {
             this.off(Events.LOAD);
             this.off(Events.ERROR);
 
             this.emit(Events.READY);
         }
+        console.groupEnd();
     },
 
     /**
@@ -245,19 +242,19 @@ var TextureManager = new Class({
      *
      * @return {boolean} `true` if it's safe to use the texture key, otherwise `false`.
      */
-    checkKey: function (key)
-    {
-        if (!key || typeof key !== 'string' || this.exists(key))
-        {
-            if (!this.silentWarnings)
-            {
+    checkKey: function (key) {
+        console.group('TextureManager checkKey');
+        if (!key || typeof key !== 'string' || this.exists(key)) {
+            if (!this.silentWarnings) {
                 // eslint-disable-next-line no-console
                 console.error('Texture key already in use: ' + key);
             }
 
+            console.groupEnd();
             return false;
         }
 
+        console.groupEnd();
         return true;
     },
 
@@ -278,21 +275,18 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.TextureManager} The Texture Manager.
      */
-    remove: function (key)
-    {
-        if (typeof key === 'string')
-        {
-            if (this.exists(key))
-            {
+    remove: function (key) {
+        console.group('TextureManager remove');
+        if (typeof key === 'string') {
+            if (this.exists(key)) {
                 key = this.get(key);
             }
-            else
-            {
-                if (!this.silentWarnings)
-                {
+            else {
+                if (!this.silentWarnings) {
                     console.warn('No texture found matching key: ' + key);
                 }
 
+                console.groupEnd();
                 return this;
             }
         }
@@ -300,14 +294,14 @@ var TextureManager = new Class({
         //  By this point key should be a Texture, if not, the following fails anyway
         var textureKey = key.key;
 
-        if (this.list.hasOwnProperty(textureKey))
-        {
+        if (this.list.hasOwnProperty(textureKey)) {
             key.destroy();
 
             this.emit(Events.REMOVE, textureKey);
             this.emit(Events.REMOVE_KEY + textureKey);
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -321,13 +315,13 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.TextureManager} The Texture Manager.
      */
-    removeKey: function (key)
-    {
-        if (this.list.hasOwnProperty(key))
-        {
+    removeKey: function (key) {
+        console.group('TextureManager removeKey');
+        if (this.list.hasOwnProperty(key)) {
             delete this.list[key];
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -349,33 +343,52 @@ var TextureManager = new Class({
      *
      * @return {this} This Texture Manager instance.
      */
-    addBase64: function (key, data)
-    {
-        if (this.checkKey(key))
-        {
+    addBase64: function (key, data) {
+        console.group('TextureManager addBase64');
+        if (this.checkKey(key)) {
             var _this = this;
 
             var image = new Image();
 
-            image.onerror = function ()
-            {
+            image.onerror = function () {
+                console.group('TextureManager addBase64 image.onerror');
                 _this.emit(Events.ERROR, key);
+                console.groupEnd();
             };
 
-            image.onload = function ()
-            {
+            image.onload = function () {
+                console.group('TextureManager addBase64 image.onload');
                 var texture = _this.create(key, image);
 
                 Parser.Image(texture, 0);
 
+                console.groupCollapsed('TextureManager addBase64 image.onload _this.emit(Events.ADD, key, texture); 执行的函数');
+                _this.listeners(Events.ADD).forEach((fun) => {
+                    console.log(fun);
+                });
+                console.groupEnd();
                 _this.emit(Events.ADD, key, texture);
+
+                console.groupCollapsed('TextureManager addBase64 image.onload _this.emit(Events.ADD_KEY + key, texture); 执行的函数');
+                _this.listeners(Events.ADD_KEY + key).forEach((fun) => {
+                    console.log(fun);
+                });
+                console.groupEnd();
                 _this.emit(Events.ADD_KEY + key, texture);
+
+                console.groupCollapsed('TextureManager addBase64 image.onload _this.emit(Events.LOAD, key, texture); 执行的函数');
+                _this.listeners(Events.LOAD).forEach((fun) => {
+                    console.log(fun);
+                });
+                console.groupEnd();
                 _this.emit(Events.LOAD, key, texture);
+                console.groupEnd();
             };
 
             image.src = data;
         }
 
+        console.groupEnd();
         return this;
     },
 
@@ -398,8 +411,8 @@ var TextureManager = new Class({
      *
      * @return {string} The base64 encoded data, or an empty string if the texture frame could not be found.
      */
-    getBase64: function (key, frame, type, encoderOptions)
-    {
+    getBase64: function (key, frame, type, encoderOptions) {
+        console.group('TextureManager getBase64');
         if (type === undefined) { type = 'image/png'; }
         if (encoderOptions === undefined) { encoderOptions = 0.92; }
 
@@ -407,22 +420,18 @@ var TextureManager = new Class({
 
         var textureFrame = this.getFrame(key, frame);
 
-        if (textureFrame && (textureFrame.source.isRenderTexture || textureFrame.source.isGLTexture))
-        {
-            if (!this.silentWarnings)
-            {
+        if (textureFrame && (textureFrame.source.isRenderTexture || textureFrame.source.isGLTexture)) {
+            if (!this.silentWarnings) {
                 console.warn('Cannot getBase64 from WebGL Texture');
             }
         }
-        else if (textureFrame)
-        {
+        else if (textureFrame) {
             var cd = textureFrame.canvasData;
 
             var canvas = CanvasPool.create2D(this, cd.width, cd.height);
             var ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-            if (cd.width > 0 && cd.height > 0)
-            {
+            if (cd.width > 0 && cd.height > 0) {
                 ctx.drawImage(
                     textureFrame.source.image,
                     cd.x,
@@ -441,6 +450,7 @@ var TextureManager = new Class({
             CanvasPool.remove(canvas);
         }
 
+        console.groupEnd();
         return data;
     },
 
@@ -457,18 +467,16 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addImage: function (key, source, dataSource)
-    {
+    addImage: function (key, source, dataSource) {
+        console.group('TextureManager addImage');
         var texture = null;
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             texture = this.create(key, source);
 
             Parser.Image(texture, 0);
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -476,6 +484,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -499,12 +508,11 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addGLTexture: function (key, glTexture)
-    {
+    addGLTexture: function (key, glTexture) {
+        console.group('TextureManager addGLTexture');
         var texture = null;
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             var width = glTexture.width;
             var height = glTexture.height;
 
@@ -516,6 +524,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -538,38 +547,30 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addCompressedTexture: function (key, textureData, atlasData)
-    {
+    addCompressedTexture: function (key, textureData, atlasData) {
+        console.group('TextureManager addCompressedTexture');
         var texture = null;
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             texture = this.create(key, textureData);
 
             texture.add('__BASE', 0, 0, 0, textureData.width, textureData.height);
 
-            if (atlasData)
-            {
-                var parse = function (texture, sourceIndex, atlasData)
-                {
-                    if (Array.isArray(atlasData.textures) || Array.isArray(atlasData.frames))
-                    {
+            if (atlasData) {
+                var parse = function (texture, sourceIndex, atlasData) {
+                    if (Array.isArray(atlasData.textures) || Array.isArray(atlasData.frames)) {
                         Parser.JSONArray(texture, sourceIndex, atlasData);
                     }
-                    else
-                    {
+                    else {
                         Parser.JSONHash(texture, sourceIndex, atlasData);
                     }
                 };
-                if (Array.isArray(atlasData))
-                {
-                    for (var i = 0; i < atlasData.length; i++)
-                    {
+                if (Array.isArray(atlasData)) {
+                    for (var i = 0; i < atlasData.length; i++) {
                         parse(texture, i, atlasData[i]);
                     }
                 }
-                else
-                {
+                else {
                     parse(texture, 0, atlasData);
                 }
             }
@@ -578,6 +579,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -594,12 +596,11 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addRenderTexture: function (key, renderTexture)
-    {
+    addRenderTexture: function (key, renderTexture) {
+        console.group('TextureManager addRenderTexture');
         var texture = null;
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             texture = this.create(key, renderTexture);
 
             texture.add('__BASE', 0, 0, 0, renderTexture.width, renderTexture.height);
@@ -608,6 +609,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -654,20 +656,20 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    generate: function (key, config)
-    {
-        if (this.checkKey(key))
-        {
+    generate: function (key, config) {
+        console.group('TextureManager generate');
+        if (this.checkKey(key)) {
             var canvas = CanvasPool.create(this, 1, 1);
 
             config.canvas = canvas;
 
             GenerateTexture(config);
 
+            console.groupEnd();
             return this.addCanvas(key, canvas);
         }
-        else
-        {
+        else {
+            console.groupEnd();
             return null;
         }
     },
@@ -687,18 +689,19 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.CanvasTexture} The Canvas Texture that was created, or `null` if the key is already in use.
      */
-    createCanvas: function (key, width, height)
-    {
+    createCanvas: function (key, width, height) {
+        console.group('TextureManager createCanvas');
         if (width === undefined) { width = 256; }
         if (height === undefined) { height = 256; }
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             var canvas = CanvasPool.create(this, width, height, CONST.CANVAS, true);
 
+            console.groupEnd();
             return this.addCanvas(key, canvas);
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -716,18 +719,16 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.CanvasTexture} The Canvas Texture that was created, or `null` if the key is already in use.
      */
-    addCanvas: function (key, source, skipCache)
-    {
+    addCanvas: function (key, source, skipCache) {
+        console.group('TextureManager addCanvas');
         if (skipCache === undefined) { skipCache = false; }
 
         var texture = null;
 
-        if (skipCache)
-        {
+        if (skipCache) {
             texture = new CanvasTexture(this, key, source, source.width, source.height);
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = new CanvasTexture(this, key, source, source.width, source.height);
 
             this.list[key] = texture;
@@ -736,6 +737,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -767,32 +769,29 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.DynamicTexture} The Dynamic Texture that was created, or `null` if the key is already in use.
      */
-    addDynamicTexture: function (key, width, height)
-    {
+    addDynamicTexture: function (key, width, height) {
+        console.group('TextureManager addDynamicTexture');
         var texture = null;
 
-        if (typeof(key) === 'string' && !this.exists(key))
-        {
+        if (typeof (key) === 'string' && !this.exists(key)) {
             texture = new DynamicTexture(this, key, width, height);
         }
-        else
-        {
+        else {
             texture = key;
             key = texture.key;
         }
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             this.list[key] = texture;
 
             this.emit(Events.ADD, key, texture);
             this.emit(Events.ADD_KEY + key, texture);
         }
-        else
-        {
+        else {
             texture = null;
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -816,16 +815,18 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addAtlas: function (key, source, data, dataSource)
-    {
+    addAtlas: function (key, source, data, dataSource) {
+        console.group('TextureManager addAtlas');
         //  New Texture Packer format?
-        if (Array.isArray(data.textures) || Array.isArray(data.frames))
-        {
-            return this.addAtlasJSONArray(key, source, data, dataSource);
+        if (Array.isArray(data.textures) || Array.isArray(data.frames)) {
+            const result = this.addAtlasJSONArray(key, source, data, dataSource);
+            console.groupEnd();
+            return result;
         }
-        else
-        {
-            return this.addAtlasJSONHash(key, source, data, dataSource);
+        else {
+            const result = this.addAtlasJSONHash(key, source, data, dataSource);
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -852,42 +853,35 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addAtlasJSONArray: function (key, source, data, dataSource)
-    {
+    addAtlasJSONArray: function (key, source, data, dataSource) {
+        console.group('TextureManager addAtlasJSONArray');
         var texture = null;
 
-        if (source instanceof Texture)
-        {
+        if (source instanceof Texture) {
             key = source.key;
             texture = source;
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = this.create(key, source);
         }
 
-        if (texture)
-        {
+        if (texture) {
             //  Multi-Atlas?
-            if (Array.isArray(data))
-            {
+            if (Array.isArray(data)) {
                 var singleAtlasFile = (data.length === 1); // multi-pack with one atlas file for all images
 
                 //  !! Assumes the textures are in the same order in the source array as in the json data !!
-                for (var i = 0; i < texture.source.length; i++)
-                {
+                for (var i = 0; i < texture.source.length; i++) {
                     var atlasData = singleAtlasFile ? data[0] : data[i];
 
                     Parser.JSONArray(texture, i, atlasData);
                 }
             }
-            else
-            {
+            else {
                 Parser.JSONArray(texture, 0, data);
             }
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -895,6 +889,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -921,36 +916,29 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addAtlasJSONHash: function (key, source, data, dataSource)
-    {
+    addAtlasJSONHash: function (key, source, data, dataSource) {
+        console.group('TextureManager addAtlasJSONHash');
         var texture = null;
 
-        if (source instanceof Texture)
-        {
+        if (source instanceof Texture) {
             key = source.key;
             texture = source;
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = this.create(key, source);
         }
 
-        if (texture)
-        {
-            if (Array.isArray(data))
-            {
-                for (var i = 0; i < data.length; i++)
-                {
+        if (texture) {
+            if (Array.isArray(data)) {
+                for (var i = 0; i < data.length; i++) {
                     Parser.JSONHash(texture, i, data[i]);
                 }
             }
-            else
-            {
+            else {
                 Parser.JSONHash(texture, 0, data);
             }
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -958,6 +946,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -982,26 +971,22 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addAtlasXML: function (key, source, data, dataSource)
-    {
+    addAtlasXML: function (key, source, data, dataSource) {
+        console.group('TextureManager addAtlasXML');
         var texture = null;
 
-        if (source instanceof Texture)
-        {
+        if (source instanceof Texture) {
             key = source.key;
             texture = source;
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = this.create(key, source);
         }
 
-        if (texture)
-        {
+        if (texture) {
             Parser.AtlasXML(texture, 0, data);
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -1009,6 +994,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -1033,26 +1019,22 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addUnityAtlas: function (key, source, data, dataSource)
-    {
+    addUnityAtlas: function (key, source, data, dataSource) {
+        console.group('TextureManager addUnityAtlas');
         var texture = null;
 
-        if (source instanceof Texture)
-        {
+        if (source instanceof Texture) {
             key = source.key;
             texture = source;
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = this.create(key, source);
         }
 
-        if (texture)
-        {
+        if (texture) {
             Parser.UnityYAML(texture, 0, data);
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -1060,6 +1042,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -1084,29 +1067,25 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created or updated, or `null` if the key is already in use.
      */
-    addSpriteSheet: function (key, source, config, dataSource)
-    {
+    addSpriteSheet: function (key, source, config, dataSource) {
+        console.group('TextureManager addSpriteSheet');
         var texture = null;
 
-        if (source instanceof Texture)
-        {
+        if (source instanceof Texture) {
             key = source.key;
             texture = source;
         }
-        else if (this.checkKey(key))
-        {
+        else if (this.checkKey(key)) {
             texture = this.create(key, source);
         }
 
-        if (texture)
-        {
+        if (texture) {
             var width = texture.source[0].width;
             var height = texture.source[0].height;
 
             Parser.SpriteSheet(texture, 0, 0, 0, width, height, config);
 
-            if (dataSource)
-            {
+            if (dataSource) {
                 texture.setDataSource(dataSource);
             }
 
@@ -1114,6 +1093,7 @@ var TextureManager = new Class({
             this.emit(Events.ADD_KEY + key, texture);
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -1132,46 +1112,43 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addSpriteSheetFromAtlas: function (key, config)
-    {
-        if (!this.checkKey(key))
-        {
+    addSpriteSheetFromAtlas: function (key, config) {
+        console.group('TextureManager addSpriteSheetFromAtlas');
+        if (!this.checkKey(key)) {
+            console.groupEnd();
             return null;
         }
 
         var atlasKey = GetValue(config, 'atlas', null);
         var atlasFrame = GetValue(config, 'frame', null);
 
-        if (!atlasKey || !atlasFrame)
-        {
+        if (!atlasKey || !atlasFrame) {
+            console.groupEnd();
             return;
         }
 
         var atlas = this.get(atlasKey);
         var sheet = atlas.get(atlasFrame);
 
-        if (sheet)
-        {
+        if (sheet) {
             var source = sheet.source.image;
-            if (!source)
-            {
+            if (!source) {
                 source = sheet.source.glTexture;
             }
             var texture = this.create(key, source);
 
-            if (sheet.trimmed)
-            {
+            if (sheet.trimmed) {
                 //  If trimmed we need to help the parser adjust
                 Parser.SpriteSheetFromAtlas(texture, sheet, config);
             }
-            else
-            {
+            else {
                 Parser.SpriteSheet(texture, 0, sheet.cutX, sheet.cutY, sheet.cutWidth, sheet.cutHeight, config);
             }
 
             this.emit(Events.ADD, key, texture);
             this.emit(Events.ADD_KEY + key, texture);
 
+            console.groupEnd();
             return texture;
         }
     },
@@ -1195,13 +1172,13 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    addUint8Array: function (key, data, width, height)
-    {
+    addUint8Array: function (key, data, width, height) {
+        console.group('TextureManager addUint8Array');
         if (
             !this.checkKey(key) ||
             data.length / 4 !== width * height
-        )
-        {
+        ) {
+            console.groupEnd();
             return null;
         }
 
@@ -1212,6 +1189,7 @@ var TextureManager = new Class({
         this.emit(Events.ADD, key, texture);
         this.emit(Events.ADD_KEY + key, texture);
 
+        console.groupEnd();
         return texture;
     },
 
@@ -1228,17 +1206,17 @@ var TextureManager = new Class({
      *
      * @return {?Phaser.Textures.Texture} The Texture that was created, or `null` if the key is already in use.
      */
-    create: function (key, source, width, height)
-    {
+    create: function (key, source, width, height) {
+        console.group('TextureManager create');
         var texture = null;
 
-        if (this.checkKey(key))
-        {
+        if (this.checkKey(key)) {
             texture = new Texture(this, key, source, width, height);
 
             this.list[key] = texture;
         }
 
+        console.groupEnd();
         return texture;
     },
 
@@ -1252,8 +1230,9 @@ var TextureManager = new Class({
      *
      * @return {boolean} Returns `true` if a Texture matching the given key exists in this Texture Manager.
      */
-    exists: function (key)
-    {
+    exists: function (key) {
+        console.group('TextureManager exists');
+        console.groupEnd();
         return (this.list.hasOwnProperty(key));
     },
 
@@ -1275,24 +1254,24 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.Texture} The Texture matching the given key.
      */
-    get: function (key)
-    {
+    get: function (key) {
+        console.group('TextureManager get');
         if (key === undefined) { key = '__DEFAULT'; }
 
-        if (this.list[key])
-        {
+        if (this.list[key]) {
+            console.groupEnd();
             return this.list[key];
         }
-        else if (key instanceof Texture)
-        {
+        else if (key instanceof Texture) {
+            console.groupEnd();
             return key;
         }
-        else if (key instanceof Frame)
-        {
+        else if (key instanceof Frame) {
+            console.groupEnd();
             return key.texture;
         }
-        else
-        {
+        else {
+            console.groupEnd();
             return this.list['__MISSING'];
         }
     },
@@ -1308,12 +1287,14 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.Frame} A Clone of the given Frame.
      */
-    cloneFrame: function (key, frame)
-    {
-        if (this.list[key])
-        {
-            return this.list[key].get(frame).clone();
+    cloneFrame: function (key, frame) {
+        console.group('TextureManager cloneFrame');
+        if (this.list[key]) {
+            const result = this.list[key].get(frame).clone();
+            console.groupEnd();
+            return result;
         }
+        console.groupEnd();
     },
 
     /**
@@ -1327,12 +1308,14 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.Frame} A Texture Frame object.
      */
-    getFrame: function (key, frame)
-    {
-        if (this.list[key])
-        {
-            return this.list[key].get(frame);
+    getFrame: function (key, frame) {
+        console.group('TextureManager getFrame');
+        if (this.list[key]) {
+            const result = this.list[key].get(frame);
+            console.groupEnd();
+            return result;
         }
+        console.groupEnd();
     },
 
     /**
@@ -1353,31 +1336,36 @@ var TextureManager = new Class({
      *
      * @return {Phaser.Textures.Frame} A Texture Frame object, if found, or undefined if not.
      */
-    parseFrame: function (key)
-    {
-        if (!key)
-        {
+    parseFrame: function (key) {
+        console.group('TextureManager parseFrame');
+        if (!key) {
+            console.groupEnd();
             return undefined;
         }
-        else if (typeof key === 'string')
-        {
-            return this.getFrame(key);
+        else if (typeof key === 'string') {
+            const result = this.getFrame(key);
+            console.groupEnd();
+            return result;
         }
-        else if (Array.isArray(key) && key.length === 2)
-        {
-            return this.getFrame(key[0], key[1]);
+        else if (Array.isArray(key) && key.length === 2) {
+            const result = this.getFrame(key[0], key[1]);
+            console.groupEnd();
+            return result;
         }
-        else if (IsPlainObject(key))
-        {
-            return this.getFrame(key.key, key.frame);
+        else if (IsPlainObject(key)) {
+            const result = this.getFrame(key.key, key.frame);
+            console.groupEnd();
+            return result;
         }
-        else if (key instanceof Texture)
-        {
-            return key.get();
+        else if (key instanceof Texture) {
+            const result = key.get();
+            console.groupEnd();
+            return result;
         }
-        else if (key instanceof Frame)
-        {
-            return key;
+        else if (key instanceof Frame) {
+            const result = key;
+            console.groupEnd();
+            return result;
         }
     },
 
@@ -1390,18 +1378,17 @@ var TextureManager = new Class({
      *
      * @return {string[]} An array containing all of the Texture keys stored in this Texture Manager.
      */
-    getTextureKeys: function ()
-    {
+    getTextureKeys: function () {
+        console.group('TextureManager getTextureKeys');
         var output = [];
 
-        for (var key in this.list)
-        {
-            if (key !== '__DEFAULT' && key !== '__MISSING' && key !== '__WHITE' && key !== '__NORMAL')
-            {
+        for (var key in this.list) {
+            if (key !== '__DEFAULT' && key !== '__MISSING' && key !== '__WHITE' && key !== '__NORMAL') {
                 output.push(key);
             }
         }
 
+        console.groupEnd();
         return output;
     },
 
@@ -1421,12 +1408,11 @@ var TextureManager = new Class({
      * @return {?Phaser.Display.Color} A Color object populated with the color values of the requested pixel,
      * or `null` if the coordinates were out of bounds.
      */
-    getPixel: function (x, y, key, frame)
-    {
+    getPixel: function (x, y, key, frame) {
+        console.group('TextureManager getPixel');
         var textureFrame = this.getFrame(key, frame);
 
-        if (textureFrame)
-        {
+        if (textureFrame) {
             //  Adjust for trim (if not trimmed x and y are just zero)
             x -= textureFrame.x;
             y -= textureFrame.y;
@@ -1436,8 +1422,7 @@ var TextureManager = new Class({
             x += data.x;
             y += data.y;
 
-            if (x >= data.x && x < data.r && y >= data.y && y < data.b)
-            {
+            if (x >= data.x && x < data.r && y >= data.y && y < data.b) {
                 var ctx = this._tempContext;
 
                 ctx.clearRect(0, 0, 1, 1);
@@ -1445,10 +1430,13 @@ var TextureManager = new Class({
 
                 var rgb = ctx.getImageData(0, 0, 1, 1);
 
-                return new Color(rgb.data[0], rgb.data[1], rgb.data[2], rgb.data[3]);
+                const result = new Color(rgb.data[0], rgb.data[1], rgb.data[2], rgb.data[3]);
+                console.groupEnd();
+                return result;
             }
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -1467,12 +1455,11 @@ var TextureManager = new Class({
      *
      * @return {number} A value between 0 and 255, or `null` if the coordinates were out of bounds.
      */
-    getPixelAlpha: function (x, y, key, frame)
-    {
+    getPixelAlpha: function (x, y, key, frame) {
+        console.group('TextureManager getPixelAlpha');
         var textureFrame = this.getFrame(key, frame);
 
-        if (textureFrame)
-        {
+        if (textureFrame) {
             //  Adjust for trim (if not trimmed x and y are just zero)
             x -= textureFrame.x;
             y -= textureFrame.y;
@@ -1482,8 +1469,7 @@ var TextureManager = new Class({
             x += data.x;
             y += data.y;
 
-            if (x >= data.x && x < data.r && y >= data.y && y < data.b)
-            {
+            if (x >= data.x && x < data.r && y >= data.y && y < data.b) {
                 var ctx = this._tempContext;
 
                 ctx.clearRect(0, 0, 1, 1);
@@ -1491,10 +1477,12 @@ var TextureManager = new Class({
 
                 var rgb = ctx.getImageData(0, 0, 1, 1);
 
+                console.groupEnd();
                 return rgb.data[3];
             }
         }
 
+        console.groupEnd();
         return null;
     },
 
@@ -1511,14 +1499,14 @@ var TextureManager = new Class({
      *
      * @return {Phaser.GameObjects.GameObject} The Game Object the texture was set on.
      */
-    setTexture: function (gameObject, key, frame)
-    {
-        if (this.list[key])
-        {
+    setTexture: function (gameObject, key, frame) {
+        console.group('TextureManager setTexture');
+        if (this.list[key]) {
             gameObject.texture = this.list[key];
             gameObject.frame = gameObject.texture.get(frame);
         }
 
+        console.groupEnd();
         return gameObject;
     },
 
@@ -1538,21 +1526,22 @@ var TextureManager = new Class({
      *
      * @return {boolean} `true` if the Texture key was successfully renamed, otherwise `false`.
      */
-    renameTexture: function (currentKey, newKey)
-    {
+    renameTexture: function (currentKey, newKey) {
+        console.group('TextureManager renameTexture');
         var texture = this.get(currentKey);
 
-        if (texture && currentKey !== newKey)
-        {
+        if (texture && currentKey !== newKey) {
             texture.key = newKey;
 
             this.list[newKey] = texture;
 
             delete this.list[currentKey];
 
+            console.groupEnd();
             return true;
         }
 
+        console.groupEnd();
         return false;
     },
 
@@ -1566,21 +1555,20 @@ var TextureManager = new Class({
      * @param {object} scope - The value to use as `this` when executing the callback.
      * @param {...*} [args] - Additional arguments that will be passed to the callback, after the child.
      */
-    each: function (callback, scope)
-    {
-        var args = [ null ];
+    each: function (callback, scope) {
+        console.group('TextureManager each');
+        var args = [null];
 
-        for (var i = 1; i < arguments.length; i++)
-        {
+        for (var i = 1; i < arguments.length; i++) {
             args.push(arguments[i]);
         }
 
-        for (var texture in this.list)
-        {
+        for (var texture in this.list) {
             args[0] = this.list[texture];
 
             callback.apply(scope, args);
         }
+        console.groupEnd();
     },
 
     /**
@@ -1594,8 +1582,8 @@ var TextureManager = new Class({
      *
      * @return {Phaser.GameObjects.Image} A reference to the Stamp Game Object.
      */
-    resetStamp: function (alpha, tint)
-    {
+    resetStamp: function (alpha, tint) {
+        console.group('TextureManager resetStamp');
         if (alpha === undefined) { alpha = 1; }
         if (tint === undefined) { tint = 0xffffff; }
 
@@ -1609,6 +1597,7 @@ var TextureManager = new Class({
         stamp.setTint(tint);
         stamp.setTexture('__WHITE');
 
+        console.groupEnd();
         return stamp;
     },
 
@@ -1618,10 +1607,9 @@ var TextureManager = new Class({
      * @method Phaser.Textures.TextureManager#destroy
      * @since 3.0.0
      */
-    destroy: function ()
-    {
-        for (var texture in this.list)
-        {
+    destroy: function () {
+        console.group('TextureManager destroy');
+        for (var texture in this.list) {
             this.list[texture].destroy();
         }
 
@@ -1633,6 +1621,7 @@ var TextureManager = new Class({
         this.stamp = null;
 
         CanvasPool.remove(this._tempCanvas);
+        console.groupEnd();
     }
 
 });

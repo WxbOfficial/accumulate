@@ -53,6 +53,7 @@ var IsoTriangle = new Class({
 
     function IsoTriangle (scene, x, y, size, height, reversed, fillTop, fillLeft, fillRight)
     {
+        console.group('IsoTriangle');
         if (x === undefined) { x = 0; }
         if (y === undefined) { y = 0; }
         if (size === undefined) { size = 48; }
@@ -147,6 +148,7 @@ var IsoTriangle = new Class({
         this.setSize(size, height);
 
         this.updateDisplayOrigin();
+        console.groupEnd();
     },
 
     /**
@@ -162,8 +164,10 @@ var IsoTriangle = new Class({
      */
     setProjection: function (value)
     {
+        console.group('IsoTriangle setProjection');
         this.projection = value;
 
+        console.groupEnd();
         return this;
     },
 
@@ -180,8 +184,10 @@ var IsoTriangle = new Class({
      */
     setReversed: function (reversed)
     {
+        console.group('IsoTriangle setReversed');
         this.isReversed = reversed;
 
+        console.groupEnd();
         return this;
     },
 
@@ -200,6 +206,7 @@ var IsoTriangle = new Class({
      */
     setFaces: function (showTop, showLeft, showRight)
     {
+        console.group('IsoTriangle setFaces');
         if (showTop === undefined) { showTop = true; }
         if (showLeft === undefined) { showLeft = true; }
         if (showRight === undefined) { showRight = true; }
@@ -208,6 +215,7 @@ var IsoTriangle = new Class({
         this.showLeft = showLeft;
         this.showRight = showRight;
 
+        console.groupEnd();
         return this;
     },
 
@@ -226,12 +234,14 @@ var IsoTriangle = new Class({
      */
     setFillStyle: function (fillTop, fillLeft, fillRight)
     {
+        console.group('IsoTriangle setFillStyle');
         this.fillTop = fillTop;
         this.fillLeft = fillLeft;
         this.fillRight = fillRight;
 
         this.isFilled = true;
 
+        console.groupEnd();
         return this;
     }
 

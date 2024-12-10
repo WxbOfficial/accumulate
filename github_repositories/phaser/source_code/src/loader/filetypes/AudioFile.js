@@ -41,6 +41,7 @@ var AudioFile = new Class({
     //  URL is an object created by AudioFile.findAudioURL
     function AudioFile (loader, key, urlConfig, xhrSettings, audioContext)
     {
+        console.group('AudioFile');
         if (IsPlainObject(key))
         {
             var config = key;
@@ -62,6 +63,7 @@ var AudioFile = new Class({
         };
 
         File.call(this, loader, fileConfig);
+        console.groupEnd();
     },
 
     /**
@@ -73,6 +75,7 @@ var AudioFile = new Class({
      */
     onProcess: function ()
     {
+        console.group('AudioFile onProcess');
         this.state = CONST.FILE_PROCESSING;
 
         var _this = this;
@@ -95,12 +98,14 @@ var AudioFile = new Class({
         );
 
         this.config.context = null;
+        console.groupEnd();
     }
 
 });
 
 AudioFile.create = function (loader, key, urls, config, xhrSettings)
 {
+    console.group('AudioFile create');
     var game = loader.systems.game;
     var audioConfig = game.config.audio;
     var deviceAudio = game.device.audio;
@@ -118,6 +123,7 @@ AudioFile.create = function (loader, key, urls, config, xhrSettings)
     {
         console.warn('No audio URLs for "%s" can play on this device', key);
 
+        console.groupEnd();
         return null;
     }
 
@@ -126,16 +132,21 @@ AudioFile.create = function (loader, key, urls, config, xhrSettings)
 
     if (deviceAudio.webAudio && !audioConfig.disableWebAudio)
     {
-        return new AudioFile(loader, key, urlConfig, xhrSettings, game.sound.context);
+        const result = new AudioFile(loader, key, urlConfig, xhrSettings, game.sound.context);
+        console.groupEnd();
+        return result;
     }
     else
     {
-        return new HTML5AudioFile(loader, key, urlConfig, config);
+        const result = new HTML5AudioFile(loader, key, urlConfig, config);
+        console.groupEnd();
+        return result;
     }
 };
 
 AudioFile.getAudioURL = function (game, urls)
 {
+    console.group('AudioFile getAudioURL');
     if (!Array.isArray(urls))
     {
         urls = [ urls ];
@@ -147,6 +158,7 @@ AudioFile.getAudioURL = function (game, urls)
 
         if (url.indexOf('blob:') === 0 || url.indexOf('data:') === 0)
         {
+            console.groupEnd();
             return {
                 url: url,
                 type: ''
@@ -159,6 +171,7 @@ AudioFile.getAudioURL = function (game, urls)
 
         if (game.device.audio[audioType])
         {
+            console.groupEnd();
             return {
                 url: url,
                 type: audioType
@@ -166,6 +179,7 @@ AudioFile.getAudioURL = function (game, urls)
         }
     }
 
+    console.groupEnd();
     return null;
 };
 
@@ -227,14 +241,17 @@ AudioFile.getAudioURL = function (game, urls)
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register audio');
 FileTypesManager.register('audio', function (key, urls, config, xhrSettings)
 {
+    console.group('FileTypesManager.register audio factoryFunction');
     var game = this.systems.game;
     var audioConfig = game.config.audio;
     var deviceAudio = game.device.audio;
 
     if (audioConfig.noAudio || (!deviceAudio.webAudio && !deviceAudio.audioData))
     {
+        console.groupEnd();
         //  Sounds are disabled, so skip loading audio
         return this;
     }
@@ -264,7 +281,9 @@ FileTypesManager.register('audio', function (key, urls, config, xhrSettings)
         }
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = AudioFile;

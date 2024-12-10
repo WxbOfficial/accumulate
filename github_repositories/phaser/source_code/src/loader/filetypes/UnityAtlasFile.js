@@ -41,6 +41,7 @@ var UnityAtlasFile = new Class({
 
     function UnityAtlasFile (loader, key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
     {
+        console.group('UnityAtlasFile');
         var image;
         var data;
 
@@ -80,6 +81,7 @@ var UnityAtlasFile = new Class({
         {
             MultiFile.call(this, loader, 'unityatlas', key, [ image, data ]);
         }
+        console.groupEnd();
     },
 
     /**
@@ -90,6 +92,7 @@ var UnityAtlasFile = new Class({
      */
     addToCache: function ()
     {
+        console.group('UnityAtlasFile addToCache');
         if (this.isReadyToProcess())
         {
             var image = this.files[0];
@@ -100,6 +103,7 @@ var UnityAtlasFile = new Class({
 
             this.complete = true;
         }
+        console.groupEnd();
     }
 
 });
@@ -204,8 +208,10 @@ var UnityAtlasFile = new Class({
  *
  * @return {this} The Loader instance.
  */
+console.group('FileTypesManager.register unityAtlas');
 FileTypesManager.register('unityAtlas', function (key, textureURL, atlasURL, textureXhrSettings, atlasXhrSettings)
 {
+    console.group('FileTypesManager.register unityAtlas factoryFunction');
     var multifile;
 
     //  Supports an Object file definition in the key argument
@@ -228,7 +234,9 @@ FileTypesManager.register('unityAtlas', function (key, textureURL, atlasURL, tex
         this.addFile(multifile.files);
     }
 
+    console.groupEnd();
     return this;
 });
+console.groupEnd();
 
 module.exports = UnityAtlasFile;
