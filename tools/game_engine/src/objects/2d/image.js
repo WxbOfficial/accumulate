@@ -5,5 +5,7 @@ export default class ImageObject extends Object2DDraw {
 	constructor(option = {}) {
 		super(option);
 
+		this.isLoad = false;
+		this.url = option.url || '';
 	}
 }

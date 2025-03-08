@@ -1,8 +1,4 @@
 import CanvasEventType from './canvas_event_type.js';
-import Vector2 from '../math/vector2.js';
-
-
-const _vector2 = new Vector2();
 
 export default class CanvasEventProcess {
 	constructor() {
@@ -14,48 +10,59 @@ export default class CanvasEventProcess {
 		this._drag = [];
 	}
 
-	execute(e) {
-		_vector2.set(e.offsetX, e.offsetY).applyMatrix3(this.scene.camera.matrixWorldInvert);
-
+	processDownEvents(x, y) {
 		let visibleObject = null, hasEmit = false;
 		for (let i = this.scene.visibleObjectCount - 1; i >= 0; i--) {
 			visibleObject = this.scene.visibleObjects[i];
 
-			if (visibleObject.hitTest(_vector2.x, _vector2.y)) {
-				if (e.type === CanvasEventType.mousedown) {
-					if (visibleObject.hasListener(CanvasEventType.mousedown)) {
-						hasEmit = true;
-						this.processDownEvents(visibleObject, e, _vector2.x, _vector2.y);
-					}
-				} else if (e.type === CanvasEventType.mousemove) {
-					this._nowMove.push(visibleObject);
+			if (visibleObject.hitTest(x, y)) {
+				if (visibleObject.hasListener(CanvasEventType.mousedown)) {
+					visibleObject.emit(CanvasEventType.mousedown, x, y);
+					hasEmit = true;
 
-					if (visibleObject.hasListener(CanvasEventType.mousemove)) {
-						hasEmit = true;
-						this.processMoveEvents(visibleObject, e, _vector2.x, _vector2.y);
-					}
-
-					if (
-						visibleObject.hasListener(CanvasEventType.mouseenter) &&
-						!this._preMove.includes(visibleObject)
-					) {
-						this.processEnterEvents(visibleObject, e);
-						hasEmit = true;
-					}
-				} else if (e.type === CanvasEventType.mouseup) {
-					if (visibleObject.hasListener(CanvasEventType.mouseup)) {
-						hasEmit = true;
-						this.processUpEvents(visibleObject, e, _vector2.x, _vector2.y);
+					if (this.topOnly) {
+						break;
 					}
 				}
+			}
+		}
+
+		if (!hasEmit) {
+			this.scene.emit(CanvasEventType.mousedown, x, y);
+		}
+
+		visibleObject = null;
+		hasEmit = null;
+	}
+	processMoveEvents(x, y) {
+		let visibleObject = null, hasMoveEmit = false;
+
+		for (let i = this.scene.visibleObjectCount - 1; i >= 0; i--) {
+			visibleObject = this.scene.visibleObjects[i];
+
+			if (
+				(!this.topOnly || this._nowMove.length === 0) &&
+				visibleObject.hitTest(x, y)
+			) {
+				this._nowMove.push(visibleObject);
+
+				if (visibleObject.hasListener(CanvasEventType.mousemove)) {
+					visibleObject.emit(CanvasEventType.mousemove, x, y);
+					hasMoveEmit = true;
+				}
+
+				if (
+					visibleObject.hasListener(CanvasEventType.mouseenter) &&
+					!this._preMove.includes(visibleObject)
+				) {
+					visibleObject.emit(CanvasEventType.mouseenter, x, y);
+				}
 			} else {
-				if (e.type === CanvasEventType.mousemove) {
-					if (
-						visibleObject.hasListener(CanvasEventType.mouseleave) &&
-						this._preMove.includes(visibleObject)
-					) {
-						this.processLeaveEvents(visibleObject, e);
-					}
+				if (
+					visibleObject.hasListener(CanvasEventType.mouseleave) &&
+					this._preMove.includes(visibleObject)
+				) {
+					visibleObject.emit(CanvasEventType.mouseleave, x, y);
 				}
 			}
 		}
@@ -67,47 +74,36 @@ export default class CanvasEventProcess {
 		this._temp = null;
 		this._nowMove.length = 0;
 
-		if (!hasEmit) {
-			this.scene.emit(e.type, e, _vector2.x, _vector2.y);
+		if (!hasMoveEmit) {
+			this.scene.emit(CanvasEventType.mousemove, x, y);
 		}
 
 		visibleObject = null;
+		hasMoveEmit = null;
 	}
+	processUpEvents(x, y) {
+		let visibleObject = null, hasEmit = false;
+		for (let i = this.scene.visibleObjectCount - 1; i >= 0; i--) {
+			visibleObject = this.scene.visibleObjects[i];
 
-	processDownEvents(visibleObject, e, x, y) {
-		return visibleObject.emit(e.type, e, x, y);
-	}
+			if (visibleObject.hitTest(x, y)) {
+				if (visibleObject.hasListener(CanvasEventType.mouseup)) {
+					visibleObject.emit(CanvasEventType.mouseup, x, y);
+					hasEmit = true;
 
-	processMoveEvents(visibleObject, e, x, y) {
-		return visibleObject.emit(e.type, e, x, y);
-	}
+					if (this.topOnly) {
+						break;
+					}
+				}
+			}
+		}
 
-	processUpEvents(visibleObject, e, x, y) {
-		return visibleObject.emit(e.type, e, x, y);
-	}
+		if (!hasEmit) {
+			this.scene.emit(CanvasEventType.mouseup, x, y);
+		}
 
-	processEnterEvents(visibleObject, e) {
-		return visibleObject.emit(CanvasEventType.mouseenter, e);
-	}
-
-	processLeaveEvents(visibleObject, e) {
-		return visibleObject.emit(CanvasEventType.mouseleave, e);
-	}
-
-	processDragDownEvent() {
-
-	}
-
-	processDragDownEvent() {
-
-	}
-
-	processDragMoveEvent() {
-
-	}
-
-	processWheelEvent() {
-
+		visibleObject = null;
+		hasEmit = null;
 	}
 
 	destroy() {

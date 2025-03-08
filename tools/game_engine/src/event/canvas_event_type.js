@@ -6,6 +6,11 @@ const CanvasEventType = {
 	mouseenter: 'mouseenter',
 	mouseleave: 'mouseleave',
 
+	dragstart: 'dragstart',
+	drag: 'drag',
+	dragend: 'dragend',
+
+
 	wheel: 'wheel',
 }
 

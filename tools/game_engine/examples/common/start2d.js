@@ -10,28 +10,9 @@ export default function start2d(canvasDom, afterRender, rendererOptions) {
 	const scene = new Scene2D();
 	scene.bindCamera(camera);
 
-	let x = 0, y = 0, allowMove = false;
-	scene.on('mousedown', function (e) {
-		x = e.offsetX;
-		y = e.offsetY;
-		allowMove = true;
-	});
-	scene.on('mousemove', function (e) {
-		// console.info('e:', e);
-		// console.info('this.camera:', this.camera);
-		if (allowMove) {
-			camera.x += x - e.offsetX;
-			camera.y += y - e.offsetY;
-			x = e.offsetX;
-			y = e.offsetY;
-		}
-	});
-	scene.on('mouseup', function () {
-		allowMove = false;
-	});
-	scene.on('wheel', function (e) {
-		camera.x += e.deltaX;
-		camera.y += e.deltaY;
+	scene.on('wheel', function (dx, dy) {
+		camera.x += dx;
+		camera.y += dy;
 	});
 
 	const canvasEvent = new CanvasEvent(canvasDom);

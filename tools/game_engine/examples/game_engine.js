@@ -14,8 +14,13 @@ const circle = new Circle({
 	//fill: null,
 	//strokeWidth: 1,
 	//stroke: '#0000ff',
+	renderOrder: 1,
 });
-object2dCanMove(circle);
+// object2dCanMove(circle);
+scene.on('mousemove', (x, y) => {
+	circle.x = x;
+	circle.y = y;
+});
 scene.addObject(circle);
 
 const rect = new Rect({
@@ -86,6 +91,8 @@ const text = new Text({
 object2dCanMove(text);
 scene.addObject(text);
 
+scene.sortObjectsByOrder();
+
 const gui = new lil.GUI();
 
 function onChangeFun() {
@@ -152,3 +159,48 @@ function initObject2dGui(folder, target) {
 
 	initObject2dGui(textFolder, text);
 }
+
+
+function mousedownCamera(x, y) {
+	//模拟click事件
+	//获取btn
+	const canvasEventDom = document.querySelectorAll("#renderCanvas")[0];
+	// console.clear();
+	//创建event
+	const event = document.createEvent("MouseEvents");
+	//初始化event
+	event.initMouseEvent("mousedown",
+		true, true, document.defaultView, 0,
+		x, y,
+		x, y,
+		false, false, false, false, 0, null);
+	//触发事件
+	canvasEventDom.dispatchEvent(event);
+}
+
+function mousemoveCamera(x, y) {
+	//模拟click事件
+	//获取btn
+	const canvasEventDom = document.querySelectorAll("#renderCanvas")[0];
+	// console.clear();
+	//创建event
+	const event = document.createEvent("MouseEvents");
+	//初始化event
+	event.initMouseEvent("mousemove",
+		true, true, document.defaultView, 0,
+		x, y,// screen
+		x, y,// client
+		false, false, false, false, 0, null);
+	//触发事件
+	canvasEventDom.dispatchEvent(event);
+}
+
+setTimeout(() => {
+	mousedownCamera(100, 100);
+	mousemoveCamera(230, 230);
+
+	setTimeout(() => {
+		mousedownCamera(100, 100);
+		mousemoveCamera(180, 180);
+	}, 1000);
+}, 2000)

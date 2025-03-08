@@ -2,12 +2,12 @@ let x = 0, y = 0, selectedObject = false, _scene = null;
 
 export function allowObject2dCanMove(scene) {
 	_scene = scene;
-	scene.on('mousemove', function (e) {
+	scene.on('mousemove', function (_x, _y) {
 		if (selectedObject) {
-			selectedObject.x += e.offsetX - x;
-			selectedObject.y += e.offsetY - y;
-			x = e.offsetX;
-			y = e.offsetY;
+			selectedObject.x += _x - x;
+			selectedObject.y += _y - y;
+			x = _x;
+			y = _y;
 
 		}
 	});
@@ -20,9 +20,9 @@ export function allowObject2dCanMove(scene) {
 	});
 }
 
-function object2dMoveFun(e, _x, _y) {
-	x = e.offsetX;
-	y = e.offsetY;
+function object2dMoveFun(_x, _y) {
+	x = _x;
+	y = _y;
 	selectedObject = this;
 
 	selectedObject.renderOrder = 1;
